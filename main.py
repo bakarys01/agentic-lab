@@ -1,25 +1,53 @@
-from agents.policy_agent import PolicyAgent
-from agents.research_agent import ResearchAgent
+# main.py
+
+from agents.concierge_agent import ConciergeAgent
 
 
-# ======================policy Agent======================================
-'''
-agent = PolicyAgent()
+def main() -> None:
 
-response = agent.answer_query(
-    "How much would I pay for mental health therapy?"
-)
+    print("=" * 60)
+    print("Healthcare Concierge")
+    print("=" * 60)
 
-print(response)
+    concierge = ConciergeAgent()
 
-'''
+    while True:
 
-# ======================Research Agent======================================
+        question = input(
+            "\nYou: "
+        ).strip()
 
-agent = ResearchAgent()
+        if question.lower() in {
+            "exit",
+            "quit",
+            "q",
+        }:
+            print("\nGoodbye!")
+            break
 
-response = agent.answer_query(
-    "What are the common treatments for sleep apnea?"
-)
+        if not question:
+            continue
 
-print(response)
+        print("\nThinking...\n")
+
+        try:
+
+            response = concierge.answer_query(
+                question
+            )
+
+            print("\n" + "=" * 60)
+            print("Healthcare Concierge")
+            print("=" * 60)
+
+            print(response)
+
+        except Exception as exc:
+
+            print(
+                f"\nError: {exc}"
+            )
+
+
+if __name__ == "__main__":
+    main()
