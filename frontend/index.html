@@ -1,46 +1,58 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MediNova — Health Concierge</title>
-    <meta name="description" content="Ask the health concierge about healthcare and your insurance policy." />
-    <link rel="stylesheet" href="/styles.css?v=20260925-chat-2" />
-    <script src="/app.js?v=20260925-chat-2" defer></script>
-  </head>
-  <body>
-    <header class="browser-bar">
-      <a class="home-link" href="/" aria-label="MediNova home">MediNova<span class="brand-dot" aria-hidden="true"></span></a>
-      <button id="check-connection" class="connection-button" type="button" data-state="checking" title="Check concierge connection">
-        <span class="status-light" aria-hidden="true"></span>
-        <span id="connection-status" role="status">Checking</span>
-      </button>
-    </header>
-    <main class="hero">
-      <div class="welcome">
-        <h1>How can I help?</h1>
-        <p>Healthcare and insurance, made clearer.</p>
-      </div>
-      <section id="conversation" class="conversation hidden" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions text">
-        <article class="chat-result hidden" id="chat-result" aria-atomic="true" aria-label="Concierge response">
-          <h2 class="result-label">MediNova</h2>
-          <p id="result-text" class="message-text"></p>
-          <p id="result-meta" class="result-meta"></p>
-        </article>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediNova — Health Concierge</title>
+  <link rel="stylesheet" href="/styles.css?v=20260925-accounts-1" />
+  <script src="/app.js?v=20260925-accounts-1" defer></script>
+</head>
+<body>
+  <header class="browser-bar">
+    <a class="home-link" href="/" aria-label="MediNova home">MediNova<span class="brand-dot" aria-hidden="true"></span></a>
+    <div class="header-actions">
+      <div id="account-controls" class="hidden"><span id="account-email"></span><button id="logout" class="text-button" type="button">Sign out</button></div>
+      <button id="check-connection" class="connection-button" type="button" data-state="checking" title="Check concierge connection"><span class="status-light" aria-hidden="true"></span><span id="connection-status" role="status">Checking</span></button>
+    </div>
+  </header>
+  <main class="hero">
+    <section id="auth-panel" class="auth-panel" aria-labelledby="auth-title">
+      <h1 id="auth-title">Welcome back</h1>
+      <p>Sign in to continue your conversations.</p>
+      <form id="auth-form">
+        <label for="auth-email">Email</label>
+        <input id="auth-email" type="email" autocomplete="username" required maxlength="254" />
+        <label for="auth-password">Password</label>
+        <input id="auth-password" type="password" autocomplete="current-password" required minlength="12" maxlength="128" aria-describedby="password-help" />
+        <p id="password-help" class="field-help">Use 12–128 characters.</p>
+        <button id="auth-submit" type="submit">Sign in</button>
+        <p id="auth-error" class="composer-error" role="alert"></p>
+      </form>
+      <button id="auth-toggle" class="text-button" type="button">Create an account</button>
+    </section>
+    <div id="chat-workspace" class="chat-workspace hidden">
+      <aside class="history-panel" aria-label="Conversation history">
+        <button id="new-conversation" type="button">New conversation</button>
+        <nav id="conversation-list" aria-label="Your conversations"></nav>
+      </aside>
+      <section class="chat-panel" aria-label="Chat">
+        <div class="chat-toolbar"><span>Your conversation</span><button id="delete-conversation" class="text-button" type="button" disabled>Delete conversation</button></div>
+        <div class="welcome"><h1>How can I help?</h1><p>Healthcare and insurance, made clearer.</p></div>
+        <section id="conversation" class="conversation hidden" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions text"></section>
+        <div class="composer">
+          <form class="ask-form" id="ask-form" aria-label="Medical question form">
+            <input id="medical-input" name="message" type="text" required maxlength="8000" placeholder="Ask a question…" aria-label="Medical question" autocomplete="off" />
+            <button type="submit">Send</button>
+          </form>
+          <p id="composer-error" class="composer-error" role="alert"></p>
+        </div>
+        <section id="capabilities" class="capabilities" aria-label="Example questions">
+          <button class="action-pill" type="button" data-prompt="How much would I pay for mental health therapy under my insurance policy?">Does my insurance cover therapy?</button>
+          <button class="action-pill" type="button" data-prompt="What are the common treatment options for sleep apnea?">What treatments help sleep apnea?</button>
+          <button class="action-pill" type="button" data-prompt="What is the difference between a copay and a deductible?">What is a copay or deductible?</button>
+        </section>
       </section>
-      <div class="composer">
-        <form class="ask-form" id="ask-form" aria-label="Medical question form">
-          <input id="medical-input" name="message" type="text" required maxlength="8000"
-            placeholder="Ask a question…" aria-label="Medical question" autocomplete="off" />
-          <button type="submit">Send</button>
-        </form>
-        <p id="composer-error" class="composer-error" role="alert"></p>
-      </div>
-      <section id="capabilities" class="capabilities" aria-label="Example questions">
-        <button class="action-pill" type="button" data-prompt="How much would I pay for mental health therapy under my insurance policy?">Does my insurance cover therapy?</button>
-        <button class="action-pill" type="button" data-prompt="What are the common treatment options for sleep apnea?">What treatments help sleep apnea?</button>
-        <button class="action-pill" type="button" data-prompt="What is the difference between a copay and a deductible?">What is a copay or deductible?</button>
-      </section>
-    </main>
-  </body>
+    </div>
+  </main>
+</body>
 </html>

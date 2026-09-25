@@ -19,7 +19,7 @@ class PolicyAgent:
             model=model,
             tools=[search_policy],
             max_steps=6,
-            verbosity_level=2,
+            verbosity_level=0,
         )
 
     def answer_query(self, query: str) -> str:

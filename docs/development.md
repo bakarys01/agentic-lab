@@ -20,7 +20,7 @@ Open **http://127.0.0.1:8000**. The Python backend serves `frontend/index.html`,
 
 The page checks `/api/health` when loaded. Click the connection indicator in the top-right corner to recheck after starting or restarting a service. Green means the concierge and specialists are reachable; amber means limited availability; red means offline. Hover over the indicator for connection details. A healthy status checks local configuration and specialist reachability; it does not prove that an external model credential is valid or has credit.
 
-Each submission posts `{ "message": "..." }` to `/api/chat`. Questions are limited to 8,000 characters. The browser displays questions and replies in order until the page is refreshed. Requests are independent; earlier messages are not sent as conversation context. The response includes the answer, consulted specialists, request ID and elapsed time. Errors keep the question available for retry. Browser requests time out after three minutes; stopping the browser request does not cancel work already running on the server.
+Sign in or create a local account before chatting. Each submission posts `{ "message": "...", "conversation_id": "...", "request_id": "..." }` to `/api/chat`. History is persisted per user and conversation; the concierge receives bounded recent context. See [accounts and memory](accounts-and-memory.md) for the session/CSRF contract, retries and limits.
 
 ## Configuration and service lifecycle
 
@@ -36,9 +36,11 @@ All three server entrypoints load the project-root `.env`. Existing process envi
 | `POLICY_AGENT_PUBLIC_URL` | `http://127.0.0.1:<policy port>` | Policy card and client URL |
 | `RESEARCH_AGENT_PUBLIC_URL` | `http://127.0.0.1:<research port>` | Research card and client URL |
 
-The example file explicitly sets both public URLs. Update those URLs when changing ports so clients and health checks use the new address. Keep the API local: it has no authentication. Normal terminals must permit outbound HTTPS to the model API; the research service also needs web access.
+The example file explicitly sets both public URLs. Update those URLs when changing ports so clients and health checks use the new address. Keep the API local: account authentication is intended for this prototype, not public deployment. Normal terminals must permit outbound HTTPS to the model API; the research service also needs web access.
 
 Stop each service with Ctrl+C in its terminal. Before restarting, stop the old process to avoid serving an outdated backend or encountering a port-in-use error.
+
+`DATABASE_PATH` selects the SQLite file (default `data/concierge.sqlite3`, relative to the project root). `SESSION_COOKIE_SECURE=false` permits local HTTP; set it to true for HTTPS. Run a single backend process/worker. Accounts/history are created automatically on first use; do not commit the database.
 
 ## Dependencies
 
@@ -49,7 +51,7 @@ Runtime dependencies cover A2A, the Python API, OpenAI-backed smolagents, web se
 Run API and concierge regression tests:
 
 ```bash
-uv run python -m pytest tests/test_api.py tests/test_backend_concierge.py tests/test_agent_configuration.py tests/test_static_assets.py -q -p no:cacheprovider
+uv run python -m pytest tests --ignore=tests/test_frontend_browser.py -q -p no:cacheprovider
 ```
 
 Run dependency-free frontend tests (Node.js 22+):
@@ -64,7 +66,13 @@ Run real-browser integration tests with Chrome installed (Selenium may download 
 uv run python -m pytest tests/test_frontend_browser.py -q -p no:cacheprovider
 ```
 
-Browser tests start a temporary local API with a deterministic concierge. They exercise page serving, same-origin submission, response rendering, error recovery, quick questions and mobile layout without paid model requests.
+Browser tests start a temporary local API with a deterministic concierge. They exercise page serving, same-origin submission, response rendering, error recovery, quick questions and mobile layout without paid model requests. They create temporary accounts/databases and also verify login, account isolation, follow-up context, history restoration and deletion.
+
+For Python coverage of the backend and memory code:
+
+```bash
+uv run --with pytest-cov python -m pytest tests --cov=backend --cov=agents.concierge_agent --cov=agents.conversation_memory --cov-report=term-missing --cov-fail-under=80
+```
 
 ## Troubleshooting
 
@@ -72,6 +80,8 @@ Browser tests start a temporary local API with a deterministic concierge. They e
 - **Concierge unavailable:** check server configuration and `OPENAI_API_KEY` in `.env`.
 - **Limited indicator:** start both A2A servers and check their configured URLs/ports.
 - **Green indicator but request fails:** check model credentials/credit and outbound HTTPS permissions. Health checks do not invoke the model. User-facing errors do not expose provider details.
+- **Session expired (401):** sign in again; persisted conversations remain available.
+- **Session verification failed (403):** reload to obtain the current CSRF token.
 - **Busy response (503):** another request is already running; retry after it finishes. Requests are not queued.
 - **Old styles or missing messages:** reload the page and confirm you opened the backend URL. Restart any old backend process so the current static-file cache policy is active.
 
