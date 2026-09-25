@@ -1,0 +1,52 @@
+﻿:root { color-scheme: dark; --bg: #14191f; --text: #f4efea; --muted: #a8afb8; --brand: #e3a071; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { opacity: .6; cursor: wait; }
+a { color: inherit; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; }
+.browser-bar { height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; gap: 16px; }
+.home-link { display: flex; align-items: center; gap: 8px; font: 1.55rem Georgia, serif; text-decoration: none; }
+.brand-dot { width: 10px; height: 10px; border: 2px solid var(--brand); border-radius: 50%; }
+.connection-button { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #ffffff16; border-radius: 24px; padding: 9px 13px; background: #ffffff04; color: var(--muted); font-size: .8rem; }
+.status-light { width: 8px; height: 8px; border-radius: 50%; background: #939aa3; }
+[data-state=connected] .status-light { background: #57d69a; box-shadow: 0 0 0 3px #57d69a12; }
+[data-state=connected] { color: #a8e4c7; }
+[data-state=limited] .status-light { background: #f3bf67; }
+[data-state=offline] .status-light { background: #ef8989; }
+.hero { width: min(100%, 840px); min-height: calc(100dvh - 76px); margin: auto; padding: 40px 24px; display: flex; flex-direction: column; justify-content: center; }
+.welcome { text-align: center; margin-bottom: 32px; }
+.welcome h1 { margin: 0 0 12px; font-family: Georgia, serif; font-weight: 400; font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -.035em; }
+.welcome p { color: var(--muted); margin: 0; font-size: .95rem; }
+.hero.has-conversation { justify-content: flex-start; padding-top: 24px; }
+.has-conversation .welcome { display: none; }
+.conversation { display: flex; flex-direction: column; gap: 28px; margin-bottom: 32px; }
+.user-message { align-self: flex-end; max-width: 85%; padding: 13px 19px; border-radius: 22px 22px 5px 22px; background: #30343b; overflow-wrap: anywhere; }
+.user-message .result-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.chat-result, .assistant-message { align-self: flex-start; width: 100%; overflow-wrap: anywhere; padding: 0 4px; }
+.result-label { color: var(--brand); font-size: .8rem; font-weight: 600; margin: 0 0 10px; }
+.message-text { margin: 0; line-height: 1.75; white-space: pre-wrap; }
+.result-meta { display: none; }
+.is-error .message-text, .composer-error { color: #f3aaa1; }
+.composer { width: 100%; }
+.ask-form { display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 20px; border: 1px solid #ffffff30; border-radius: 26px; background: #22272d; }
+.ask-form:focus-within { border-color: var(--brand); }
+.ask-form input, .ask-form input:focus, .ask-form input:focus-visible { appearance: none; outline: none; border: 0; box-shadow: none; background: transparent; min-width: 0; width: 100%; flex: 1; padding: 12px 0; color: var(--text); font-size: 1rem; }
+.ask-form input::placeholder { color: var(--muted); opacity: 1; }
+.ask-form button { flex-shrink: 0; border: 0; border-radius: 18px; background: var(--brand); color: #20150f; padding: 12px 18px; font-size: .9rem; font-weight: 600; }
+.ask-form button span { margin-left: 6px; }
+.composer-error { font-size: .9rem; margin: 12px 0; }
+.composer-error:empty, .hidden { display: none; }
+.capabilities { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
+.action-pill { color: #c1c6cd; background: transparent; border: 1px solid #ffffff18; border-radius: 16px; padding: 12px 15px; text-align: left; font-size: .8rem; line-height: 1.5; }
+.action-pill:hover:not(:disabled) { border-color: #e3a07180; background: #ffffff05; }
+.has-conversation .capabilities { margin-top: 16px; }
+@media(max-width: 600px) {
+  .browser-bar { padding: 0 18px; height: 64px; }
+  .hero { padding: 24px 16px; min-height: calc(100dvh - 64px); }
+  .ask-form { padding: 7px 8px 7px 16px; gap: 8px; border-radius: 22px; }
+  .ask-form button { padding: 12px; }
+  .user-message { max-width: 92%; }
+  .capabilities { justify-content: flex-start; }
+}

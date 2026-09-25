@@ -1,3 +1,5 @@
+import os
+
 import httpx
 
 from a2a.client import ClientConfig, create_client
@@ -9,8 +11,12 @@ from a2a.types import (
 )
 
 
-POLICY_AGENT_URL = "http://127.0.0.1:9999"
-RESEARCH_AGENT_URL = "http://127.0.0.1:9998"
+def get_agent_url(name: str) -> str:
+    """Use the same specialist endpoint for health checks and A2A calls."""
+    default_port = {"policy": "9999", "research": "9998"}[name]
+    prefix = name.upper()
+    port = os.getenv(f"{prefix}_AGENT_PORT", default_port)
+    return os.getenv(f"{prefix}_AGENT_PUBLIC_URL", f"http://127.0.0.1:{port}").rstrip("/")
 
 
 async def ask_a2a_agent(
@@ -85,7 +91,7 @@ async def ask_policy_agent(
     """
 
     return await ask_a2a_agent(
-        agent_url=POLICY_AGENT_URL,
+        agent_url=get_agent_url("policy"),
         question=question,
         timeout=60.0,
     )
@@ -99,7 +105,7 @@ async def ask_research_agent(
     """
 
     return await ask_a2a_agent(
-        agent_url=RESEARCH_AGENT_URL,
+        agent_url=get_agent_url("research"),
         question=question,
         timeout=120.0,
     )

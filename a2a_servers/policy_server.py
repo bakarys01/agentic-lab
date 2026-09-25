@@ -1,5 +1,10 @@
 import asyncio
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 import uvicorn
 
@@ -43,8 +48,8 @@ BIND_HOST = os.getenv(
 )
 
 PUBLIC_URL = os.getenv(
-    "A2A_PUBLIC_URL",
-    f"http://127.0.0.1:{PORT}",
+    "POLICY_AGENT_PUBLIC_URL",
+    os.getenv("A2A_PUBLIC_URL", f"http://127.0.0.1:{PORT}"),
 )
 
 
