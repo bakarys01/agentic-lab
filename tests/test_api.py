@@ -1,4 +1,5 @@
-from fastapi.testclient import TestClient
+from fastapi.testclient import TestClient as BaseTestClient
+from uuid import uuid4, UUID
 import asyncio
 import pytest
 from concurrent.futures import ThreadPoolExecutor
@@ -7,8 +8,30 @@ from threading import Event
 from backend.api import create_api_app
 
 
+@pytest.fixture(autouse=True)
+def isolated_db(tmp_path, monkeypatch):
+    monkeypatch.setenv('DATABASE_PATH', str(tmp_path / 'api.sqlite3'))
+
+
+class TestClient(BaseTestClient):
+    __test__ = False
+
+    def __init__(self, app, **kwargs):
+        super().__init__(app, **kwargs)
+        self.headers['X-Requested-With'] = 'fetch'
+        response = self.post('/api/auth/register', json={'email': f'{uuid4()}@example.com', 'password': 'test-password-123'})
+        assert response.status_code == 201, response.text
+        self.headers['X-CSRF-Token'] = response.json()['csrf_token']
+        self.conversation_id = self.post('/api/conversations').json()['id']
+
+    def post(self, url, **kwargs):
+        if url == '/api/chat':
+            kwargs['json'] = {'conversation_id': self.conversation_id, 'request_id': str(uuid4()), **kwargs.get('json', {})}
+        return super().post(url, **kwargs)
+
+
 class FakeConcierge:
-    def answer_query_with_metadata(self, query: str):
+    def answer_query_with_metadata(self, query: str, history=None):
         return {
             "answer": "This is a test answer.",
             "agents_used": ["research"],
@@ -34,7 +57,7 @@ def test_chat_endpoint_returns_metadata():
     payload = response.json()
     assert payload["answer"] == "This is a test answer."
     assert payload["agents_used"] == ["research"]
-    assert payload["request_id"] == "req-123"
+    assert UUID(payload["request_id"])
     assert payload["latency_ms"] == 321
 
 
@@ -62,7 +85,7 @@ def test_health_endpoint_returns_status():
 
 def test_chat_can_call_async_specialist_from_sync_tool():
     class AsyncToolConcierge(FakeConcierge):
-        def answer_query_with_metadata(self, query):
+        def answer_query_with_metadata(self, query, history=None):
             async def specialist():
                 return query
             return {"answer": asyncio.run(specialist()), "agents_used": ["policy"]}
@@ -107,7 +130,7 @@ def test_chat_rejects_excessively_long_requests():
 @pytest.mark.parametrize("error, status", [(TimeoutError("private"), 504), (RuntimeError("private"), 502)])
 def test_chat_errors_do_not_expose_internal_details(error, status):
     class FailingConcierge(FakeConcierge):
-        def answer_query_with_metadata(self, query):
+        def answer_query_with_metadata(self, query, history=None):
             raise error
     response = TestClient(create_api_app(FailingConcierge())).post("/api/chat", json={"message": "Hello"})
     assert response.status_code == status
@@ -118,7 +141,7 @@ def test_chat_errors_do_not_expose_internal_details(error, status):
     {"answer": "ok", "agents_used": "policy"}, {"answer": "ok", "latency_ms": "invalid"}])
 def test_invalid_agent_payload_returns_sanitized_gateway_error(payload):
     class InvalidConcierge(FakeConcierge):
-        def answer_query_with_metadata(self, query):
+        def answer_query_with_metadata(self, query, history=None):
             return payload
     client = TestClient(create_api_app(InvalidConcierge()), raise_server_exceptions=False)
     response = client.post("/api/chat", json={"message": "Hello"})
@@ -131,7 +154,7 @@ def test_busy_concierge_rejects_queued_requests_and_recovers():
     release = Event()
 
     class BlockingConcierge(FakeConcierge):
-        def answer_query_with_metadata(self, query):
+        def answer_query_with_metadata(self, query, history=None):
             started.set()
             assert release.wait(timeout=5)
             return super().answer_query_with_metadata(query)
@@ -153,7 +176,7 @@ def test_busy_concierge_rejects_queued_requests_and_recovers():
 
 def test_agent_failure_releases_busy_lock():
     class RecoveringConcierge(FakeConcierge):
-        def answer_query_with_metadata(self, query):
+        def answer_query_with_metadata(self, query, history=None):
             if query == "Fail":
                 raise RuntimeError("private")
             return super().answer_query_with_metadata(query)

@@ -87,8 +87,8 @@ The frontend shows a compact indicator: green when all services are available, a
 The API contract is intentionally small:
 
 - POST `/api/chat`
-  - body: `{ "message": "..." }`
-  - response: `{ "answer": "...", "agents_used": ["..."], "request_id": "...", "latency_ms": 123 }`
+  - body: `{ "message": "...", "conversation_id": "UUID", "request_id": "UUID" }` (authenticated session and CSRF header required)
+  - response: `{ "answer": "...", "agents_used": ["..."], "request_id": "...", "latency_ms": 123, "conversation_id": "..." }`
 - GET `/api/health`
   - response: status summary for the concierge, policy service, and research service
 
@@ -98,7 +98,7 @@ This gives the browser a stable API surface while hiding the A2A and tool-layer 
 
 The backend creates the real concierge lazily after loading `.env`. Chat and health handlers run in FastAPI worker threads, allowing synchronous smolagents tools to call `asyncio.run()` for A2A work. A nonblocking lock permits one active concierge query per API process; concurrent queries receive 503 instead of waiting indefinitely. Tool usage metadata comes from completed agent memory, including parallel specialist calls.
 
-The browser sends only the current question. It renders user and assistant text in order using `textContent`; the thread exists only in the page DOM and is cleared on refresh. It does not provide model memory. API metadata remains available but is hidden from the main chat layout.
+The browser sends the current question, conversation ID and stable request ID. The backend identifies the owner from a server-side session, loads authorized completed turns from SQLite and supplies bounded context. Agent memory is reset for every run. The browser reloads persisted messages and renders content using `textContent`. See [accounts and memory](accounts-and-memory.md) for the schema, endpoints and lifecycle.
 
 The backend serves the frontend on the same origin. Static HTML/CSS/JavaScript responses use `Cache-Control: no-store`, including conditional requests. Versioned asset URLs prevent clients with older cached assets from mixing frontend versions.
 
@@ -112,7 +112,7 @@ Messages must contain non-whitespace text and may contain at most 8,000 characte
 | 503 | Concierge initialization unavailable, or another query is running |
 | 504 | A `TimeoutError` reached the API from specialist execution |
 
-The browser aborts its request after three minutes. This does not cancel work already executing in the server. No authentication, persistent storage, streaming, or deployment hardening is implemented.
+The browser aborts its request after three minutes. This does not cancel work already executing in the server. Local account authentication and SQLite persistence are implemented. Streaming and public deployment hardening are not implemented. Only a single backend worker is supported.
 
 ## Why this design works
 

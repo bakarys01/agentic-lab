@@ -8,7 +8,7 @@ import pytest
 def test_metadata_includes_tools_executed_in_parallel():
     concierge = ConciergeAgent.__new__(ConciergeAgent)
     concierge.agent = SimpleNamespace(
-        run=lambda task: "Combined response",
+        run=lambda task, **kwargs: "Combined response",
         memory=SimpleNamespace(steps=[
             SimpleNamespace(),
             SimpleNamespace(tool_calls=[

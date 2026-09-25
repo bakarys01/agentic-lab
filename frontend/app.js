@@ -1,166 +1,252 @@
-﻿const form = document.getElementById('ask-form');
-const input = document.getElementById('medical-input');
-const resultBox = document.getElementById('chat-result');
-const resultText = document.getElementById('result-text');
-const resultMeta = document.getElementById('result-meta');
+const byId = id => document.getElementById(id);
+const form = byId('ask-form');
+const input = byId('medical-input');
 const submitButton = form.querySelector('button[type="submit"]');
 const quickPills = document.querySelectorAll('.action-pill');
-const connectionStatus = document.getElementById('connection-status');
-const checkConnectionButton = document.getElementById('check-connection');
-const conversation = document.getElementById('conversation');
-const composerError = document.getElementById('composer-error');
+const conversation = byId('conversation');
+const composerError = byId('composer-error');
 const hero = document.querySelector('.hero');
+let user = null;
+let csrf = '';
+let activeId = null;
 let pending = false;
-let completedReply = null;
+let generation = 0;
+let retry = null;
+let register = false;
+let renderedRequests = new Set();
 
-function appendMessage(role, text, metadata = '', isError = false) {
-  const row = document.createElement('article');
-  row.className = role === 'user' ? 'user-message' : 'assistant-message';
-  row.classList.toggle('is-error', isError);
-  const label = document.createElement('h2');
-  label.className = 'result-label';
-  label.textContent = role === 'user' ? 'You' : 'MediNova';
-  const body = document.createElement('p');
-  body.className = 'message-text';
-  body.textContent = text;
-  row.append(label, body);
-  if (metadata) {
-    const meta = document.createElement('p');
-    meta.className = 'result-meta';
-    meta.textContent = metadata;
-    row.append(meta);
-  }
-  conversation.insertBefore(row, resultBox);
+function savedConversation(value) {
+  if (!user) return null;
+  const key = `medinova.conversation.${user.id}`;
+  try {
+    if (value === undefined) return localStorage.getItem(key);
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, value);
+  } catch { /* History still works when browser storage is disabled. */ }
+  return null;
 }
-
-function startTurn(message) {
-  if (completedReply) {
-    appendMessage('assistant', completedReply.text, completedReply.metadata, completedReply.isError);
-  }
-  conversation.classList.remove('hidden');
-  hero.classList.toggle('has-conversation', true);
-  appendMessage('user', message);
-  input.value = '';
-  setResult('Thinking...');
+function setPending(value) {
+  pending = value;
+  const disabled = value || !user;
+  submitButton.disabled = disabled;
+  input.disabled = disabled;
+  quickPills.forEach(pill => { pill.disabled = disabled; });
+  byId('new-conversation').disabled = disabled;
+  byId('delete-conversation').disabled = disabled || !activeId;
+  byId('conversation-list').querySelectorAll('button').forEach(button => { button.disabled = value; });
+  submitButton.textContent = value ? 'Thinking…' : 'Send';
+  form.setAttribute('aria-busy', String(value));
 }
-
-function setResult(message, isError = false) {
-  resultBox.classList.remove('hidden');
-  resultBox.classList.toggle('is-error', isError);
-  resultText.textContent = message;
-  resultMeta.textContent = '';
-  completedReply = { text: message, metadata: '', isError };
+function clearSession() {
+  generation += 1;
+  savedConversation(null);
+  user = null; csrf = ''; activeId = null; retry = null;
+  conversation.replaceChildren();
+  renderedRequests = new Set();
+  byId('conversation-list').replaceChildren();
+  byId('account-email').textContent = '';
+  input.value = ''; composerError.textContent = '';
+  byId('auth-password').value = '';
+  byId('auth-email').value = '';
+  byId('account-controls').classList.add('hidden');
+  byId('chat-workspace').classList.add('hidden');
+  byId('auth-panel').classList.remove('hidden');
+  hero.classList.remove('has-conversation');
+  setPending(false);
 }
-
 async function requestJSON(url, options = {}, timeoutMs = 180000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const epoch = generation;
+  const mutation = options.method && options.method !== 'GET';
   try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
+    const response = await fetch(url, {...options, credentials: 'same-origin', signal: controller.signal,
+      headers: {...(mutation ? {'Content-Type': 'application/json', 'X-Requested-With': 'fetch', ...(csrf ? {'X-CSRF-Token': csrf} : {})} : {}), ...options.headers}});
+    if (response.status === 401 && epoch === generation) clearSession();
+    if (response.status === 204) return null;
     let payload;
-    try {
-      payload = await response.json();
-    } catch {
-      throw new Error('The concierge is unavailable. Please try again.');
-    }
+    try { payload = await response.json(); }
+    catch { throw new Error('The server is unavailable. Please try again.'); }
     if (!response.ok) {
       const detail = payload?.detail;
-      const message = typeof detail === 'string' ? detail
-        : Array.isArray(detail) ? detail.map(item => item.msg).filter(Boolean).join(' ')
-          : detail?.message;
-      throw new Error(message || 'The concierge is unavailable. Please try again.');
+      throw new Error(typeof detail === 'string' ? detail : detail?.message || 'The request could not be completed. Please try again.');
     }
     return payload;
-  } finally {
-    clearTimeout(timer);
-  }
+  } finally { clearTimeout(timer); }
 }
-
-function connectionState(state, label, description) {
-  checkConnectionButton.dataset.state = state;
-  connectionStatus.textContent = label;
-  checkConnectionButton.setAttribute('title', description + ' Click to check again.');
-  checkConnectionButton.setAttribute('aria-label', description + ' Check connection');
+function showError(error) {
+  return error.name === 'AbortError' ? 'The request timed out. Retry the same question to check its result.'
+    : error.name === 'TypeError' ? 'Unable to connect. Check your connection and retry.' : error.message;
 }
-
-async function checkConnection() {
-  checkConnectionButton.disabled = true;
-  connectionState('checking', 'Checking', 'Checking concierge connection.');
-  try {
-    const payload = await requestJSON('/api/health', {}, 15000);
-    const services = payload?.services || {};
-    const missing = ['policy', 'research'].filter(name => services[name]?.status !== 'available');
-    if (services.concierge?.status !== 'available') {
-      connectionState('offline', 'Offline', 'Concierge unavailable.');
-    } else if (missing.length || payload.status !== 'ok') {
-      connectionState('limited', 'Limited', `Concierge reachable. Unavailable specialists: ${missing.join(', ') || 'service degraded'}.`);
-    } else {
-      connectionState('connected', 'Connected', 'Concierge connected. Policy and research agents available.');
+function renderMessages(messages) {
+  renderedRequests = new Set(messages.filter(message => message.role === 'user').map(message => message.request_id));
+  conversation.replaceChildren();
+  conversation.classList.toggle('hidden', !messages.length);
+  hero.classList.toggle('has-conversation', !!messages.length);
+  messages.forEach(message => {
+    const row = document.createElement('article');
+    row.className = message.role === 'user' ? 'user-message' : 'assistant-message';
+    const label = document.createElement('h2'); label.className = 'result-label';
+    label.textContent = message.role === 'user' ? 'You' : 'MediNova';
+    const body = document.createElement('p'); body.className = 'message-text'; body.textContent = message.content;
+    row.append(label, body);
+    if (message.status === 'pending' || message.status === 'failed') {
+      const status = document.createElement('p'); status.className = 'message-status';
+      status.textContent = message.status === 'pending' ? 'Awaiting response — retry to check progress.' : 'Response failed — retry this question.';
+      row.append(status);
+      if (message.role === 'user' && message.request_id) {
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'text-button'; button.textContent = 'Retry';
+        button.addEventListener('click', () => {
+          if (pending) return;
+          retry = {message: message.content, conversation_id: activeId, request_id: message.request_id};
+          input.value = message.content; input.focus();
+        }); row.append(button);
+      }
     }
-  } catch {
-    connectionState('offline', 'Offline', 'Cannot reach the concierge server.');
-  } finally {
-    checkConnectionButton.disabled = false;
-  }
-}
-
-function setPending(value) {
-  pending = value;
-  submitButton.disabled = value;
-  input.disabled = value;
-  quickPills.forEach(pill => { pill.disabled = value; });
-  submitButton.textContent = value ? 'Thinking...' : 'Send';
-  form.setAttribute('aria-busy', String(value));
-}
-
-form.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  if (pending) return;
-  const message = input.value.trim();
-  composerError.textContent = '';
-  if (!message) { input.focus(); return; }
-  if (message.length > 8000) {
-    composerError.textContent = 'Please keep your question under 8,000 characters.';
-    input.focus();
-    return;
-  }
-  setPending(true);
-  startTurn(message);
-  try {
-    const payload = await requestJSON('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
-    });
-    if (typeof payload?.answer !== 'string' || !payload.answer.trim()) {
-      throw new Error('The concierge returned an empty answer. Please try again.');
-    }
-    setResult(payload.answer);
-    const agents = Array.isArray(payload.agents_used) ? payload.agents_used.filter(agent => typeof agent === 'string') : [];
-    const duration = Number.isFinite(payload.latency_ms) && payload.latency_ms >= 0
-      ? `${(payload.latency_ms / 1000).toFixed(1)}s` : '';
-    resultMeta.textContent = [agents.length ? `Specialists consulted: ${agents.join(', ')}` : 'Answered by concierge', duration].filter(Boolean).join(' · ');
-    completedReply = { ...completedReply, metadata: resultMeta.textContent };
-  } catch (error) {
-    const errorMessage = error.name === 'AbortError'
-      ? 'The request timed out. The agent may still be working; wait a moment before retrying.'
-      : error.name === 'TypeError'
-        ? 'Unable to connect. Check your connection and retry.'
-        : error.message || 'The concierge is unavailable right now.';
-    setResult(errorMessage, true);
-    input.value = message;
-  } finally {
-    setPending(false);
-    input.focus({ preventScroll: true });
-  }
-});
-
-quickPills.forEach(pill => {
-  pill.addEventListener('click', () => {
-    if (pending) return;
-    input.value = pill.dataset.prompt;
-    input.focus();
+    conversation.append(row);
   });
+}
+async function loadMessages(id, epoch = generation) {
+  const data = await requestJSON(`/api/conversations/${encodeURIComponent(id)}/messages`);
+  if (epoch !== generation || id !== activeId) return;
+  renderMessages(data.messages);
+  const last = data.messages.at(-1);
+  if (last?.role === 'user' && last.status !== 'complete' && last.request_id) {
+    retry = {message: last.content, conversation_id: id, request_id: last.request_id};
+  }
+}
+async function selectConversation(id) {
+  if (pending) return;
+  const epoch = ++generation;
+  activeId = id; savedConversation(id); retry = null;
+  input.value = ''; composerError.textContent = '';
+  renderMessages([]); setPending(true);
+  try { await loadMessages(id, epoch); }
+  catch (error) { if (epoch === generation) composerError.textContent = showError(error); }
+  finally { if (epoch === generation) setPending(false); }
+}
+async function loadConversations(epoch = generation, restore = false) {
+  const data = await requestJSON('/api/conversations');
+  if (epoch !== generation || !user) return;
+  byId('conversation-list').replaceChildren();
+  data.conversations.forEach(item => {
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'conversation-choice';
+    button.textContent = item.title || 'New conversation'; button.disabled = pending;
+    button.setAttribute('aria-current', String(item.id === activeId));
+    button.addEventListener('click', () => selectConversation(item.id));
+    byId('conversation-list').append(button);
+  });
+  if (restore) {
+    const saved = savedConversation();
+    const target = data.conversations.find(item => item.id === saved) || data.conversations[0];
+    if (target) await selectConversation(target.id);
+  }
+}
+async function acceptSession(payload) {
+  user = payload.user; csrf = payload.csrf_token; generation += 1;
+  byId('account-email').textContent = user.email;
+  byId('auth-panel').classList.add('hidden');
+  byId('account-controls').classList.remove('hidden');
+  byId('chat-workspace').classList.remove('hidden');
+  setPending(false);
+  await loadConversations(generation, true);
+}
+byId('auth-toggle').addEventListener('click', () => {
+  register = !register;
+  byId('auth-title').textContent = register ? 'Create your account' : 'Welcome back';
+  byId('auth-submit').textContent = register ? 'Create account' : 'Sign in';
+  byId('auth-toggle').textContent = register ? 'Already have an account? Sign in' : 'Create an account';
+  byId('auth-password').setAttribute('autocomplete', register ? 'new-password' : 'current-password');
+  byId('auth-error').textContent = '';
 });
-checkConnectionButton.addEventListener('click', checkConnection);
+byId('auth-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (byId('auth-submit').disabled) return;
+  generation += 1;
+  byId('auth-submit').disabled = true; byId('auth-toggle').disabled = true; byId('auth-error').textContent = '';
+  try {
+    const payload = await requestJSON(`/api/auth/${register ? 'register' : 'login'}`, {method: 'POST', body: JSON.stringify({email: byId('auth-email').value.trim(), password: byId('auth-password').value})});
+    byId('auth-password').value = ''; await acceptSession(payload);
+  } catch (error) { (user ? composerError : byId('auth-error')).textContent = showError(error); }
+  finally { byId('auth-submit').disabled = false; byId('auth-toggle').disabled = false; }
+});
+byId('logout').addEventListener('click', async () => {
+  try { await requestJSON('/api/auth/logout', {method: 'POST'}); clearSession(); }
+  catch (error) { composerError.textContent = `Sign out failed. ${showError(error)}`; }
+});
+byId('new-conversation').addEventListener('click', async () => {
+  if (pending || !user) return;
+  generation += 1; activeId = null; savedConversation(null); retry = null;
+  renderMessages([]); input.value = ''; composerError.textContent = ''; setPending(false); input.focus();
+});
+byId('delete-conversation').addEventListener('click', async () => {
+  if (pending || !activeId || !confirm('Delete this conversation and all its messages?')) return;
+  const epoch = generation;
+  try {
+    await requestJSON(`/api/conversations/${encodeURIComponent(activeId)}`, {method: 'DELETE'});
+    if (epoch !== generation) return;
+    activeId = null; retry = null; savedConversation(null); renderMessages([]); setPending(false);
+    await loadConversations();
+  } catch (error) { if (epoch === generation) composerError.textContent = showError(error); }
+});
+form.addEventListener('submit', async event => {
+  event.preventDefault(); if (pending || !user) return;
+  const message = input.value.trim(); composerError.textContent = '';
+  if (!message) { input.focus(); return; }
+  if (message.length > 8000) { composerError.textContent = 'Please keep your question under 8,000 characters.'; return; }
+  const epoch = generation; setPending(true);
+  try {
+    if (!activeId) {
+      const created = await requestJSON('/api/conversations', {method: 'POST', body: '{}'});
+      if (epoch !== generation) return;
+      activeId = created.id; savedConversation(activeId);
+    }
+    const request = retry?.message === message && retry.conversation_id === activeId ? retry
+      : {message, conversation_id: activeId, request_id: crypto.randomUUID()};
+    retry = request;
+    // Show submission immediately; persisted history replaces this optimistic row.
+    if (!renderedRequests.has(request.request_id)) {
+    const row = document.createElement('article'); row.className = 'user-message';
+    const label = document.createElement('h2'); label.className = 'result-label'; label.textContent = 'You';
+    const body = document.createElement('p'); body.className = 'message-text'; body.textContent = message;
+    row.append(label, body); conversation.append(row); conversation.classList.remove('hidden'); hero.classList.add('has-conversation');
+    renderedRequests = new Set([...renderedRequests, request.request_id]);
+    }
+    input.value = '';
+    await requestJSON('/api/chat', {method: 'POST', body: JSON.stringify(request)});
+    if (epoch !== generation) return;
+    retry = null; await loadMessages(activeId, epoch); await loadConversations(epoch);
+  } catch (error) {
+    if (epoch !== generation) return;
+    composerError.textContent = showError(error); input.value = message;
+    if (activeId) { try { await loadMessages(activeId, epoch); } catch { /* Preserve the actionable request error. */ } }
+  } finally { if (epoch === generation) { setPending(false); input.focus({preventScroll: true}); } }
+});
+quickPills.forEach(pill => pill.addEventListener('click', () => {
+  if (pending || !user) return; input.value = pill.dataset.prompt; input.focus();
+}));
+async function checkConnection() {
+  const button = byId('check-connection'); button.disabled = true;
+  let state = 'offline'; let label = 'Offline';
+  try {
+    const data = await requestJSON('/api/health', {}, 15000);
+    if (data.services?.concierge?.status === 'available') {
+      state = data.status === 'ok' ? 'connected' : 'limited'; label = state === 'connected' ? 'Connected' : 'Limited';
+    }
+  } catch { /* The offline indicator represents health failures. */ }
+  button.dataset.state = state; byId('connection-status').textContent = label;
+  button.setAttribute('aria-label', `Concierge ${label.toLowerCase()}. Check connection`); button.disabled = false;
+}
+byId('check-connection').addEventListener('click', checkConnection);
+setPending(false);
 checkConnection();
+const bootEpoch = generation;
+(async () => {
+  try {
+    const payload = await requestJSON('/api/auth/me');
+    if (bootEpoch === generation) await acceptSession(payload);
+  } catch (error) {
+    if (user) composerError.textContent = showError(error);
+    else if (bootEpoch === generation) clearSession();
+  }
+})();

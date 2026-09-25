@@ -4,7 +4,9 @@ A multi-agent healthcare assistant that demonstrates specialist-agent collaborat
 
 ## Key capabilities
 
-- browser chat with visible questions/replies, selectable examples and a connection indicator
+- local accounts with isolated, persistent conversation history
+- browser chat with selectable examples and a connection indicator
+- bounded conversation memory for follow-up questions
 - insurance policy retrieval
 - healthcare web research
 - intelligent routing
@@ -104,7 +106,7 @@ Open **http://127.0.0.1:8000** in your browser. The backend serves the frontend 
 
 The connection indicator turns green when the concierge initializes and both specialist endpoints are reachable. Click it to recheck. This is a service health check, not a validation of model access.
 
-Select an example question or type your own. Questions and answers remain visible until refresh, but each request is independent: previous messages are not sent to the agent.
+Create an account or sign in, then select an example question or type your own. Conversations are saved in SQLite and restored after refresh. Each conversation has its own bounded context, so the concierge can understand follow-up questions. Use New conversation to start a separate thread.
 
 See [the development guide](docs/development.md) for configuration, tests and troubleshooting, and [the architecture guide](docs/architecture.md) for API contracts.
 
@@ -131,11 +133,13 @@ Browser tests require Chrome and a matching Selenium driver; frontend unit tests
 
 - What treatments are available for sleep apnea and does my insurance cover them?
 
+See [accounts and memory](docs/accounts-and-memory.md) for authentication, storage, API contracts, retries, backup and privacy details.
+
 ## Current limitations
 
 - The healthcare workflow is a local development architecture with separate local services.
-- There is no authentication layer. Keep the services bound to loopback; they are not ready for public deployment.
-- Conversation history is neither persisted nor supplied as model context.
+- Local email/password authentication is implemented. Keep services bound to loopback; password recovery, email verification and public deployment hardening are not implemented.
+- Full history is persisted locally; the model sees only the latest six completed exchanges within a 16,000-character budget. No automatic summary or cross-conversation memory is implemented.
 - Specialist execution is synchronous and local-process based.
 - This project is for demonstration and tooling, not clinical diagnosis.
 
@@ -145,11 +149,11 @@ Future work includes:
 
 - Provider Agent
 - MCP integration
-- persistent conversation memory
+- automatic conversation summaries
 - streaming responses
 - observability and tracing
 - containerization
-- authentication
+- account recovery and stronger account controls
 - production deployment
 
 These are future directions, not implemented features in the current project.

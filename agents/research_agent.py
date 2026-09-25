@@ -23,7 +23,7 @@ class ResearchAgent:
                 DuckDuckGoSearchTool()
             ],
             max_steps=8,
-            verbosity_level=2,
+            verbosity_level=0,
         )
 
     def answer_query(self, query: str) -> str:

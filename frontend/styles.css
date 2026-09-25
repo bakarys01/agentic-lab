@@ -50,3 +50,33 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--brand); outline
   .user-message { max-width: 92%; }
   .capabilities { justify-content: flex-start; }
 }
+/* Account controls and persistent conversation navigation. */
+.hero { width: min(100%, 1180px); }
+.header-actions, #account-controls { display: flex; align-items: center; gap: 12px; }
+#account-email { font-size: .8rem; color: var(--muted); max-width: 230px; overflow: hidden; text-overflow: ellipsis; }
+.text-button { border: 0; background: transparent; color: var(--muted); padding: 8px; font-size: .8rem; text-decoration: underline; text-underline-offset: 3px; }
+.auth-panel { width: min(100%, 380px); align-self: center; }
+.auth-panel h1 { font: 2.2rem Georgia, serif; }
+.auth-panel p { color: var(--muted); }
+#auth-form { display: flex; flex-direction: column; gap: 10px; margin: 24px 0 12px; }
+#auth-form input { border: 1px solid #ffffff30; border-radius: 12px; padding: 13px; color: var(--text); background: #22272d; font: inherit; min-width: 0; }
+#auth-form input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+#auth-submit, #new-conversation { border: 0; border-radius: 12px; padding: 12px; background: var(--brand); color: #20150f; font-weight: 600; }
+.field-help { font-size: .8rem; margin: 0 0 8px; }
+.chat-workspace { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; width: 100%; }
+.history-panel { border-right: 1px solid #ffffff15; padding-right: 20px; min-width: 0; }
+#new-conversation { width: 100%; }
+#conversation-list { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; max-height: 65vh; overflow-y: auto; }
+.conversation-choice { border: 1px solid transparent; border-radius: 10px; color: var(--muted); background: transparent; padding: 12px 10px; text-align: left; font-size: .82rem; overflow-wrap: anywhere; }
+.conversation-choice:hover, .conversation-choice[aria-current=true] { border-color: #ffffff25; background: #ffffff07; color: var(--text); }
+.chat-panel { min-width: 0; }
+.chat-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; color: var(--muted); font-size: .8rem; }
+.message-status { font-size: .8rem; color: var(--brand); }
+.hidden, #account-controls.hidden { display: none; }
+@media(max-width: 800px) {
+  .chat-workspace { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .history-panel { border-right: 0; border-bottom: 1px solid #ffffff15; padding: 0 0 14px; }
+  #conversation-list { max-height: 150px; }
+  #account-email { display: none; }
+  .header-actions, #account-controls { gap: 6px; }
+}
