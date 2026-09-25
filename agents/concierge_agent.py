@@ -1,5 +1,10 @@
 # agents/concierge_agent.py
 
+import time
+from typing import Any
+
+import httpx
+from a2a_clients.client_utils import get_agent_url
 from smolagents import (
     OpenAIServerModel,
     ToolCallingAgent,
@@ -8,6 +13,7 @@ from smolagents import (
 from tools.concierge_tools import (
     ask_policy,
     ask_research,
+    clear_agent_usage,
 )
 
 
@@ -32,15 +38,11 @@ class ConciergeAgent:
                 ask_research,
             ],
             max_steps=8,
-            verbosity_level=2,
+            verbosity_level=0,
         )
 
-    def answer_query(
-        self,
-        query: str,
-    ) -> str:
-
-        task = f"""
+    def _build_task(self, query: str) -> str:
+        return f"""
 You are a healthcare concierge agent.
 
 You have access to two specialized agents.
@@ -86,6 +88,52 @@ User question:
 {query}
 """
 
-        response = self.agent.run(task)
-
+    def answer_query(
+        self,
+        query: str,
+    ) -> str:
+        clear_agent_usage()
+        response = self.agent.run(self._build_task(query))
         return str(response)
+
+    def answer_query_with_metadata(
+        self,
+        query: str,
+    ) -> dict[str, Any]:
+        clear_agent_usage()
+        started = time.perf_counter()
+        response = self.agent.run(self._build_task(query))
+        latency_ms = int((time.perf_counter() - started) * 1000)
+        # Parallel tools run in copied contexts. Completed memory is authoritative
+        # because ContextVar updates inside those threads do not reach this thread.
+        tool_names = {
+            call.name
+            for step in self.agent.memory.steps
+            for call in (getattr(step, "tool_calls", None) or [])
+        }
+
+        return {
+            "answer": str(response),
+            "agents_used": [name for name in ("policy", "research") if f"ask_{name}" in tool_names],
+            "latency_ms": latency_ms,
+        }
+
+    def get_health(self) -> dict[str, Any]:
+        services = {
+            "concierge": {"status": "available"},
+            "policy": {"status": "unknown"},
+            "research": {"status": "unknown"},
+        }
+
+        for name in ("policy", "research"):
+            url = f"{get_agent_url(name).rstrip('/')}/.well-known/agent-card.json"
+            try:
+                response = httpx.get(url, timeout=3.0)
+                services[name]["status"] = "available" if response.status_code == 200 else "unavailable"
+            except httpx.HTTPError:
+                services[name]["status"] = "unavailable"
+
+        return {
+            "status": "ok" if all(service["status"] == "available" for service in services.values()) else "degraded",
+            "services": services,
+        }

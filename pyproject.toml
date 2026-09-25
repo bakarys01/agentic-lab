@@ -1,27 +1,22 @@
 [project]
 name = "my-agents"
 version = "0.1.0"
-description = "Add your description here"
+description = "Healthcare concierge with a browser chat and A2A specialist agents"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "a2a-sdk[http-server]>=1.1.5",
-    "geopandas>=1.1.4",
-    "helium>=7.0.3",
-    "kaleido>=1.4.0",
-    "langchain-community>=0.4.2",
-    "langfuse>=4.15.4",
-    "llama-index-embeddings-huggingface>=0.8.0",
-    "llama-index-llms-huggingface-api>=0.8.0",
-    "openinference-instrumentation-smolagents>=0.1.40",
-    "opentelemetry-exporter-otlp>=1.44.0",
-    "opentelemetry-sdk>=1.44.0",
-    "pandas>=3.0.6",
-    "plotly>=7.1.0",
+    "fastapi>=0.141.1",
+    "httpx>=0.28.1",
+    "pydantic>=2.0",
     "pymupdf>=1.28.2",
     "python-dotenv>=1.2.3",
-    "rank-bm25>=0.2.2",
+    "smolagents[openai,toolkit]>=1.26.0",
+    "uvicorn>=0.53.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.1.0",
     "selenium>=4.49.0",
-    "shapely>=2.1.2",
-    "smolagents[all,litellm,toolkit]>=1.26.0",
 ]
