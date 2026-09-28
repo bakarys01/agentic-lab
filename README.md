@@ -1,13 +1,17 @@
-# Health Concierge
+# Agentic Lab — MediNova Healthcare Concierge
 
-A multi-agent healthcare assistant that demonstrates specialist-agent collaboration through the A2A protocol. The system routes user questions to a policy specialist for insurance questions and a research specialist for healthcare questions, then synthesizes a single response through a healthcare concierge.
+Agentic Lab is a personal AI Engineering / MLOps / LLMOps / AgentOps laboratory. **MediNova**, a healthcare and insurance concierge, is its reference application: keep the same use case while progressively comparing agent frameworks, models, retrieval strategies and deployment environments.
+
+The aim is to explain engineering choices with evidence about quality, latency, cost, reliability and operational complexity. Controlled experiments will change one main dimension at a time; no comparative benchmark results are available yet.
+
+**Current baseline:** a local Python application using smolagents, OpenAI `gpt-4o` and A2A specialist services. Docker, MCP tool services, alternative frameworks/providers, distributed tracing, AI benchmarks, Terraform and cloud deployments are **planned, not implemented**. See the [ordered learning roadmap](docs/roadmap.md).
 
 ## Key capabilities
 
 - local accounts with isolated, persistent conversation history
 - browser chat with selectable examples and a connection indicator
 - bounded conversation memory for follow-up questions
-- insurance policy retrieval
+- lexical, page-based retrieval from a shared insurance PDF
 - healthcare web research
 - intelligent routing
 - multi-agent orchestration
@@ -25,7 +29,7 @@ flowchart TD
     PDF[(Insurance Policy PDF)]
     WEB[(Web)]
 
-    U --> API
+    U -->|Static web frontend| API
     API --> C
     C -->|A2A| P
     C -->|A2A| R
@@ -49,6 +53,8 @@ The research agent answers healthcare research questions using web search. It is
 - smolagents = reasoning inside an agent
 - A2A = communication between agents
 - tools = capabilities available to an individual agent
+
+The model provider and the runtime are separate architectural choices. Today the model is fixed in the agent constructors, tools run in Python inside the specialists, and all services run locally. MCP is a future agent-to-tool boundary; it is not used by this application today.
 
 This project keeps those boundaries explicit: the concierge never touches the PDF or web-search implementation directly; it calls specialist agents over A2A.
 
@@ -141,19 +147,18 @@ See [accounts and memory](docs/accounts-and-memory.md) for authentication, stora
 - Local email/password authentication is implemented. Keep services bound to loopback; password recovery, email verification and public deployment hardening are not implemented.
 - Full history is persisted locally; the model sees only the latest six completed exchanges within a 16,000-character budget. No automatic summary or cross-conversation memory is implemented.
 - Specialist execution is synchronous and local-process based.
+- Only one backend worker and one active concierge query are supported. Specialist servers have no application-level authentication and currently print questions and responses to their consoles; use synthetic data and keep them local.
 - This project is for demonstration and tooling, not clinical diagnosis.
 
 ## Roadmap
 
-Future work includes:
+Follow this order: finish V1 → Docker → evaluation and observability → MCP → generic AWS deployment → AWS agent-native experiments → LangGraph → multiple models → GCP → Azure → advanced production concerns → final engineering report.
 
-- Provider Agent
-- MCP integration
-- automatic conversation summaries
-- streaming responses
-- observability and tracing
-- containerization
-- account recovery and stronger account controls
-- production deployment
+The [roadmap](docs/roadmap.md) defines status, learning goals, deliverables and completion evidence for all twelve phases, including RAG experiments, security, FinOps and controlled comparisons. A Provider Agent is optional future work, not a prerequisite for V1.
 
-These are future directions, not implemented features in the current project.
+## Documentation
+
+- [Architecture](docs/architecture.md): implemented components, boundaries and limitations.
+- [Development](docs/development.md): verified startup commands, configuration and checks.
+- [Accounts and memory](docs/accounts-and-memory.md): storage, authentication, API contracts and retries.
+- [Roadmap](docs/roadmap.md): project vision, planned experiments and interview narrative.

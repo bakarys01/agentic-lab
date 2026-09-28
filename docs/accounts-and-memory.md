@@ -4,7 +4,7 @@
 
 Start the three services as described in the README, then open `http://127.0.0.1:8000`. Choose **Create an account**, enter an email address and a password of 12–128 characters, and submit. Registration signs you in automatically. Email addresses are normalized to lowercase; email ownership is not verified in this local version.
 
-Use **New conversation** to start a separate thread. The first successful submission attempt creates its title from the question. Select a thread in the history list to reload it. Refreshing the page restores the signed-in session and the last selected conversation (or the most recent conversation when no selection is saved).
+Use **New conversation** to start a separate thread. The first persisted question sets its title, even if agent execution subsequently fails. Select a thread in the history list to reload it. Refreshing the page restores the signed-in session and the last selected conversation (or the most recent conversation when no selection is saved).
 
 Use **Delete conversation** and confirm to remove its messages and request records. Deletion is rejected while that conversation has a request running. **Sign out** revokes the current session and clears messages from the page.
 
@@ -58,12 +58,14 @@ The backend persists a pending user message before executing the model. On succe
 
 The concierge receives at most the six most recent successful user/assistant pairs, bounded to 16,000 characters of serialized JSON. Whole pairs are retained; a pair that exceeds the remaining budget is omitted along with older context. Failed and pending turns are excluded. The current question is supplied separately and has an 8,000-character limit.
 
-Every agent execution explicitly resets smolagents memory. Context comes only from the authorized conversation, never from the shared agent's previous run. The concierge uses that context to formulate standalone specialist questions. There is no cross-conversation profile or automatic summary.
+The concierge explicitly passes `reset=True` on each execution. Specialist wrappers call `run(task)` without an explicit reset argument and rely on the library default; they do not receive the persisted history directly. The concierge uses authorized conversation context to formulate standalone specialist questions. There is no cross-conversation profile or automatic summary.
 
-The browser uses a stable request ID when retrying a timeout or failed request. A browser timeout does not cancel work already executing on the server. Reload the thread or use Retry to check the result. On backend startup, persisted pending requests are marked failed so interrupted work can be retried.
+The browser uses a stable request ID when retrying a timeout or failed request. A browser timeout does not cancel work already executing on the server. Reload the thread or use Retry to check the result. When the backend lazily initializes its store after a restart, persisted pending requests are marked failed so interrupted work can be retried.
 
 **Run one backend process/worker for this version.** The shared-agent lock, startup recovery and rate limits assume a single process. An interrupted external model request might already have incurred cost even if its result was never saved; exactly-once external billing cannot be guaranteed across crashes.
 
 ## Current limitations
 
 No email verification, password reset, account deletion UI, MFA, automatic retention policy, automatic summary, or database encryption is implemented. Registration is open to anyone who can reach the local service. All users currently share the same example insurance-policy PDF; user-specific document ingestion is not implemented. Do not expose this prototype publicly without a separate deployment/security design.
+
+The specialist A2A servers currently print full questions and responses to stdout. Conversation deletion does not delete these logs. Use synthetic questions in the lab; logging redaction and service authentication are still planned work. See [architecture limitations](architecture.md#evidence-observability-and-security-limits).
