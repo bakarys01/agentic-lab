@@ -18,7 +18,7 @@ RUN uv sync --frozen --no-dev
 COPY agents/ ./agents/
 COPY a2a_servers/ ./a2a_servers/
 COPY tools/ ./tools/
-COPY data/ ./data/
+COPY data/2026AnthemgHIPSBC.pdf ./data/2026AnthemgHIPSBC.pdf
 
 # Create an unprivileged runtime user
 RUN useradd --create-home --shell /usr/sbin/nologin appuser \

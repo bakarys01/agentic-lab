@@ -8,6 +8,12 @@ services:
       POLICY_AGENT_PORT: "9999"
       POLICY_AGENT_PUBLIC_URL: "http://policy-agent:9999"
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9999/.well-known/agent-card.json', timeout=5).close()"]
+      interval: 15s
+      timeout: 7s
+      retries: 5
+      start_period: 30s
     restart: unless-stopped
     networks:
       - agentic-network
@@ -21,6 +27,12 @@ services:
       RESEARCH_AGENT_PORT: "9998"
       RESEARCH_AGENT_PUBLIC_URL: "http://research-agent:9998"
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9998/.well-known/agent-card.json', timeout=5).close()"]
+      interval: 15s
+      timeout: 7s
+      retries: 5
+      start_period: 30s
     restart: unless-stopped
     networks:
       - agentic-network
@@ -32,16 +44,27 @@ services:
     environment:
       BACKEND_HOST: "0.0.0.0"
       BACKEND_PORT: "8000"
+      DATABASE_PATH: "/app/data/concierge.sqlite3"
 
       POLICY_AGENT_PUBLIC_URL: "http://policy-agent:9999"
       RESEARCH_AGENT_PUBLIC_URL: "http://research-agent:9998"
 
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - backend-data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json, urllib.request; response = urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=10); result = json.load(response); assert result.get('status') == 'ok', result"]
+      interval: 15s
+      timeout: 12s
+      retries: 5
+      start_period: 30s
     depends_on:
-      - policy-agent
-      - research-agent
+      policy-agent:
+        condition: service_healthy
+      research-agent:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - agentic-network
@@ -49,3 +72,6 @@ services:
 networks:
   agentic-network:
     driver: bridge
+
+volumes:
+  backend-data:
