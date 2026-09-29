@@ -42,6 +42,23 @@ Stop each service with Ctrl+C in its terminal. Before restarting, stop the old p
 
 `DATABASE_PATH` selects the SQLite file (default `data/concierge.sqlite3`, relative to the project root). `SESSION_COOKIE_SECURE=false` permits local HTTP; set it to true for HTTPS. Run a single backend process/worker. Accounts/history are created automatically on first use; do not commit the database.
 
+## Docker development
+
+From the repository root, with Docker running and `OPENAI_API_KEY` configured in `.env`:
+
+```bash
+docker compose up --build -d --wait
+docker compose ps
+```
+
+Open `http://127.0.0.1:8000`. Only the backend port is published, bound to host loopback. Specialist traffic uses internal service names. All services have healthchecks; the backend waits for healthy specialist cards and its own check requires `/api/health` to return `status: ok`. These checks do not invoke the model, validate credit, or automatically restart an unhealthy running process.
+
+The backend runs as `appuser` with `DATABASE_PATH=/app/data/concierge.sqlite3`. The named `backend-data` volume persists accounts/history across container recreation; its actual name is prefixed by the Compose project name. The image pre-creates `/app/data` with runtime-user ownership for a new volume. An existing volume must have compatible ownership. The Policy image copies only the example PDF; SQLite files and journals are excluded from the build context.
+
+Use `docker compose down` to stop/remove containers while retaining data. **Do not use `docker compose down -v` unless deliberately deleting accounts and history.** A volume is not a backup: stop the backend before an offline SQLite copy, retain the backup privately outside the container, and test restoration.
+
+When upgrading from the original configuration without a volume, stop the old backend and copy its `/app/data/concierge.sqlite3` to a private backup **before recreating it**. Restore that database into the new volume before starting the backend, with ownership matching `appuser`. Do not overwrite an already populated volume. The host's `data/concierge.sqlite3` and the container's database are separate; do not assume they contain the same accounts. Preserve the original backup until login/history have been verified.
+
 ## Dependencies
 
 Runtime dependencies cover A2A, the Python API, OpenAI-backed smolagents, web search and PDF retrieval. Course-demo libraries were removed. `uv sync` also installs the default development group (pytest and Selenium); use `uv sync --no-dev` for runtime only.

@@ -1,0 +1,40 @@
+FROM python:3.13-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Install locked production dependencies
+COPY pyproject.toml uv.lock README.md ./
+
+RUN uv sync --frozen --no-dev
+
+# Backend + Concierge + A2A clients
+COPY backend/ ./backend/
+COPY agents/ ./agents/
+COPY a2a_clients/ ./a2a_clients/
+COPY tools/ ./tools/
+
+# Frontend is served directly by FastAPI
+COPY frontend/ ./frontend/
+
+# Non-root runtime user
+RUN useradd --create-home --shell /usr/sbin/nologin appuser \
+    && mkdir -p /app/data \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+# backend.server reads these variables
+ENV BACKEND_HOST=0.0.0.0 \
+    BACKEND_PORT=8000
+
+EXPOSE 8000
+
+CMD ["python", "-m", "backend.server"]
