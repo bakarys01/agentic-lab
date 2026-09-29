@@ -1,0 +1,41 @@
+services:
+  backend:
+    ports: !reset []
+    environment:
+      SESSION_COOKIE_SECURE: "true"
+      FORWARDED_ALLOW_IPS: "172.30.50.2"
+    networks:
+      agentic-network: {}
+      proxy-network: {}
+
+  proxy:
+    image: caddy:2-alpine
+    environment:
+      APP_DOMAIN: "${APP_DOMAIN:?Define APP_DOMAIN}"
+      ACME_EMAIL: "${ACME_EMAIL:?Define ACME_EMAIL}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      proxy-network:
+        ipv4_address: 172.30.50.2
+
+networks:
+  proxy-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.50.0/24
+          ip_range: 172.30.50.128/25
+
+volumes:
+  caddy-data:
+  caddy-config:

@@ -59,6 +59,28 @@ Use `docker compose down` to stop/remove containers while retaining data. **Do n
 
 When upgrading from the original configuration without a volume, stop the old backend and copy its `/app/data/concierge.sqlite3` to a private backup **before recreating it**. Restore that database into the new volume before starting the backend, with ownership matching `appuser`. Do not overwrite an already populated volume. The host's `data/concierge.sqlite3` and the container's database are separate; do not assume they contain the same accounts. Preserve the original backup until login/history have been verified.
 
+## HTTPS preparation (MED-3 — in progress)
+
+`docker-compose.https.yml` adds Caddy in front of the same-origin UI/API, removes the backend's published port and enables `SESSION_COOKIE_SECURE=true`. Only the proxy publishes ports 80/443. Uvicorn trusts forwarded client/protocol headers from `172.30.50.2` only in this configuration. Docker allocates dynamic proxy-network addresses from `172.30.50.128/25`, keeping Caddy's fixed address outside that range.
+
+Set `APP_DOMAIN` (hostname only) and `ACME_EMAIL` in `.env`; `.env.example` documents these variables but does not supply them to Compose. Placeholder values are suitable for configuration checks only. The proxy waits up to 170 seconds for backend response headers, before the frontend's 180-second timeout, and provides a JSON error on proxy failure. This does not cancel ongoing agent execution.
+
+Preparation checks:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.https.yml config --quiet
+docker compose -f docker-compose.yml -f docker-compose.https.yml run --rm --no-deps proxy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+uv run python -m pytest tests/test_proxy_headers.py -q
+```
+
+Recorded during setup: Compose/Caddy configuration validation succeeded and both proxy-header unit tests passed. These tests check Uvicorn middleware behavior for trusted/untrusted peers; they do not test the deployed Caddy-to-backend chain. The validation container does not publish service ports, but Compose may create networks and volumes.
+
+The source file is named `Caddyfile`, matching the Compose mount exactly. Preserve this capitalization when deploying on Linux.
+
+**Still pending:** a controlled domain and server, DNS, a valid public certificate and renewal verification, HTTP-to-HTTPS redirection, secure-cookie/CSRF login flows, actual forwarded client addresses and proxy timeout behavior. Local HTTPS testing was deferred. Do not start the public HTTPS configuration with placeholder domain values or consider MED-3 complete. Private-access controls must be ready before exposing the beta.
+
+Continue using `docker compose up -d --wait` and `http://127.0.0.1:8000` for local development. If switching back from the HTTPS stack, first run `docker compose -f docker-compose.yml -f docker-compose.https.yml down` **without `-v`** to retain the database and Caddy volumes. Caddy certificate state is stored in `caddy-data`; do not delete it during normal updates.
+
 ## Dependencies
 
 Runtime dependencies cover A2A, the Python API, OpenAI-backed smolagents, web search and PDF retrieval. Course-demo libraries were removed. `uv sync` also installs the default development group (pytest and Selenium); use `uv sync --no-dev` for runtime only.
