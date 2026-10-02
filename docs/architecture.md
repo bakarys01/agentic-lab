@@ -1,186 +1,159 @@
-# Architecture
+# Architecture and contributor guide
 
-## Overview
+This document describes the code in this repository. [The roadmap](roadmap.md) tracks future experiments. The reference application is MediNova, a healthcare concierge that routes a question to independent specialists. Configuration selects an agent's prompt, runtime, model, tools, delegates and network port; Python adapters implement the supported combinations.
 
-This document describes **implemented behavior**, verified against the repository on 2026-09-28. Agentic Lab is the laboratory; MediNova Healthcare Concierge is the reference application. Future architectures belong in the [roadmap](roadmap.md). A dependency, prompt instruction or planned Jira ticket is not evidence that a capability has been validated in production.
+## Start here
 
-The project implements a healthcare concierge built around a small multi-agent pattern:
+From the repository root, use Python 3.13 and uv:
 
-- a concierge agent orchestrates the conversation
-- a policy specialist handles insurance questions
-- a research specialist handles general healthcare questions
-- each specialist runs as an A2A-compatible service
-- the front end calls a lightweight Python API layer
+~~~bash
+uv sync
+~~~
 
-This keeps the user experience simple while preserving the agent boundaries that matter for correctness and trust.
+Copy .env.example to .env and set OPENAI_API_KEY and HF_TOKEN. The policy and research agents use OpenAI gpt-4o; the healthcare provider uses Hugging Face openai/gpt-oss-20b. The insurance PDF and doctor directory must exist at data/2026AnthemgHIPSBC.pdf and data/doctors.json. Never commit .env or the conversation database.
 
-```mermaid
-flowchart TD
-    U[Browser: static HTML / CSS / JavaScript] --> B[FastAPI: auth, conversations, chat]
-    B --> DB[(SQLite: users, sessions, conversations, requests, messages)]
-    B --> C[Concierge: smolagents ToolCallingAgent]
-    C -->|A2A JSON-RPC| P[Policy: smolagents ToolCallingAgent]
-    C -->|A2A JSON-RPC| R[Research: smolagents ToolCallingAgent]
-    P -->|Local Python tool| PDF[PyMuPDF and lexical page search]
-    PDF --> D[(Shared insurance PDF)]
-    R -->|Local DuckDuckGoSearchTool| W[Web search]
-    C --> M[OpenAI gpt-4o]
-    P --> M
-    R --> M
-```
+Open four terminals and run one command in each:
 
-There are three server processes. The concierge runs inside the backend process, and the backend also serves the frontend. There is no separate frontend server, concierge server, MCP service, vector database or container runtime configured in the repository.
+~~~bash
+uv run --env-file .env python -m a2a_servers.serve policy
+uv run --env-file .env python -m a2a_servers.serve research
+uv run --env-file .env python -m a2a_servers.serve healthcare_provider
+uv run --env-file .env python -m backend.server
+~~~
 
-## Implementation map
+The commands above are separate long-running processes, not a single shell script. Open http://127.0.0.1:8000, create an account, and start a conversation. For a command-line check, use:
 
-| Layer | Source | Actual responsibility |
-| --- | --- | --- |
-| UI | `frontend/index.html`, `styles.css`, `app.js` | Accounts, messages, conversation list, examples and connection indicator |
-| API | `backend/api.py`, `backend/server.py` | FastAPI/Uvicorn, same-origin assets, validation and serialized concierge access |
-| Identity and persistence | `backend/auth.py`, `backend/storage.py` | Local accounts, session/CSRF checks, SQLite ownership and turn persistence |
-| Orchestration | `agents/concierge_agent.py`, `agents/conversation_memory.py` | Routing prompt, bounded history and response synthesis |
-| Specialist adapters | `tools/concierge_tools.py`, `a2a_clients/client_utils.py` | Python tools bridging synchronous agent execution to asynchronous A2A clients |
-| Specialists | `agents/policy_agent.py`, `agents/research_agent.py` | Domain prompts and local retrieval/search tools |
-| A2A servers | `a2a_servers/policy_server.py`, `research_server.py` | Starlette, agent cards, JSON-RPC and in-memory A2A task stores |
+~~~bash
+uv run --env-file .env python -m examples.run_agent concierge "What is my deductible, what are common treatments for depression, and which psychiatrists are in Paris?"
+~~~
 
-All three agents instantiate `OpenAIServerModel(model_id="gpt-4o")`; there is no application-level model/provider selector. Concierge and Research have `max_steps=8`, Policy has `max_steps=6`. Prompts are inline Python strings versioned with the code, not a separate prompt registry. `main.py` is a terminal interface: it calls the concierge directly, does not provide the web account/history flow and does not itself load `.env`.
+The A2A servers must already be running for the concierge to delegate. If an activated environment points to another project, use uv run without activating it. On Windows, the project's .venv/Scripts/python.exe is an alternative; use uv's --env-file option for command-line clients that do not load .env themselves.
 
-## Request flow
+The same four services are described by docker-compose.yml. Set both model tokens in .env and run docker compose up --build. docker-compose.https.yml adds the optional Caddy proxy; it is not needed for local development. Compose configuration can be checked without starting containers with docker compose --env-file .env.example config --quiet. The backend listens on port 8000; specialist ports are internal to the Compose network.
 
-1. The user enters a question in the static HTML/JavaScript front end.
-2. The front end sends the message, conversation UUID and stable request UUID to `/api/chat`, with the session cookie and CSRF header.
-3. The API checks ownership, acquires its nonblocking query lock, reuses a saved result for a completed retry or persists a pending turn, then loads completed history and invokes `answer_query_with_metadata()`.
-4. The concierge agent runs a `ToolCallingAgent` with `ask_policy` and `ask_research` tools.
-5. Each tool sends a request to one of the specialist A2A services.
-6. The specialist returns domain-specific information.
-7. The concierge synthesizes the final answer and returns it to the API.
-8. The API validates and saves the response with the completed turn, then sends it to the browser, which reloads persisted messages. Failed turns are marked for retry.
+## Running architecture
 
-## Agent boundaries
+~~~mermaid
+flowchart LR
+    User[Browser or CLI] --> API[FastAPI backend]
+    API --> DB[(SQLite accounts and conversations)]
+    API --> C[Concierge: AgentRuntime / smolagents]
+    C -->|A2A JSON-RPC| P[Policy A2A server]
+    C -->|A2A JSON-RPC| R[Research A2A server]
+    C -->|A2A JSON-RPC| H[Healthcare provider A2A server]
+    P --> PT[Local search_policy tool]
+    PT --> PDF[(Insurance PDF)]
+    R --> RT[Local web_search tool]
+    RT --> Web[(Web)]
+    H -->|MCP stdio| HM[list_doctors]
+    HM --> Doctors[(doctors.json)]
+    C -.-> O[OpenAI model]
+    P -.-> O
+    R -.-> O
+    H -.-> HF[Hugging Face model]
+~~~
 
-### Concierge agent
+The browser, API and concierge share the backend process. Each specialist has its own A2A server process. The healthcare provider's MCP server is a stdio subprocess started by its MCP client, not a fourth network endpoint. A2A carries agent-to-agent requests; MCP connects an agent to a tool. The policy and research tools are still local Python tools.
 
-The concierge is responsible for:
+The concierge's smolagents tool names are generated as ask_policy, ask_research and ask_healthcare_provider. Their descriptions come from each specialist's AgentDefinition. The model chooses tools using those descriptions and prompts/concierge.md; no fixed number of specialists is written into the prompt. Each tool calls the generic A2A client. The specialist server constructs the same AgentRuntime for its configured agent and returns a text message.
 
-- deciding whether the question is policy-focused, research-focused, or mixed
-- invoking the correct specialist tool(s)
-- combining specialist output into a single response
-- returning metadata like which specialist agents were used
+## Where things live
 
-It does not perform the policy lookup or web research itself. It delegates those tasks to specialty services.
-
-### Policy agent
-
-The policy agent answers questions about:
-
-- coverage and benefits
-- deductibles and copays
-- coinsurance
-- exclusions and limitations
-- in-network and out-of-network differences
-
-It uses the local PDF-based retrieval tool attached to the policy service.
-
-`tools/policy_tools.py` loads `data/2026AnthemgHIPSBC.pdf` at import time with PyMuPDF. Run from the repository root because this path is relative to the working directory. It preserves one-based page numbers, splits the lowercased query on whitespace and scores each page by how many distinct query terms occur as substrings. It returns at most three matching pages, each truncated to 5,000 characters, with source/page labels.
-
-This is a lexical retrieval baseline, not embedding-based semantic search. There is no chunking pipeline, vector store, hybrid search, reranker, upload flow or per-user document corpus. The prompt requests grounded answers and page references; citation accuracy is not automatically scored or enforced.
-
-### Research agent
-
-The research agent answers questions about:
-
-- symptoms and disease descriptions
-- treatment options
-- medical procedures
-- general healthcare context
-
-It uses search-oriented tools and responds with internet-derived context.
-
-The concrete tool is smolagents' `DuckDuckGoSearchTool`. The prompt requests reliable sources and URLs when available. This is not an allowlisted or independently verified medical-source pipeline, and current regression tests do not establish clinical accuracy.
-
-## A2A communication
-
-The specialist services expose agent cards and callable endpoints. The concierge calls them through the A2A client utilities in `a2a_clients/`.
-
-The relevant layers are:
-
-- `a2a_servers/policy_server.py`
-- `a2a_servers/research_server.py`
-- `a2a_clients/client_utils.py`
-- `tools/concierge_tools.py`
-
-This allows the orchestration layer to remain loosely coupled from the specialist implementation.
-
-Both servers advertise A2A 1.0 / JSON-RPC at `/`, expose `/.well-known/agent-card.json`, set `streaming=False` and use `InMemoryTaskStore`. Their executors call synchronous specialists through `asyncio.to_thread`. The `cancel()` methods are no-ops; durable A2A task recovery and cancellation are not implemented. SQLite conversation persistence is separate from these in-memory task stores.
-
-| Process | Default listener | Entrypoint from repository root |
-| --- | --- | --- |
-| UI/API/concierge | `127.0.0.1:8000` | `uv run python -m backend.server` |
-| Policy | `127.0.0.1:9999` | `uv run python -m a2a_servers.policy_server` |
-| Research | `127.0.0.1:9998` | `uv run python -m a2a_servers.research_server` |
-
-See [development configuration](development.md#configuration-and-service-lifecycle) and [`.env.example`](../.env.example) for environment variables. `POLICY_AGENT_PUBLIC_URL` and `RESEARCH_AGENT_PUBLIC_URL` are used for both discovery and calls. Policy's server alone also recognizes the legacy `A2A_PUBLIC_URL` fallback; clients do not, so use the explicit specialist variables.
-
-## Health model
-
-The API health endpoint checks the status of each service through the `get_health()` method on the concierge. That method probes:
-
-- whether the concierge can be initialized locally (no model inference call)
-- the policy agent card URL
-- the research agent card URL
-
-The frontend shows a compact indicator: green when all services are available, amber when specialists are unavailable or service is degraded, red when the concierge cannot be reached or initialized. Hover text provides details; clicking reruns the check. It does not verify model credentials, quota, or outbound inference connectivity.
-
-## Data flow and contracts
-
-The API contract is intentionally small:
-
-- POST `/api/chat`
-  - body: `{ "message": "...", "conversation_id": "UUID", "request_id": "UUID" }` (authenticated session and CSRF header required)
-  - response: `{ "answer": "...", "agents_used": ["..."], "request_id": "...", "latency_ms": 123, "conversation_id": "..." }`
-- GET `/api/health`
-  - response: status summary for the concierge, policy service, and research service
-
-This gives the browser a stable API surface while hiding the A2A and tool-layer complexity.
-
-## Execution and browser state
-
-The backend creates the real concierge lazily after loading `.env`. Chat and health handlers run in FastAPI worker threads, allowing synchronous smolagents tools to call `asyncio.run()` for A2A work. A nonblocking lock permits one active concierge query per API process; concurrent queries receive 503 instead of waiting indefinitely. Tool usage metadata comes from completed agent memory, including parallel specialist calls.
-
-The browser sends the current question, conversation ID and stable request ID. The backend identifies the owner from a server-side session, loads authorized completed turns from SQLite and supplies bounded context. Agent memory is reset for every run. The browser reloads persisted messages and renders content using `textContent`. See [accounts and memory](accounts-and-memory.md) for the schema, endpoints and lifecycle.
-
-The backend serves the frontend on the same origin. Static HTML/CSS/JavaScript responses use `Cache-Control: no-store`, including conditional requests. Versioned asset URLs prevent clients with older cached assets from mixing frontend versions.
-
-### Chat validation and errors
-
-Messages must contain non-whitespace text and may contain at most 8,000 characters. Empty/invalid input returns 400 or 422. Response payloads are validated before returning them to the browser.
-
-| Status | Meaning |
+| Path | Responsibility |
 | --- | --- |
-| 502 | Agent execution failed or returned an invalid/empty response |
-| 503 | Concierge initialization unavailable, or another query is running |
-| 504 | A `TimeoutError` reached the API from specialist execution |
+| config/agents.yaml | Agent definitions, model references, execution profiles, tool registry, MCP server settings and A2A ports |
+| agents/definition.py | Immutable AgentDefinition schema and defaults |
+| agents/config_loader.py | Read and validate the configuration; resolve MCP script paths |
+| agents/runtime.py | Build an agent, choose its framework adapter, run it, report tool usage and check delegate A2A cards |
+| agents/models.py | Create a model from a model profile and its credential environment variable |
+| agents/conversation_memory.py | Select a bounded suffix of completed conversation pairs |
+| prompts/*.md and prompts/loader.py | Versioned instructions, loaded by configured prompt name |
+| tools/registry.py and tools/policy_tools.py | Resolve local smolagents tools; search the shared PDF |
+| tools/delegation.py and a2a_clients/client_utils.py | Turn a synchronous manager tool call into an A2A client request |
+| tools/mcp_connector.py and mcp_servers/healthcare.py | Discover allowed MCP tools and serve list_doctors over stdio |
+| a2a_servers/{serve,app,card,executor}.py | Start any configured A2A agent; publish its Agent Card and JSON-RPC route |
+| backend/{api,auth,storage,server}.py | HTTP API, authentication, SQLite, static files and server entry point |
+| frontend/ | Browser UI served by the backend |
+| main.py and examples/run_agent.py | Interactive CLI and one-shot configured agent runner |
+| tests/ | Python regression, frontend and browser checks |
 
-The browser aborts its request after three minutes. This does not cancel work already executing in the server. Local account authentication and SQLite persistence are implemented. Streaming and public deployment hardening are not implemented. Only a single backend worker is supported.
+The generic A2A launcher is python -m a2a_servers.serve NAME. There are no agent-specific server or client modules to edit when adding a specialist.
 
-## Why this design works
+## Configuration contract
 
-The project deliberately separates:
+config/agents.yaml has version: 1. Its main sections are:
 
-- reasoning (`smolagents` inside each agent)
-- inter-agent communication (`A2A`)
-- tool execution (PDF retrieval and web search)
+- agents: name to role, description, prompt and optional runtime, model, tools, mcp_servers, delegates, execution, memory, policies, input and output.
+- execution_profiles: named max_steps values.
+- models: provider, model_id and api_key_env.
+- tools: local smolagents components, either a prebuilt instance or a zero-argument factory referenced as module:object.
+- mcp_servers: stdio script and allowed tool names.
+- a2a_servers: agent name to port. A corresponding public URL may be set in the environment as NAME_IN_UPPERCASE_AGENT_PUBLIC_URL.
 
-That separation gives future experiments a starting point. Swapping frameworks or models is not yet a configuration-only operation: adapters and compatibility tests still need to be designed. A2A currently separates agents, while tools are local Python calls. MCP will address agent-to-tool/data interoperability; it will not replace A2A. Framework, model/provider and cloud/runtime must remain distinct decisions.
+Defaults from AgentDefinition are runtime=smolagents, model=default, execution=default, memory=none and text input/output. role accepts manager or specialist, but the current runtime does not branch on role: delegates and runtime determine what the agent does. Invalid names, profiles and settings fail early in the loaders.
 
-## Evidence, observability and security limits
+Supported combinations are currently smolagents + OpenAI + local tools/delegates, or LangChain + Hugging Face + MCP tools. The LangChain adapter does not yet accept local tools or delegates; the smolagents adapter does not yet accept MCP. Memory modes other than none, policy plugins and structured input/output are declared in the schema but rejected by AgentRuntime. New providers or frameworks require a tested change to agents/models.py or agents/runtime.py; YAML alone cannot create an unsupported adapter.
 
-Implemented operational metadata includes `agents_used`, a request UUID and `latency_ms`. For the real concierge, latency covers its agent run, not the entire HTTP/storage path; a reused result retains its original metadata. These fields are not distributed traces or a benchmark. There is no token/cost accounting, span propagation across A2A, p50/p95 aggregation, OpenTelemetry, MLflow, LangSmith or Langfuse integration.
+A delegate is named under its manager's delegates list. AgentRuntime reads that delegate's local definition for validation and tool description, but the actual invocation crosses A2A. This means a completely external agent without a local AgentDefinition is not yet supported by configuration alone. A2A ports live in YAML; changing only an old *_AGENT_PORT environment variable has no effect. A2A_BIND_HOST controls the listen address, whereas NAME_AGENT_PUBLIC_URL is the reachable URL announced on the Agent Card and used by clients.
 
-The backend redacts submitted inputs from validation errors and logs exception types for chat failures. However, **both A2A servers print full questions and answers**. Logging redaction remains work to complete before sharing environments or using private health information. Low smolagents verbosity does not remove those prints.
+## Request and state flow
 
-Local security includes hashed passwords and session tokens, revocable cookies, CSRF/origin checks, parameterized SQL, ownership checks, input/response validation and in-process rate limits. The A2A endpoints have no application-level authentication/authorization. Registration is open to anyone who can reach the service; data and backups are not encrypted by the application. There is no dedicated prompt-injection defense, tool authorization policy, PII filtering or human approval workflow. Prompt instructions do not enforce such boundaries.
+1. The browser signs in using backend/auth.py and calls POST /api/chat with a message, conversation_id and request_id. The API requires a session cookie, CSRF token and ownership of the conversation.
+2. backend/storage.py records a pending request in SQLite and supplies completed conversation turns. Reusing a completed request_id returns its stored response; failed turns remain retryable.
+3. backend/api.py calls AgentRuntime.answer_query_with_metadata on the concierge. agents/conversation_memory.py keeps at most six complete user/assistant pairs and a 16,000-character serialized budget. The question and bounded context enter a fresh smolagents execution.
+4. The concierge chooses one or more generated ask_* tools. tools/delegation.py calls a2a_clients/client_utils.py; the client reads the specialist's Agent Card and sends an A2A text request.
+5. a2a_servers/executor.py runs the configured specialist in a worker thread and emits a text answer. Policy uses search_policy over the shared PDF. Research uses DuckDuckGoSearchTool. Healthcare provider uses MCP list_doctors over the local JSON directory.
+6. The concierge synthesizes the specialist results. Metadata records names of tools actually called and the concierge run latency. The API validates, persists and returns the answer.
 
-HTTPX specialist calls use 60-second Policy and 120-second Research timeout settings; these are not guaranteed end-to-end execution deadlines. The browser aborts after 180 seconds without cancelling model execution. Step limits and local rate limits are useful bounds, but not token budgets or billing caps.
+The A2A server publishes /.well-known/agent-card.json and accepts JSON-RPC at /. Agent Cards use the configured agent description and endpoint. The implementation is request/response text only, with in-memory A2A task stores; it does not implement streaming, persistent remote tasks or effective cancellation. Conversation history stays in the backend and is not sent as a specialist conversation; the manager reformulates a standalone specialist question.
 
-Tests currently live directly in `tests/`: Python API/auth/storage/memory/configuration tests, Node frontend tests and Selenium browser flows. Browser tests use a deterministic concierge and temporary SQLite databases. They do not validate real model quality, medical correctness, real A2A interoperability under load or cloud operations. No CI workflow, Dockerfile, Compose configuration, Terraform module or AI evaluation dataset is present. Consult the [roadmap](roadmap.md) for the planned validation layers.
+GET /api/health checks the three specialist Agent Card endpoints and reports their reachability. It does not prove that credentials, model inference, MCP tools, PDF access or answer quality work. The backend handles one active concierge query per process; a concurrent query gets 503. A2A client calls use a 120-second HTTPX timeout, while the browser has its own timeout; neither guarantees remote cancellation.
+
+## Add a specialist
+
+For a new internal agent, follow this order:
+
+1. Write prompts/NAME.md with its domain, grounding rules and response expectations. Keep routing instructions in the manager prompt generic.
+2. Add agents.NAME in config/agents.yaml with a clear description and prompt: NAME. Choose runtime and model. For a local smolagents capability, register a Tool in tools and reference it under tools. For an MCP capability, add a dedicated script under mcp_servers, register its stdio connection and allowed_tools, then reference it from mcp_servers on the agent. Do not put prompt text or credentials in YAML.
+3. Add a2a_servers.NAME.port with a free port, and add NAME to agents.concierge.delegates. Start python -m a2a_servers.serve NAME; no new A2A server Python module is needed. Set NAME_AGENT_PUBLIC_URL only when the client's reachable address differs from the local default.
+4. Test definition loading, Agent Card creation, direct A2A communication and a concierge question that requires this agent. Check the server access log for a POST to /. Update the Compose services and model credentials if the agent must run in containers.
+
+A compact example for a new smolagents specialist:
+
+~~~yaml
+agents:
+  nutrition:
+    role: specialist
+    description: Answers nutrition questions from its approved sources.
+    prompt: nutrition
+    tools: [search_nutrition]
+
+  concierge:
+    role: manager
+    prompt: concierge
+    description: Coordinates specialist agents.
+    delegates: [policy, research, healthcare_provider, nutrition]
+
+a2a_servers:
+  nutrition:
+    port: 9996
+~~~
+
+This is a fragment to merge into the existing file, not a replacement for its other sections. search_nutrition must be registered under tools, and prompts/nutrition.md must exist. A different model/provider or framework needs an adapter supported by create_model and AgentRuntime first. For a third-party A2A agent, the client transport is reusable, but local definition/validation and endpoint configuration need extending before it becomes configuration-only.
+
+## API, operations and limits
+
+The backend serves the UI and HTTP API on the same origin. Key routes are POST /api/auth/register, POST /api/auth/login, POST /api/auth/logout, GET/POST /api/conversations, GET /api/conversations/{id}/messages, DELETE /api/conversations/{id}, POST /api/chat and GET /api/health. Chat requests include message, conversation_id and request_id UUIDs. Responses include answer, agents_used, request_id, latency_ms and conversation_id. Invalid input is rejected; agent failures return a sanitized 502, timeouts 504, and unavailable/busy concierge requests 503.
+
+SQLite holds users, sessions, conversations, requests and messages. Passwords use PBKDF2 hashes; session tokens are stored hashed and the API enforces CSRF, origin/ownership checks and rate limits. DATABASE_PATH defaults to data/concierge.sqlite3. The Compose backend uses a named volume. Preserve or back up that file before replacing a deployment. Session cookies should be marked secure when HTTPS is used.
+
+The A2A services have no application-level authentication or authorization. Keep them on loopback locally or on a private container network; the HTTPS proxy exposes only the backend. The policy PDF and doctors.json are shared application data, not per-user records. The provider directory is a static sample and does not establish appointment availability, insurance network membership or clinical suitability. The application is an engineering reference, not a source of medical advice.
+
+The frontend and Python tests use deterministic substitutes for many agent calls. Run:
+
+~~~bash
+uv run python -m pytest tests -q -p no:cacheprovider
+node --test tests/frontend.test.cjs
+~~~
+
+The browser tests require Chrome and a matching Selenium driver; the JavaScript tests require Node.js. These checks do not score answer correctness, real model quality or remote interoperability under load. Live checks require working API credentials and network access. There is no distributed tracing, token/cost ledger, long-running task recovery or CI-based AI evaluation yet. Record new architectural decisions here and future experiments in the roadmap.

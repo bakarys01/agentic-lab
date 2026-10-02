@@ -1,0 +1,86 @@
+version: 1
+
+agents:
+  policy:
+    role: specialist
+    description: >-
+      Answers questions about the user's insurance policy, including coverage,
+      deductibles, copays, coinsurance and exclusions. Does not give medical advice
+      or find doctors.
+    prompt: policy
+    execution: policy
+    tools:
+      - search_policy
+
+  research:
+    role: specialist
+    description: >-
+      Researches general medical questions about conditions, symptoms and
+      treatments using web sources. Does not determine insurance coverage
+      or find doctors in the provider directory.
+    prompt: research
+    tools:
+      - web_search
+
+  concierge:
+    role: manager
+    description: Coordinates insurance and healthcare research specialists.
+    prompt: concierge
+    delegates:
+      - policy
+      - research
+      - healthcare_provider
+
+  healthcare_provider:
+    role: specialist
+    description: >-
+      Finds doctors by city, region or medical specialty in the provider directory.
+      Does not determine insurance coverage or appointment availability.
+    runtime: langchain
+    model: provider_search
+    prompt: healthcare_provider
+    mcp_servers:
+      - healthcare_providers
+
+execution_profiles:
+  default:
+    max_steps: 8
+
+  policy:
+    max_steps: 6
+
+models:
+  default:
+    provider: openai
+    model_id: gpt-4o
+    api_key_env: OPENAI_API_KEY
+
+  provider_search:
+    provider: huggingface
+    model_id: openai/gpt-oss-20b
+    api_key_env: HF_TOKEN
+
+tools:
+  search_policy:
+    kind: instance
+    target: tools.policy_tools:search_policy
+
+  web_search:
+    kind: factory
+    target: smolagents:DuckDuckGoSearchTool
+
+mcp_servers:
+  healthcare_providers:
+    transport: stdio
+    script: mcp_servers/healthcare.py
+    allowed_tools:
+      - list_doctors
+
+
+a2a_servers:
+  policy:
+    port: 9999
+  research:
+    port: 9998
+  healthcare_provider:
+    port: 9997

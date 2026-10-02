@@ -9,15 +9,15 @@ from a2a.types import (
     SendMessageConfiguration,
     SendMessageRequest,
 )
-
+from agents.config_loader import load_a2a_config
 
 def get_agent_url(name: str) -> str:
-    """Use the same specialist endpoint for health checks and A2A calls."""
-    default_port = {"policy": "9999", "research": "9998"}[name]
-    prefix = name.upper()
-    port = os.getenv(f"{prefix}_AGENT_PORT", default_port)
-    return os.getenv(f"{prefix}_AGENT_PUBLIC_URL", f"http://127.0.0.1:{port}").rstrip("/")
-
+    port = load_a2a_config(name)["port"]
+    public_url = os.getenv(
+        f"{name.upper()}_AGENT_PUBLIC_URL",
+        f"http://127.0.0.1:{port}",
+    )
+    return public_url.rstrip("/")
 
 async def ask_a2a_agent(
     agent_url: str,
@@ -81,31 +81,3 @@ async def ask_a2a_agent(
     finally:
         await client.close()
         await httpx_client.aclose()
-
-
-async def ask_policy_agent(
-    question: str,
-) -> str:
-    """
-    Ask the Insurance Policy Agent through A2A.
-    """
-
-    return await ask_a2a_agent(
-        agent_url=get_agent_url("policy"),
-        question=question,
-        timeout=60.0,
-    )
-
-
-async def ask_research_agent(
-    question: str,
-) -> str:
-    """
-    Ask the Health Research Agent through A2A.
-    """
-
-    return await ask_a2a_agent(
-        agent_url=get_agent_url("research"),
-        question=question,
-        timeout=120.0,
-    )

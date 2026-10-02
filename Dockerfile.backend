@@ -18,6 +18,8 @@ COPY backend/ ./backend/
 COPY agents/ ./agents/
 COPY a2a_clients/ ./a2a_clients/
 COPY tools/ ./tools/
+COPY prompts/ ./prompts/
+COPY config/ ./config/
 
 # Frontend is served directly by FastAPI
 COPY frontend/ ./frontend/

@@ -1,7 +1,7 @@
 # main.py
 
-from agents.concierge_agent import ConciergeAgent
-
+from agents.config_loader import load_agent_definition
+from agents.runtime import AgentRuntime
 
 def main() -> None:
 
@@ -9,7 +9,7 @@ def main() -> None:
     print("Healthcare Concierge")
     print("=" * 60)
 
-    concierge = ConciergeAgent()
+    concierge = AgentRuntime(load_agent_definition("concierge"))
 
     while True:
 
@@ -32,9 +32,7 @@ def main() -> None:
 
         try:
 
-            response = concierge.answer_query(
-                question
-            )
+            response = concierge.run(question)
 
             print("\n" + "=" * 60)
             print("Healthcare Concierge")

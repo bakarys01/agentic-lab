@@ -8,7 +8,7 @@ The professional goal is to explain where technologies belong, why one approach 
 
 ## Status and evidence
 
-Baseline inspected on **2026-09-28**. Status describes repository implementation, not Jira ticket creation or an unverified running environment:
+Baseline rechecked on **2026-10-02**. Status describes repository implementation, not Jira ticket creation or an unverified running environment:
 
 - **[IMPLEMENTED]**: concrete code or documentation exists; its validation limits must still be stated.
 - **[IN PROGRESS]**: part of a phase exists, but its completion criteria are not met.
@@ -18,27 +18,29 @@ Baseline inspected on **2026-09-28**. Status describes repository implementation
 | --- | --- | --- |
 | Web UI and FastAPI | [IMPLEMENTED] | `frontend/`, `backend/api.py`; local same-origin app, no separate frontend build |
 | Accounts, history and memory | [IMPLEMENTED] | `backend/auth.py`, `backend/storage.py`, `agents/conversation_memory.py`; SQLite and bounded per-conversation context |
-| Three smolagents agents | [IMPLEMENTED] | `agents/`; `gpt-4o` fixed in each constructor |
-| Specialist A2A communication | [IMPLEMENTED] | `a2a_clients/`, `a2a_servers/`; local JSON-RPC, no streaming or service authentication |
+| Modular agents | [IMPLEMENTED] | `config/agents.yaml`, `agents/runtime.py`; concierge, policy and research use smolagents/OpenAI, healthcare provider uses LangChain/Hugging Face |
+| Specialist A2A communication | [IMPLEMENTED] | Generic `a2a_servers/serve.py` and `a2a_clients/client_utils.py`; concierge calls all three specialists over local JSON-RPC, without streaming or service authentication |
 | Policy retrieval | [IMPLEMENTED] | `tools/policy_tools.py`; lexical page scoring over one shared PDF |
-| Research search | [IMPLEMENTED] | `agents/research_agent.py`; DuckDuckGo tool, source guidance in prompts |
+| Research search | [IMPLEMENTED] | Configured DuckDuckGo tool and `prompts/research.md`; source guidance in the prompt |
+| Provider directory via MCP | [IMPLEMENTED] | `mcp_servers/healthcare.py` exposes `list_doctors` over stdio to the LangChain specialist; static local JSON data |
+| Container configuration | [IMPLEMENTED] | `Dockerfile.agent`, `Dockerfile.backend`, `docker-compose.yml` and HTTPS override; Compose configuration parses, but a full container run has not been validated here |
 | Regression tests | [IMPLEMENTED] | `tests/`; deterministic substitutes, not live AI quality benchmarks |
 | Request metadata | [IMPLEMENTED] | Concierge latency, selected specialists and idempotency IDs; not distributed observability |
 | V1 completion | [IN PROGRESS] | Functional local foundation exists; final validation and operational gaps remain |
-| Docker, MCP, benchmark/tracing, provider adapters | [PLANNED] | No corresponding application implementation or evaluation dataset |
+| Benchmark, tracing, additional provider adapters | [PLANNED] | No AI quality dataset, distributed traces or general provider adapter registry |
 | Alternative frameworks, Terraform, CI/CD and clouds | [PLANNED] | No deployment artifacts or measured comparisons |
 
-Detailed current behavior belongs in [architecture](architecture.md), startup and test commands in [development](development.md), and the identity/storage contract in [accounts and memory](accounts-and-memory.md). Do not interpret existing test coverage as evidence of answer quality or production readiness.
+Detailed current behavior, startup and test commands, and identity/storage contracts belong in [architecture](architecture.md). Do not interpret existing test coverage as evidence of answer quality or production readiness.
 
 ## Separate the layers
 
 | Layer | Responsibility | Current baseline | Planned investigations |
 | --- | --- | --- | --- |
-| Agent framework | Reasoning loop, state and internal orchestration | smolagents | LangGraph, Strands, Google ADK, Microsoft Agent Framework |
-| A2A | Agent-to-agent communication | Concierge to Policy/Research | Preserve the boundary when replacing implementations |
-| Tools / MCP | Agent-to-tool, data and service access | Local Python tools | MCP services for policy retrieval and search |
-| Model/provider | Inference and model access | OpenAI `gpt-4o` through OpenAIServerModel | OpenAI, Claude, Gemini; Bedrock, Vertex AI, Azure; selected open models |
-| Runtime/cloud | Hosting, identity, network, scaling and operations | Local Python processes | Docker, AWS, GCP, Azure and managed agent runtimes |
+| Agent framework | Reasoning loop, state and internal orchestration | smolagents and a LangChain MCP specialist | LangGraph, Strands, Google ADK, Microsoft Agent Framework |
+| A2A | Agent-to-agent communication | Concierge to Policy, Research and Healthcare Provider | Preserve the boundary when replacing implementations |
+| Tools / MCP | Agent-to-tool, data and service access | Local policy/search tools; MCP stdio for the provider directory | MCP comparison for additional tool boundaries |
+| Model/provider | Inference and model access | Configured OpenAI gpt-4o and Hugging Face gpt-oss-20b | Claude, Gemini; Bedrock, Vertex AI, Azure; selected open models |
+| Runtime/cloud | Hosting, identity, network, scaling and operations | Local Python processes and Compose definitions | Validate containers, then AWS, GCP, Azure and managed runtimes |
 | Evaluation/operations | Evidence, traces, costs and experiment provenance | Regression tests and basic metadata | Benchmark, OpenTelemetry, experiment tracking and FinOps |
 
 Framework, model family, provider API and runtime are different variables. For example, using Strands does not by itself mean the application runs on AgentCore or calls Bedrock. Candidate integrations must be checked for support, regional availability, quotas and cost at implementation time; this roadmap is not a compatibility guarantee.
@@ -52,16 +54,19 @@ flowchart TD
     B --> C[Concierge agent]
     C -->|A2A| P[Policy agent]
     C -->|A2A| R[Research agent]
+    C -->|A2A| H[Healthcare provider agent]
     P -->|MCP| PT[Policy / retrieval service]
     R -->|MCP| RT[Search service]
+    H -->|MCP: implemented| HT[Provider directory service]
     PT --> D[(Documents / data)]
     RT --> W[Web]
+    HT --> J[(Doctor directory)]
     C -.-> M[Model/provider adapters]
     P -.-> M
     R -.-> M
 ```
 
-Modularity does not require a separate process for every box. Today frontend, API and concierge share the backend process. Add services only when the experiment or deployment needs that boundary. A Provider Agent is optional later work, not a V1 requirement.
+Modularity does not require a separate process for every box. Today frontend, API and concierge share the backend process. Three specialists have separate A2A services; the provider's MCP server is a stdio subprocess. Add further services only when the experiment or deployment needs that boundary.
 
 ## Ordered delivery phases
 
@@ -73,17 +78,19 @@ Follow the phase order below. Security and cost controls apply from the beginnin
 
 **Existing:** browser chat, account/history flows, backend API, concierge and specialists, bounded memory, tests and documentation.
 
-**Remaining:** review desktop/mobile usability, validate policy-only/research-only/mixed/follow-up scenarios, characterize failure paths and correct the gaps uncovered by essential tests. Document single-worker/concurrency limits, raw A2A logging and shared-PDF behavior. Do not add frameworks or new agents during this phase.
+**Remaining:** review desktop/mobile usability, validate policy-only/research-only/provider-only/mixed/follow-up scenarios, characterize failure paths and correct gaps uncovered by essential tests. Document single-worker/concurrency limits and shared-PDF behavior.
 
 **Exit evidence:** reproducible local demo, readable architecture, essential regression checks recorded, and a clear list of limitations. Existing backend/frontend components should be refined, not rebuilt unnecessarily.
 
-### 2. Containerization — [PLANNED]
+### 2. Containerization — [IN PROGRESS]
 
 **Learn:** images, runtime configuration, internal networking, healthchecks and persistent volumes.
 
-**Deliver:** Dockerfiles, `.dockerignore` and Docker Compose for the current three services; preserve same-origin UI/API and one backend worker. Keep secrets and local databases out of images. Preserve SQLite across replacement and document consistent backups. Future MCP/vLLM services are added only in their phases.
+**Existing:** a shared specialist Dockerfile, backend Dockerfile, `.dockerignore`, Compose definition for four services, and optional HTTPS/Caddy override. Compose configuration parses but the full stack has not been run and measured here.
 
-**Exit evidence:** `docker compose up` reproduces the full local application from documented configuration on a clean machine, with persistence and restart checks. This command is a target; it is not available in the current repository.
+**Remaining:** build and start all four services on a clean machine, verify A2A/MCP requests and healthchecks, then restart and restore the SQLite volume. Keep secrets and local databases out of images. Future vLLM services are added only when an experiment needs them.
+
+**Exit evidence:** `docker compose up --build` reproduces the full local application from documented configuration on a clean machine, with persistence and restart checks. A successful configuration parse alone does not meet this criterion.
 
 ### 3. Evaluation and observability — [PLANNED]
 
@@ -93,11 +100,13 @@ Follow the phase order below. Security and cost controls apply from the beginnin
 
 **Exit evidence:** a repeatable baseline report containing quality, latency, token/cost measurements and failures, plus a trace following one complete request. Record what remains unmeasured. Do not begin framework/model/cloud comparisons before this baseline.
 
-### 4. MCP tool/data boundaries — [PLANNED]
+### 4. Additional MCP tool/data boundaries — [PLANNED]
 
 **Learn:** agent-to-tool interoperability, contracts, error handling and authorization.
 
-**Deliver:** move selected policy/search capabilities behind MCP while keeping A2A between agents. Keep model, framework and evaluation workload fixed for the first comparison. Add integration tests and trace propagation; preserve service-side authorization independently of model decisions.
+**Existing:** the healthcare provider already uses an MCP stdio tool to query a static doctor directory.
+
+**Deliver:** compare moving selected policy/search capabilities behind MCP while keeping A2A between agents. Keep model, framework and evaluation workload fixed for the first comparison. Add integration tests and trace propagation; preserve service-side authorization independently of model decisions.
 
 **Exit evidence:** the same evaluation suite runs against local-tool and MCP variants, with functional differences and protocol overhead reported. Installing a development assistant's MCP/plugin does not count as implementing MCP inside MediNova.
 
@@ -192,7 +201,7 @@ Record unavoidable differences rather than claiming causality from them. Live we
 
 Store commit, dependency versions, dataset/evaluator versions, framework, model/provider, prompt version, generation settings, corpus/index version, embedding model, chunk size, top-k, reranker, runtime/region, repetitions and timestamps with results. Separate inference and infrastructure costs, document the pricing date, and include failed requests. MLflow is a candidate experiment tracker, not an existing integration.
 
-Prompts currently live in Python. A future prompt-versioning approach should make changes independently identifiable and evaluable. Create `docs/experiments.md` when the first benchmark protocol/run exists; do not create an empty results journal now.
+Prompts are versioned in `prompts/*.md` and selected from `config/agents.yaml`. Future evaluations should record the prompt file hashes and configuration revision alongside each run. Keep experiment results with the evaluation artifacts when that work begins; this documentation directory remains limited to the architecture guide and roadmap.
 
 ## RAG / data engineering track — [PLANNED]
 
