@@ -13,6 +13,7 @@ from backend.storage import Store
 @pytest.fixture(autouse=True)
 def isolated_db(tmp_path, monkeypatch):
     monkeypatch.setenv('DATABASE_PATH', str(tmp_path / 'api.sqlite3'))
+    monkeypatch.setattr('backend.api.generate_title', lambda question, answer: 'Test conversation')
 
 
 class TestClient(BaseTestClient):
@@ -78,7 +79,50 @@ def test_existing_conversation_database_gains_custom_title_column(tmp_path):
     Store(path)
     with sqlite3.connect(path) as db:
         columns = {row[1] for row in db.execute('PRAGMA table_info(conversations)')}
-    assert 'title_custom' in columns
+    assert {'title_custom', 'title_generated'} <= columns
+
+
+def test_first_successful_turn_generates_title_once(tmp_path):
+    calls = []
+    def title_generator(question, answer):
+        calls.append((question, answer))
+        return 'Sleep apnea treatment'
+
+    client = TestClient(create_api_app(FakeConcierge(), db_path=tmp_path / 'titles.sqlite3', title_generator=title_generator))
+    assert client.post('/api/chat', json={'message': 'What are the treatments for sleep apnea?'}).status_code == 200
+    first = client.get('/api/conversations').json()['conversations'][0]
+    assert first['title'] == 'Sleep apnea treatment'
+    assert first['title_ready'] is True
+    assert client.post('/api/chat', json={'message': 'And what about CPAP?'}).status_code == 200
+    assert calls == [('What are the treatments for sleep apnea?', 'This is a test answer.')]
+
+
+def test_manual_rename_wins_over_in_flight_generated_title(tmp_path):
+    path = tmp_path / 'title-race.sqlite3'
+    user_id = conversation_id = None
+
+    def title_generator(question, answer):
+        Store(path).rename_conversation(user_id, conversation_id, 'My chosen title')
+        return 'Generated title'
+
+    client = TestClient(create_api_app(FakeConcierge(), db_path=path, title_generator=title_generator))
+    user_id = client.get('/api/auth/me').json()['user']['id']
+    conversation_id = client.conversation_id
+    assert client.post('/api/chat', json={'message': 'First question'}).status_code == 200
+    item = client.get('/api/conversations').json()['conversations'][0]
+    assert item['title'] == 'My chosen title'
+    assert item['title_ready'] is True
+
+
+def test_title_generation_failure_keeps_chat_answer_and_provisional_title(tmp_path):
+    def title_generator(question, answer):
+        raise TimeoutError('model unavailable')
+
+    client = TestClient(create_api_app(FakeConcierge(), db_path=tmp_path / 'titles.sqlite3', title_generator=title_generator))
+    assert client.post('/api/chat', json={'message': 'What is my deductible?'}).status_code == 200
+    item = client.get('/api/conversations').json()['conversations'][0]
+    assert item['title'] == 'What is my deductible?'
+    assert item['title_ready'] is False
 
 
 def test_chat_endpoint_returns_metadata():

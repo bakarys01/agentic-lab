@@ -156,6 +156,7 @@ async function loadMessages(id, epoch = generation) {
   if (last?.role === 'user' && last.status !== 'complete' && last.request_id) {
     retry = {message: last.content, conversation_id: id, request_id: last.request_id};
   }
+  return data.messages;
 }
 async function selectConversation(id) {
   if (pending) return;
@@ -192,6 +193,20 @@ async function loadConversations(epoch = generation, restore = false) {
     const saved = savedConversation();
     const target = data.conversations.find(item => item.id === saved) || data.conversations[0];
     if (target) await selectConversation(target.id);
+  }
+  return data.conversations;
+}
+async function refreshGeneratedTitle(id, ownerId, attempts = 12) {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (user?.id !== ownerId) return;
+    try {
+      const data = await requestJSON('/api/conversations');
+      if (user?.id !== ownerId) return;
+      const item = data.conversations.find(candidate => candidate.id === id);
+      if (!item) return;
+      if (item.title_ready) { await loadConversations(generation); return; }
+    } catch { return; }
   }
 }
 async function acceptSession(payload) {
@@ -317,7 +332,13 @@ form.addEventListener('submit', async event => {
     input.value = '';
     await requestJSON('/api/chat', {method: 'POST', body: JSON.stringify(request)});
     if (epoch !== generation) return;
-    retry = null; await loadMessages(activeId, epoch); await loadConversations(epoch);
+    retry = null;
+    const messages = await loadMessages(activeId, epoch);
+    const items = await loadConversations(epoch);
+    const item = items?.find(candidate => candidate.id === activeId);
+    if (messages?.filter(entry => entry.role === 'assistant').length === 1 && item && !item.title_ready) {
+      void refreshGeneratedTitle(activeId, user.id);
+    }
   } catch (error) {
     if (epoch !== generation) return;
     composerError.textContent = showError(error); input.value = message;

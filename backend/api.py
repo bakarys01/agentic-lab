@@ -8,7 +8,7 @@ from threading import Lock
 from time import perf_counter
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
 from starlette.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -17,6 +17,7 @@ from starlette.types import Scope
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from dotenv import load_dotenv
 from backend.storage import Store
+from backend.title_generation import generate_title
 from backend.auth import install_auth
 from agents.config_loader import load_agent_definition
 from agents.runtime import AgentRuntime
@@ -89,7 +90,7 @@ def _chat_response(payload: Any, started: float) -> ChatResponse:
     )
 
 
-def create_api_app(concierge: Any | None = None, db_path: str | Path | None = None) -> FastAPI:
+def create_api_app(concierge: Any | None = None, db_path: str | Path | None = None, title_generator=None) -> FastAPI:
     """Create the small backend API that exposes the concierge agent."""
     app = FastAPI(title="Health Concierge API", version="1.0.0")
     concierge_agent = concierge
@@ -97,6 +98,13 @@ def create_api_app(concierge: Any | None = None, db_path: str | Path | None = No
     query_lock = Lock()
     storage_lock = Lock()
     store = None
+    title_generator = title_generator or generate_title
+
+    def update_title(conversation_id: str, question: str, answer: str) -> None:
+        try:
+            get_store().apply_generated_title(conversation_id, title_generator(question, answer))
+        except Exception as exc:
+            logger.warning("Conversation title generation failed (%s)", type(exc).__name__)
 
     def get_store():
         nonlocal store
@@ -177,7 +185,7 @@ def create_api_app(concierge: Any | None = None, db_path: str | Path | None = No
         }
 
     @app.post("/api/chat", response_model=ChatResponse)
-    def chat(body: ChatRequest, request: Request) -> ChatResponse:
+    def chat(body: ChatRequest, request: Request, background_tasks: BackgroundTasks) -> ChatResponse:
         user = identity(request)['user']
         conversation_id, request_id = str(body.conversation_id), str(body.request_id)
         get_store().messages(user['id'], conversation_id)
@@ -206,7 +214,8 @@ def create_api_app(concierge: Any | None = None, db_path: str | Path | None = No
             result = _chat_response(payload, started).model_copy(update={
                 'request_id': request_id, 'conversation_id': conversation_id,
             })
-            get_store().finish_turn(conversation_id, request_id, result.model_dump())
+            if get_store().finish_turn(conversation_id, request_id, result.model_dump()):
+                background_tasks.add_task(update_title, conversation_id, message, result.answer)
             begun = False
             return result
         except HTTPException:

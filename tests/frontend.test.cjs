@@ -30,7 +30,7 @@ async function setup({anon=false, chat, history, override, confirmDelete=true}={
       if(url==='/api/auth/me') return anon?response({},401):response({user:{id:'u1',email:'one@example.com'},csrf_token:'csrf'});
       if(url==='/api/auth/login'||url==='/api/auth/register') return response({user:{id:'u1',email:'one@example.com'},csrf_token:'csrf'});
       if(url==='/api/auth/logout') return response(null,204);
-      if(url==='/api/conversations') return response(options.method==='POST'?{id:'c1',title:'New conversation'}:{conversations:[{id:'c1',title:'First'}]});
+      if(url==='/api/conversations') return response(options.method==='POST'?{id:'c1',title:'New conversation'}:{conversations:[{id:'c1',title:'First',title_ready:true}]});
       if(url.endsWith('/messages')) return response({messages});
       if(options.method==='PATCH') return response({id:'c1',title:JSON.parse(options.body).title});
       if(options.method==='DELETE') return response(null,204);
@@ -43,6 +43,20 @@ async function setup({anon=false, chat, history, override, confirmDelete=true}={
 }
 test('requires authentication before sending chat',async()=>{const ui=await setup({anon:true});await ui.submit('hi');assert.equal(ui.calls.filter(c=>c.url==='/api/chat').length,0);assert.equal(ui.button.disabled,true);});
 test('sends conversation, idempotency and CSRF identifiers and renders stored messages',async()=>{const ui=await setup();await ui.submit('  benefits? ');const call=ui.calls.find(c=>c.url==='/api/chat');assert.deepEqual(JSON.parse(call.options.body),{message:'benefits?',conversation_id:'c1',request_id:'request-1'});assert.equal(call.options.headers['X-CSRF-Token'],'csrf');assert.equal(call.options.headers['X-Requested-With'],'fetch');assert.equal(ui.ids.conversation.children.length,2);assert.equal(ui.ids.conversation.children[1].children[1].textContent,'Safe <script>answer</script>');});
+test('refreshes the first chat title after background generation',async()=>{
+  let sent=false; let reads=0;
+  const ui=await setup({override:async(url,options={})=>{
+    if(url==='/api/chat') {sent=true; return undefined;}
+    if(url==='/api/conversations' && options.method!=='POST' && sent) {
+      reads+=1;
+      return response({conversations:[{id:'c1',title:reads===1?'First question':'Insurance deductible',title_ready:reads>1}]});
+    }
+  }});
+  await ui.submit('What is my deductible?');
+  assert.equal(ui.ids['conversation-list'].children[0].children[0].textContent,'First question');
+  await new Promise(resolve=>setTimeout(resolve,1100));
+  assert.equal(ui.ids['conversation-list'].children[0].children[0].textContent,'Insurance deductible');
+});
 test('uncertain retry reuses request identifier',async()=>{const ui=await setup({chat:async()=>{throw new TypeError('offline');}});await ui.submit('hello');await ui.submit('hello');const requests=ui.calls.filter(c=>c.url==='/api/chat').map(c=>JSON.parse(c.options.body));assert.equal(requests[0].request_id,requests[1].request_id);assert.match(ui.ids['composer-error'].textContent,/connection/i);});
 test('logout clears rendered history and disables chat',async()=>{const ui=await setup();await ui.submit('private');await ui.ids.logout.click();assert.equal(ui.ids.conversation.children.length,0);assert.equal(ui.ids['account-email'].textContent,'');assert.equal(ui.button.disabled,true);});
 test('blank and overlong inputs never send',async()=>{const ui=await setup();await ui.submit(' ');await ui.submit('x'.repeat(8001));assert.equal(ui.calls.filter(c=>c.url==='/api/chat').length,0);});

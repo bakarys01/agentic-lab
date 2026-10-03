@@ -55,6 +55,11 @@ models:
     model_id: gpt-4o
     api_key_env: OPENAI_API_KEY
 
+  title:
+    provider: openai
+    model_id: gpt-4o-mini
+    api_key_env: OPENAI_API_KEY
+
   provider_search:
     provider: huggingface
     model_id: openai/gpt-oss-20b
