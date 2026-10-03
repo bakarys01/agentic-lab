@@ -1,164 +1,48 @@
 # Agentic Lab — MediNova Healthcare Concierge
 
-Agentic Lab is a personal AI Engineering / MLOps / LLMOps / AgentOps laboratory. **MediNova**, a healthcare and insurance concierge, is its reference application: keep the same use case while progressively comparing agent frameworks, models, retrieval strategies and deployment environments.
+MediNova is a modular healthcare concierge reference application. A manager agent routes questions over A2A to three specialists: insurance policy, health research and provider directory. The provider specialist uses MCP to query a local doctor directory. The browser application adds accounts and persistent conversations.
 
-The aim is to explain engineering choices with evidence about quality, latency, cost, reliability and operational complexity. Controlled experiments will change one main dimension at a time; no comparative benchmark results are available yet.
+The repository has two detailed documents:
 
-**Current baseline:** a local Python application using smolagents, OpenAI `gpt-4o` and A2A specialist services. Docker, MCP tool services, alternative frameworks/providers, distributed tracing, AI benchmarks, Terraform and cloud deployments are **planned, not implemented**. See the [ordered learning roadmap](docs/roadmap.md).
+- [Architecture and contributor guide](docs/architecture.md): actual components, setup, configuration, request flow, adding an agent, tests and limits.
+- [Roadmap](docs/roadmap.md): future experiments and evidence needed to complete them.
 
-## Key capabilities
+## Quick start
 
-- local accounts with isolated, persistent conversation history
-- browser chat with selectable examples and a connection indicator
-- bounded conversation memory for follow-up questions
-- lexical, page-based retrieval from a shared insurance PDF
-- healthcare web research
-- intelligent routing
-- multi-agent orchestration
-- A2A communication
+Use Python 3.13 and uv. From the repository root:
 
-## Architecture overview
-
-```mermaid
-flowchart TD
-    U[User]
-    API[Python API]
-    C[Concierge Agent]
-    P[Policy Agent]
-    R[Research Agent]
-    PDF[(Insurance Policy PDF)]
-    WEB[(Web)]
-
-    U -->|Static web frontend| API
-    API --> C
-    C -->|A2A| P
-    C -->|A2A| R
-    P -->|search_policy| PDF
-    R -->|web search| WEB
-```
-
-## Responsibilities
-
-### Concierge Agent
-The concierge is the orchestration layer. It receives the user question, decides which specialist agent is relevant, and synthesizes final responses from the returned specialist knowledge.
-
-### Policy Agent
-The policy agent answers insurance questions using the local PDF retrieval tool. It remains scoped to coverage, deductibles, copays, in-network/out-of-network costs, and exclusions.
-
-### Research Agent
-The research agent answers healthcare research questions using web search. It is responsible for symptoms, conditions, treatments, procedures, and healthcare options.
-
-## smolagents vs A2A vs Tools
-
-- smolagents = reasoning inside an agent
-- A2A = communication between agents
-- tools = capabilities available to an individual agent
-
-The model provider and the runtime are separate architectural choices. Today the model is fixed in the agent constructors, tools run in Python inside the specialists, and all services run locally. MCP is a future agent-to-tool boundary; it is not used by this application today.
-
-This project keeps those boundaries explicit: the concierge never touches the PDF or web-search implementation directly; it calls specialist agents over A2A.
-
-## Project structure
-
-- `agents/`: concierge and specialist agents
-- `a2a_clients/`, `a2a_servers/`: specialist communication
-- `backend/`: API and static frontend server
-- `frontend/`: HTML, CSS and JavaScript (no build required)
-- `tools/`: specialist and concierge tools
-- `data/`: insurance policy document
-- `tests/`: API, frontend and browser regression tests
-- `docs/`: architecture and development instructions
-
-## Setup
-
-This project uses Python 3.13 and `uv` for environment management.
-
-```bash
+~~~bash
 uv sync
-```
+~~~
 
-Copy `.env.example` to `.env` only if that file does not already exist (`Copy-Item .env.example .env` in PowerShell, or `cp .env.example .env` in a POSIX shell). Configure:
+Copy .env.example to .env and set OPENAI_API_KEY and HF_TOKEN. The sample insurance PDF and doctor directory must be present in data/. Start these four commands in separate terminals:
 
-- `OPENAI_API_KEY` with access to `gpt-4o` and available API credit
-- `A2A_BIND_HOST` (optional)
-- `POLICY_AGENT_PORT` (optional)
-- `RESEARCH_AGENT_PORT` (optional)
-- `POLICY_AGENT_PUBLIC_URL` and `RESEARCH_AGENT_PUBLIC_URL` if changing specialist addresses
-- `BACKEND_HOST` / `BACKEND_PORT` (defaults: `127.0.0.1:8000`)
+~~~bash
+uv run --env-file .env python -m a2a_servers.serve policy
+uv run --env-file .env python -m a2a_servers.serve research
+uv run --env-file .env python -m a2a_servers.serve healthcare_provider
+uv run --env-file .env python -m backend.server
+~~~
 
-## Running the application
+Open http://127.0.0.1:8000. To run a single configured agent from the CLI:
 
-Open three terminals from the project root.
+~~~bash
+uv run --env-file .env python -m examples.run_agent concierge "What is my deductible, what treatments exist for depression, and which psychiatrists are in Paris?"
+~~~
 
-### Terminal 1: Policy agent
+Docker Compose also defines the backend and three specialist services:
 
-```bash
-uv run python -m a2a_servers.policy_server
-```
+~~~bash
+docker compose up --build
+~~~
 
-### Terminal 2: Research agent
+Keep model credentials in .env and keep specialist A2A endpoints private. See the [architecture guide](docs/architecture.md) for the complete setup, contracts and extension steps.
 
-```bash
-uv run python -m a2a_servers.research_server
-```
+## Checks
 
-### Terminal 3: Backend API
-
-```bash
-uv run python -m backend.server
-```
-
-Open **http://127.0.0.1:8000** in your browser. The backend serves the frontend and API together; no npm installation or separate frontend server is needed.
-
-The connection indicator turns green when the concierge initializes and both specialist endpoints are reachable. Click it to recheck. This is a service health check, not a validation of model access.
-
-Create an account or sign in, then select an example question or type your own. Conversations are saved in SQLite and restored after refresh. Each conversation has its own bounded context, so the concierge can understand follow-up questions. Use New conversation to start a separate thread.
-
-See [the development guide](docs/development.md) for configuration, tests and troubleshooting, and [the architecture guide](docs/architecture.md) for API contracts.
-
-## Verification
-
-```bash
+~~~bash
 uv run python -m pytest tests -q -p no:cacheprovider
 node --test tests/frontend.test.cjs
-```
+~~~
 
-Browser tests require Chrome and a matching Selenium driver; frontend unit tests require Node.js 22+. Automated tests use deterministic substitutes and do not make paid model calls.
-
-## Example queries
-
-### Policy only
-
-- How much would I pay for mental health therapy?
-
-### Research only
-
-- What are the common treatments for sleep apnea?
-
-### Multi-agent
-
-- What treatments are available for sleep apnea and does my insurance cover them?
-
-See [accounts and memory](docs/accounts-and-memory.md) for authentication, storage, API contracts, retries, backup and privacy details.
-
-## Current limitations
-
-- The healthcare workflow is a local development architecture with separate local services.
-- Local email/password authentication is implemented. Keep services bound to loopback; password recovery, email verification and public deployment hardening are not implemented.
-- Full history is persisted locally; the model sees only the latest six completed exchanges within a 16,000-character budget. No automatic summary or cross-conversation memory is implemented.
-- Specialist execution is synchronous and local-process based.
-- Only one backend worker and one active concierge query are supported. Specialist servers have no application-level authentication and currently print questions and responses to their consoles; use synthetic data and keep them local.
-- This project is for demonstration and tooling, not clinical diagnosis.
-
-## Roadmap
-
-Follow this order: finish V1 → Docker → evaluation and observability → MCP → generic AWS deployment → AWS agent-native experiments → LangGraph → multiple models → GCP → Azure → advanced production concerns → final engineering report.
-
-The [roadmap](docs/roadmap.md) defines status, learning goals, deliverables and completion evidence for all twelve phases, including RAG experiments, security, FinOps and controlled comparisons. A Provider Agent is optional future work, not a prerequisite for V1.
-
-## Documentation
-
-- [Architecture](docs/architecture.md): implemented components, boundaries and limitations.
-- [Development](docs/development.md): verified startup commands, configuration and checks.
-- [Accounts and memory](docs/accounts-and-memory.md): storage, authentication, API contracts and retries.
-- [Roadmap](docs/roadmap.md): project vision, planned experiments and interview narrative.
+This is a local engineering reference. Policy retrieval uses a shared PDF, provider results use a static directory, and tests do not establish medical correctness or production readiness.

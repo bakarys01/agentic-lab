@@ -1,0 +1,3002 @@
+[
+    {
+        "id": "DOC001",
+        "name": "Dr. Aghetti Agnes",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC002",
+        "name": "Dr. Alili Nassira",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC003",
+        "name": "Dr. Berthet Elodie",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC004",
+        "name": "Dr. Bouquet-Castiglione Floriane",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC005",
+        "name": "Dr. Buch Dan",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC006",
+        "name": "Dr. Burcin Cecilia",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC007",
+        "name": "Dr. Chabriat Hugues",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC008",
+        "name": "Dr. Crassard Isabelle",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC009",
+        "name": "Dr. Di Meglio Lucas",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC010",
+        "name": "Dr. Dimitrovic Ana",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC011",
+        "name": "Dr. Doat Vincent",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC012",
+        "name": "Dr. Doukhi Diana",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC013",
+        "name": "Dr. Frasca Polara Giulia",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC014",
+        "name": "Dr. Gobron Claire",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC015",
+        "name": "Dr. Grosset Lina",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC016",
+        "name": "Dr. Guey Stephanie",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC017",
+        "name": "Dr. Herve Dominique",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC018",
+        "name": "Dr. Jouvent Eric",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC019",
+        "name": "Dr. Lalou Mikhael",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC020",
+        "name": "Dr. Lutz Gina",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC021",
+        "name": "Dr. Mawet Jerome",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC022",
+        "name": "Dr. Mazighi Mikael",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC023",
+        "name": "Dr. Pirlog Bianca Oana",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC024",
+        "name": "Dr. Porche Maximilien",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC025",
+        "name": "Dr. Reiner Peggy",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC026",
+        "name": "Dr. Roos Caroline",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC027",
+        "name": "Dr. Tuloup Gabrielle",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC028",
+        "name": "Dr. Vancheri Edoardo",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC029",
+        "name": "Dr. Vever Ursula",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC030",
+        "name": "Dr. Zanin Adrien",
+        "specialty": "Neurology",
+        "address": {
+            "street": "2 rue Ambroise-Paré",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75010",
+            "country": "France"
+        },
+        "phone": "01 49 95 65 01",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Lariboisière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/lariboisiere/service-de-neurologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC031",
+        "name": "Dr. Abgrall Gaelle",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC032",
+        "name": "Dr. Baillon-Dhumez Diane",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC033",
+        "name": "Dr. Bigot Thierry",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC034",
+        "name": "Dr. Bouaza Bennadji Karima Diana",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC035",
+        "name": "Dr. Carena Nilda",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC036",
+        "name": "Dr. Gasnier Matthieu",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC037",
+        "name": "Dr. Gaurin Jeanne",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC038",
+        "name": "Dr. Gouraud Clement",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC039",
+        "name": "Dr. Guez Laurence",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC040",
+        "name": "Dr. Heng Monika",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC041",
+        "name": "Dr. Iribarnegaray Sarah",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC042",
+        "name": "Dr. Ketabi Karim",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC043",
+        "name": "Dr. Kipman Amelie",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC044",
+        "name": "Dr. Lancon Gael",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC045",
+        "name": "Dr. Lemogne Cedric",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC046",
+        "name": "Dr. Ouazana-Vedrines Charles",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC047",
+        "name": "Dr. Pritschkat Caroline",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC048",
+        "name": "Dr. Remadi Marion",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC049",
+        "name": "Dr. Rotenberg Lea",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC050",
+        "name": "Dr. Varlet Leny",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC051",
+        "name": "Dr. Wallaert Raphaelle",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC052",
+        "name": "Dr. Wohl Mathias",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "1 place du Parvis Notre-Dame",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75004",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Hôtel-Dieu"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/hotel-dieu/service-de-psychiatrie-de-ladulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC053",
+        "name": "Dr. Andry Benzaquen Pascale",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC054",
+        "name": "Dr. Bekel Lilia",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC055",
+        "name": "Dr. Bellon Nathalia Lucia",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC056",
+        "name": "Dr. Bodemer Skandalis Christine",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC057",
+        "name": "Dr. Bonigen Julie",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC058",
+        "name": "Dr. De Peufeilhoux-Le-Sache Laetitia",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC059",
+        "name": "Dr. Delanoe Philippe",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC060",
+        "name": "Dr. Hadj-Rabia Smail",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC061",
+        "name": "Dr. Meni Cecile",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC062",
+        "name": "Dr. Perrin Olivia",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC063",
+        "name": "Dr. Polivka Laura",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC064",
+        "name": "Dr. Seyler Morgane",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC065",
+        "name": "Dr. Testard Marion",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC066",
+        "name": "Dr. Welfringer Anne",
+        "specialty": "Dermatology",
+        "address": {
+            "street": "149 rue de Sèvres",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75015",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Necker-Enfants malades"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/necker-enfants-malades/service-de-dermatologie",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC067",
+        "name": "Dr. Belghiti Jeremie",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC068",
+        "name": "Dr. Boyer De Latour Alexandre",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC069",
+        "name": "Dr. Canlorbe Geoffroy",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC070",
+        "name": "Dr. Cohen Sandra",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC071",
+        "name": "Dr. Dabreteau Thomas",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC072",
+        "name": "Dr. Du Couedic Mahaut",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC073",
+        "name": "Dr. Favier Amelia",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC074",
+        "name": "Dr. Godiris Petit Gaelle",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC075",
+        "name": "Dr. Haury Julie",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC076",
+        "name": "Dr. Kamara Dado",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC077",
+        "name": "Dr. Kane Aminata",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC078",
+        "name": "Dr. Lepillier Corinne",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC079",
+        "name": "Dr. Mal Pierre Andre",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC080",
+        "name": "Dr. Mosseri Juliette",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC081",
+        "name": "Dr. Oueld Es Cheikh Eva",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC082",
+        "name": "Dr. Salabi Thierry",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC083",
+        "name": "Dr. Seban Benjamin",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC084",
+        "name": "Dr. Uzan Catherine",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC085",
+        "name": "Dr. Youkharibache Alienor",
+        "specialty": "Gynecologic Surgery & Oncology",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": "01 42 17 81 33",
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-chirurgie-et-cancerologie-gynecologique-et-mammaire",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC086",
+        "name": "Dr. Barron Emma",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC087",
+        "name": "Dr. Bertin Simon",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC088",
+        "name": "Dr. Charradi Salma",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC089",
+        "name": "Dr. Debroize Jean-Philippe",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC090",
+        "name": "Dr. Del Cul Antoine",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC091",
+        "name": "Dr. Djonouma Ndilyam",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC092",
+        "name": "Dr. Fossati Philippe",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC093",
+        "name": "Dr. Girault Nathalie",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC094",
+        "name": "Dr. Grignard Juliette",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC095",
+        "name": "Dr. Gros Guillaume",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC096",
+        "name": "Dr. Guennec Elodie",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC097",
+        "name": "Dr. Guesdon Alice",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC098",
+        "name": "Dr. Jedrecy Stanislas",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC099",
+        "name": "Dr. Laifa Chiraz",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    },
+    {
+        "id": "DOC100",
+        "name": "Dr. Levy Fanny",
+        "specialty": "Psychiatry",
+        "address": {
+            "street": "47-83 boulevard de l'Hôpital",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "zip_code": "75013",
+            "country": "France"
+        },
+        "phone": null,
+        "email": null,
+        "years_experience": null,
+        "board_certified": null,
+        "hospital_affiliations": [
+            "Hôpital Pitié-Salpêtrière"
+        ],
+        "education": {
+            "medical_school": null,
+            "residency": null,
+            "fellowship": null
+        },
+        "languages": null,
+        "accepts_new_patients": null,
+        "insurance_accepted": null,
+        "source": "https://www.aphp.fr/pitie-salpetriere/service-de-psychiatrie-adulte",
+        "verified_at": "2026-09-30",
+        "verification_note": "Name, specialty/service affiliation and practice hospital/address verified from the cited AP-HP public service page. Null means not established by the checked source."
+    }
+]

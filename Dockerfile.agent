@@ -4,31 +4,24 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
-
-# Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-# Install locked production dependencies
 COPY pyproject.toml uv.lock README.md ./
-
 RUN uv sync --frozen --no-dev
 
-# Copy only what the Research Agent needs
 COPY agents/ ./agents/
+COPY a2a_clients/ ./a2a_clients/
 COPY a2a_servers/ ./a2a_servers/
 COPY tools/ ./tools/
+COPY prompts/ ./prompts/
+COPY config/ ./config/
+COPY mcp_servers/ ./mcp_servers/
+COPY data/2026AnthemgHIPSBC.pdf data/doctors.json ./data/
 
-# Non-root runtime user
 RUN useradd --create-home --shell /usr/sbin/nologin appuser \
     && chown -R appuser:appuser /app
 
 USER appuser
+ENV PATH="/app/.venv/bin:$PATH" \
+    A2A_BIND_HOST=0.0.0.0
 
-ENV PATH="/app/.venv/bin:$PATH"
-
-ENV A2A_BIND_HOST=0.0.0.0 \
-    RESEARCH_AGENT_PORT=9998
-
-EXPOSE 9998
-
-CMD ["python", "-m", "a2a_servers.research_server"]
+CMD ["python", "-m", "a2a_servers.serve", "policy"]

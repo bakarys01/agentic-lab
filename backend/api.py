@@ -18,9 +18,15 @@ from pydantic import BaseModel, ConfigDict, Field
 from dotenv import load_dotenv
 from backend.storage import Store
 from backend.auth import install_auth
+from agents.config_loader import load_agent_definition
+from agents.runtime import AgentRuntime
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 logger = logging.getLogger(__name__)
+
+
+def build_concierge() -> AgentRuntime:
+    return AgentRuntime(load_agent_definition("concierge"))
 
 
 class FrontendFiles(StaticFiles):
@@ -41,13 +47,6 @@ class FrontendFiles(StaticFiles):
             status_code=status_code,
             headers={"Cache-Control": "no-store"},
         )
-
-try:
-    from agents.concierge_agent import ConciergeAgent
-except ImportError:  # pragma: no cover - dependencies may be unavailable
-    logger.exception("Concierge dependencies could not be imported")
-    ConciergeAgent = None
-
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=8000, description="User question for the healthcare concierge")
@@ -127,9 +126,7 @@ def create_api_app(concierge: Any | None = None, db_path: str | Path | None = No
         nonlocal concierge_agent
         with initialization_lock:
             if concierge_agent is None:
-                if ConciergeAgent is None:
-                    raise RuntimeError("Concierge dependencies are unavailable")
-                concierge_agent = ConciergeAgent()
+                concierge_agent = build_concierge()
         return concierge_agent
 
     @app.get("/api/health")
@@ -148,7 +145,11 @@ def create_api_app(concierge: Any | None = None, db_path: str | Path | None = No
             services = {}
 
         if "concierge" not in services and isinstance(payload, dict):
-            services = {key: value for key, value in payload.items() if key in {"concierge", "policy", "research"}}
+            services = {
+                name: service
+                for name, service in payload.items()
+                if isinstance(service, dict) and "status" in service
+            }
 
         healthy = bool(services) and all(
             isinstance(service, dict) and service.get("status") == "available"

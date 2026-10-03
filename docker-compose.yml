@@ -2,12 +2,12 @@ services:
   policy-agent:
     build:
       context: .
-      dockerfile: Dockerfile.policy
+      dockerfile: Dockerfile.agent
+    command: ["python", "-m", "a2a_servers.serve", "policy"]
     environment:
       A2A_BIND_HOST: "0.0.0.0"
-      POLICY_AGENT_PORT: "9999"
       POLICY_AGENT_PUBLIC_URL: "http://policy-agent:9999"
-      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:?Set OPENAI_API_KEY}"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9999/.well-known/agent-card.json', timeout=5).close()"]
       interval: 15s
@@ -21,14 +21,33 @@ services:
   research-agent:
     build:
       context: .
-      dockerfile: Dockerfile.research
+      dockerfile: Dockerfile.agent
+    command: ["python", "-m", "a2a_servers.serve", "research"]
     environment:
       A2A_BIND_HOST: "0.0.0.0"
-      RESEARCH_AGENT_PORT: "9998"
       RESEARCH_AGENT_PUBLIC_URL: "http://research-agent:9998"
-      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:?Set OPENAI_API_KEY}"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9998/.well-known/agent-card.json', timeout=5).close()"]
+      interval: 15s
+      timeout: 7s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - agentic-network
+
+  healthcare-provider-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    command: ["python", "-m", "a2a_servers.serve", "healthcare_provider"]
+    environment:
+      A2A_BIND_HOST: "0.0.0.0"
+      HEALTHCARE_PROVIDER_AGENT_PUBLIC_URL: "http://healthcare-provider-agent:9997"
+      HF_TOKEN: "${HF_TOKEN:?Set HF_TOKEN}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9997/.well-known/agent-card.json', timeout=5).close()"]
       interval: 15s
       timeout: 7s
       retries: 5
@@ -45,11 +64,10 @@ services:
       BACKEND_HOST: "0.0.0.0"
       BACKEND_PORT: "8000"
       DATABASE_PATH: "/app/data/concierge.sqlite3"
-
       POLICY_AGENT_PUBLIC_URL: "http://policy-agent:9999"
       RESEARCH_AGENT_PUBLIC_URL: "http://research-agent:9998"
-
-      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      HEALTHCARE_PROVIDER_AGENT_PUBLIC_URL: "http://healthcare-provider-agent:9997"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:?Set OPENAI_API_KEY}"
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
@@ -64,6 +82,8 @@ services:
       policy-agent:
         condition: service_healthy
       research-agent:
+        condition: service_healthy
+      healthcare-provider-agent:
         condition: service_healthy
     restart: unless-stopped
     networks:

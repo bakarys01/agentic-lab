@@ -83,6 +83,23 @@ def test_health_endpoint_returns_status():
     assert payload["services"]["concierge"]["status"] == "available"
 
 
+def test_health_includes_new_specialists_in_legacy_payload():
+    class ExpandedConcierge(FakeConcierge):
+        def get_health(self):
+            return {
+                **super().get_health(),
+                "healthcare_provider": {"status": "available"},
+            }
+
+    response = TestClient(create_api_app(concierge=ExpandedConcierge())).get(
+        "/api/health"
+    )
+
+    assert response.json()["services"]["healthcare_provider"] == {
+        "status": "available"
+    }
+
+
 def test_chat_can_call_async_specialist_from_sync_tool():
     class AsyncToolConcierge(FakeConcierge):
         def answer_query_with_metadata(self, query, history=None):
@@ -99,14 +116,18 @@ def test_chat_can_call_async_specialist_from_sync_tool():
 
 def test_default_factory_connects_real_concierge(monkeypatch):
     import backend.api as api
-    monkeypatch.setattr(api, "ConciergeAgent", FakeConcierge)
+    monkeypatch.setattr(api, "build_concierge", FakeConcierge)
     response = TestClient(api.create_api_app()).post("/api/chat", json={"message": "Hello"})
     assert response.json()["answer"] == "This is a test answer."
 
 
 def test_missing_concierge_returns_unavailable(monkeypatch):
     import backend.api as api
-    monkeypatch.setattr(api, "ConciergeAgent", None)
+
+    def unavailable_concierge():
+        raise RuntimeError("Concierge unavailable")
+
+    monkeypatch.setattr(api, "build_concierge", unavailable_concierge)
     client = TestClient(api.create_api_app())
     assert client.get("/api/health").json()["status"] == "degraded"
     assert client.post("/api/chat", json={"message": "Hello"}).status_code == 503
