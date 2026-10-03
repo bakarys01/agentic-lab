@@ -4,9 +4,12 @@ const { readFileSync } = require('node:fs');
 const vm = require('node:vm');
 function element() {
   return {children: [], value: '', textContent: '', disabled: false, dataset: {}, attributes: {},
+    style: {}, offsetWidth: 180, offsetHeight: 100,
     classList: {toggle() {}, remove() {}, add() {}},
-    addEventListener(name, fn) {this[name] = fn;}, setAttribute(k,v) {this.attributes[k]=v;},
-    focus() {}, append(...nodes) {this.children.push(...nodes);}, replaceChildren(...nodes) {this.children=[...nodes];},
+    addEventListener(name, fn) {this[`on_${name}`] = fn; if(name!=='close') this[name] = fn;}, setAttribute(k,v) {this.attributes[k]=v;},
+    focus() {}, showModal() {this.open=true;}, close() {this.open=false;this.on_close?.();},
+    contains() {return false;}, getBoundingClientRect() {return {left:0,right:32,top:0,bottom:32};},
+    append(...nodes) {this.children.push(...nodes);}, replaceChildren(...nodes) {this.children=[...nodes];},
     scrollIntoView() {}, querySelectorAll() {return this.children;}};
 }
 const response = (payload, status=200) => ({ok:status<400, status, json:async()=>payload});
@@ -17,7 +20,8 @@ async function setup({anon=false, chat, history, override, confirmDelete=true}={
   const pill=element(); pill.dataset.prompt='What is a deductible?';
   const calls=[]; let messages=history || []; let counter=0;
   const storage=new Map();
-  const context=vm.createContext({document:{getElementById:get, querySelector:()=>element(), querySelectorAll:()=>[pill], createElement:()=>element()},
+  const context=vm.createContext({document:{getElementById:get, querySelector:()=>element(), querySelectorAll:()=>[pill], createElement:()=>element(), addEventListener(){}},
+    window:{innerWidth:1280,innerHeight:900},
     crypto:{randomUUID:()=>`request-${++counter}`}, localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},
     confirm:()=>confirmDelete, AbortController,setTimeout,clearTimeout,
     fetch: async(url,options={})=>{calls.push({url,options});
@@ -28,6 +32,7 @@ async function setup({anon=false, chat, history, override, confirmDelete=true}={
       if(url==='/api/auth/logout') return response(null,204);
       if(url==='/api/conversations') return response(options.method==='POST'?{id:'c1',title:'New conversation'}:{conversations:[{id:'c1',title:'First'}]});
       if(url.endsWith('/messages')) return response({messages});
+      if(options.method==='PATCH') return response({id:'c1',title:JSON.parse(options.body).title});
       if(options.method==='DELETE') return response(null,204);
       if(url==='/api/chat') {const body=JSON.parse(options.body); if(chat) return chat(body); messages=[...messages,{role:'user',content:body.message,status:'complete'},{role:'assistant',content:'Safe <script>answer</script>',status:'complete'}]; return response({answer:'Safe <script>answer</script>'});}
       throw Error(url);
@@ -62,9 +67,13 @@ test('new conversation clears view and creates a server conversation on send',as
   assert.ok(ui.calls.some(c=>c.url==='/api/conversations'&&c.options.method==='POST'));
 });
 test('delete requires confirmation and clears current messages',async()=>{
-  const cancelled=await setup({confirmDelete:false}); await cancelled.ids['delete-conversation'].click();
+  const cancelled=await setup({confirmDelete:false});
+  cancelled.ids['conversation-list'].children[0].children[1].click({stopPropagation(){}});
+  await cancelled.ids['delete-conversation'].click();
   assert.equal(cancelled.calls.filter(c=>c.options.method==='DELETE').length,0);
-  const ui=await setup(); await ui.submit('history'); await ui.ids['delete-conversation'].click();
+  const ui=await setup(); await ui.submit('history');
+  ui.ids['conversation-list'].children[0].children[1].click({stopPropagation(){}});
+  await ui.ids['delete-conversation'].click();
   assert.equal(ui.calls.filter(c=>c.options.method==='DELETE').length,1);
   assert.equal(ui.ids.conversation.children.length,0);
 });

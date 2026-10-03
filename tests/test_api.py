@@ -1,11 +1,13 @@
 from fastapi.testclient import TestClient as BaseTestClient
 from uuid import uuid4, UUID
 import asyncio
+import sqlite3
 import pytest
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 
 from backend.api import create_api_app
+from backend.storage import Store
 
 
 @pytest.fixture(autouse=True)
@@ -45,6 +47,38 @@ class FakeConcierge:
             "policy": {"status": "available"},
             "research": {"status": "available"},
         }
+
+
+def test_conversation_rename_is_persistent_validated_and_owner_scoped():
+    app = create_api_app(concierge=FakeConcierge())
+    owner = TestClient(app)
+    url = f'/api/conversations/{owner.conversation_id}'
+    assert owner.patch(url, json={'title': '  My coverage  '}).json()['title'] == 'My coverage'
+    assert owner.get('/api/conversations').json()['conversations'][0]['title'] == 'My coverage'
+    assert owner.patch(url, json={'title': '   '}).status_code == 422
+    assert owner.patch(url, json={'title': 'x' * 81}).status_code == 422
+    assert owner.patch(url, json={'title': 'Valid'}, headers={'X-CSRF-Token': 'wrong'}).status_code == 403
+    other = TestClient(app)
+    assert other.patch(url, json={'title': 'Stolen'}).status_code == 404
+    assert owner.get('/api/conversations').json()['conversations'][0]['title'] == 'My coverage'
+
+
+def test_manual_title_is_not_replaced_by_first_message():
+    client = TestClient(create_api_app(concierge=FakeConcierge()))
+    url = f'/api/conversations/{client.conversation_id}'
+    assert client.patch(url, json={'title': 'New conversation'}).status_code == 200
+    assert client.post('/api/chat', json={'message': 'First question'}).status_code == 200
+    assert client.get('/api/conversations').json()['conversations'][0]['title'] == 'New conversation'
+
+
+def test_existing_conversation_database_gains_custom_title_column(tmp_path):
+    path = tmp_path / 'legacy.sqlite3'
+    with sqlite3.connect(path) as db:
+        db.execute('CREATE TABLE conversations (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, title TEXT NOT NULL, created_at REAL NOT NULL, updated_at REAL NOT NULL)')
+    Store(path)
+    with sqlite3.connect(path) as db:
+        columns = {row[1] for row in db.execute('PRAGMA table_info(conversations)')}
+    assert 'title_custom' in columns
 
 
 def test_chat_endpoint_returns_metadata():
