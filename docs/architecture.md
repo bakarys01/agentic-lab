@@ -143,7 +143,7 @@ This is a fragment to merge into the existing file, not a replacement for its ot
 
 ## API, operations and limits
 
-The backend serves the UI and HTTP API on the same origin. Key routes are POST /api/auth/register, POST /api/auth/login, POST /api/auth/logout, GET/POST /api/conversations, GET /api/conversations/{id}/messages, DELETE /api/conversations/{id}, POST /api/chat and GET /api/health. Chat requests include message, conversation_id and request_id UUIDs. Responses include answer, agents_used, request_id, latency_ms and conversation_id. Invalid input is rejected; agent failures return a sanitized 502, timeouts 504, and unavailable/busy concierge requests 503.
+The backend serves the UI and HTTP API on the same origin. Key routes are POST /api/auth/register, POST /api/auth/login, POST /api/auth/logout, GET/POST /api/conversations, GET /api/conversations/{id}/messages, PATCH /api/conversations/{id} to rename, DELETE /api/conversations/{id}, POST /api/chat and GET /api/health. The browser exposes rename and delete in each history item's actions menu. Chat requests include message, conversation_id and request_id UUIDs. Responses include answer, agents_used, request_id, latency_ms and conversation_id. Invalid input is rejected; agent failures return a sanitized 502, timeouts 504, and unavailable/busy concierge requests 503.
 
 SQLite holds users, sessions, conversations, requests and messages. Passwords use PBKDF2 hashes; session tokens are stored hashed and the API enforces CSRF, origin/ownership checks and rate limits. DATABASE_PATH defaults to data/concierge.sqlite3. The Compose backend uses a named volume. Preserve or back up that file before replacing a deployment. Session cookies should be marked secure when HTTPS is used.
 

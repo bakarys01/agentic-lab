@@ -13,7 +13,11 @@ let pending = false;
 let generation = 0;
 let retry = null;
 let register = false;
+let historyCollapsed = false;
 let renderedRequests = new Set();
+let menuConversation = null;
+let menuTrigger = null;
+let renameTargetId = null;
 
 function savedConversation(value) {
   if (!user) return null;
@@ -32,13 +36,49 @@ function setPending(value) {
   input.disabled = disabled;
   quickPills.forEach(pill => { pill.disabled = disabled; });
   byId('new-conversation').disabled = disabled;
-  byId('delete-conversation').disabled = disabled || !activeId;
+  byId('rename-conversation').disabled = disabled || !menuConversation;
+  byId('delete-conversation').disabled = disabled || !menuConversation;
   byId('conversation-list').querySelectorAll('button').forEach(button => { button.disabled = value; });
   submitButton.textContent = value ? 'Thinking…' : 'Send';
   form.setAttribute('aria-busy', String(value));
 }
+function setHistoryCollapsed(collapsed) {
+  closeConversationMenu();
+  historyCollapsed = collapsed;
+  byId('chat-workspace').classList.toggle('history-collapsed', collapsed);
+  const toggle = byId('toggle-history');
+  toggle.setAttribute('aria-expanded', String(!collapsed));
+  toggle.setAttribute('aria-label', collapsed ? 'Show conversation history' : 'Hide conversation history');
+  toggle.title = collapsed ? 'Show conversation history' : 'Hide conversation history';
+}
+function closeConversationMenu() {
+  byId('conversation-menu').classList.add('hidden');
+  if (menuTrigger) menuTrigger.setAttribute('aria-expanded', 'false');
+  menuConversation = null;
+  menuTrigger = null;
+}
+function openConversationMenu(item, trigger) {
+  if (pending) return;
+  if (menuTrigger === trigger) { closeConversationMenu(); return; }
+  closeConversationMenu();
+  menuConversation = item;
+  menuTrigger = trigger;
+  trigger.setAttribute('aria-expanded', 'true');
+  const menu = byId('conversation-menu');
+  menu.classList.remove('hidden');
+  const anchor = trigger.getBoundingClientRect();
+  const left = Math.max(8, Math.min(anchor.right - menu.offsetWidth, window.innerWidth - menu.offsetWidth - 8));
+  const below = anchor.bottom + 4;
+  const top = below + menu.offsetHeight <= window.innerHeight - 8 ? below : Math.max(8, anchor.top - menu.offsetHeight - 4);
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
+  setPending(false);
+  byId('rename-conversation').focus();
+}
 function clearSession() {
   generation += 1;
+  closeConversationMenu();
+  if (byId('rename-dialog').open) byId('rename-dialog').close();
   savedConversation(null);
   user = null; csrf = ''; activeId = null; retry = null;
   conversation.replaceChildren();
@@ -50,6 +90,7 @@ function clearSession() {
   byId('auth-email').value = '';
   byId('account-controls').classList.add('hidden');
   byId('chat-workspace').classList.add('hidden');
+  setHistoryCollapsed(false);
   byId('auth-panel').classList.remove('hidden');
   hero.classList.remove('has-conversation');
   setPending(false);
@@ -105,6 +146,7 @@ function renderMessages(messages) {
     }
     conversation.append(row);
   });
+  conversation.scrollTop = conversation.scrollHeight;
 }
 async function loadMessages(id, epoch = generation) {
   const data = await requestJSON(`/api/conversations/${encodeURIComponent(id)}/messages`);
@@ -117,6 +159,7 @@ async function loadMessages(id, epoch = generation) {
 }
 async function selectConversation(id) {
   if (pending) return;
+  closeConversationMenu();
   const epoch = ++generation;
   activeId = id; savedConversation(id); retry = null;
   input.value = ''; composerError.textContent = '';
@@ -128,13 +171,22 @@ async function selectConversation(id) {
 async function loadConversations(epoch = generation, restore = false) {
   const data = await requestJSON('/api/conversations');
   if (epoch !== generation || !user) return;
+  closeConversationMenu();
   byId('conversation-list').replaceChildren();
   data.conversations.forEach(item => {
+    const row = document.createElement('div'); row.className = 'conversation-item';
     const button = document.createElement('button'); button.type = 'button'; button.className = 'conversation-choice';
     button.textContent = item.title || 'New conversation'; button.disabled = pending;
     button.setAttribute('aria-current', String(item.id === activeId));
     button.addEventListener('click', () => selectConversation(item.id));
-    byId('conversation-list').append(button);
+    const actions = document.createElement('button'); actions.type = 'button'; actions.className = 'icon-button conversation-actions-toggle';
+    actions.textContent = '⋯'; actions.disabled = pending;
+    actions.setAttribute('aria-label', `Actions for ${button.textContent}`);
+    actions.setAttribute('aria-haspopup', 'menu');
+    actions.setAttribute('aria-expanded', 'false');
+    actions.addEventListener('click', event => { event.stopPropagation(); openConversationMenu(item, actions); });
+    row.append(button, actions);
+    byId('conversation-list').append(row);
   });
   if (restore) {
     const saved = savedConversation();
@@ -148,6 +200,7 @@ async function acceptSession(payload) {
   byId('auth-panel').classList.add('hidden');
   byId('account-controls').classList.remove('hidden');
   byId('chat-workspace').classList.remove('hidden');
+  setHistoryCollapsed(false);
   setPending(false);
   await loadConversations(generation, true);
 }
@@ -176,18 +229,66 @@ byId('logout').addEventListener('click', async () => {
 });
 byId('new-conversation').addEventListener('click', async () => {
   if (pending || !user) return;
+  closeConversationMenu();
   generation += 1; activeId = null; savedConversation(null); retry = null;
   renderMessages([]); input.value = ''; composerError.textContent = ''; setPending(false); input.focus();
 });
-byId('delete-conversation').addEventListener('click', async () => {
-  if (pending || !activeId || !confirm('Delete this conversation and all its messages?')) return;
+byId('toggle-history').addEventListener('click', () => setHistoryCollapsed(!historyCollapsed));
+byId('conversation-list').addEventListener('scroll', closeConversationMenu);
+document.addEventListener('click', event => {
+  if (menuConversation && !byId('conversation-menu').contains(event.target) && event.target !== menuTrigger) closeConversationMenu();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && menuConversation) {
+    const trigger = menuTrigger;
+    closeConversationMenu();
+    trigger.focus();
+  }
+});
+byId('rename-conversation').addEventListener('click', () => {
+  if (!menuConversation || pending) return;
+  const target = menuConversation;
+  closeConversationMenu();
+  renameTargetId = target.id;
+  byId('rename-input').value = target.title;
+  byId('rename-error').textContent = '';
+  byId('rename-dialog').showModal();
+  byId('rename-input').focus();
+});
+byId('rename-cancel').addEventListener('click', () => byId('rename-dialog').close());
+byId('rename-dialog').addEventListener('close', () => { renameTargetId = null; });
+byId('rename-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!renameTargetId || byId('rename-save').disabled) return;
+  const title = byId('rename-input').value.trim();
+  if (!title || title.length > 80) { byId('rename-error').textContent = 'Enter a name with up to 80 characters.'; return; }
   const epoch = generation;
+  byId('rename-save').disabled = true;
+  byId('rename-error').textContent = '';
   try {
-    await requestJSON(`/api/conversations/${encodeURIComponent(activeId)}`, {method: 'DELETE'});
+    await requestJSON(`/api/conversations/${encodeURIComponent(renameTargetId)}`, {method: 'PATCH', body: JSON.stringify({title})});
     if (epoch !== generation) return;
-    activeId = null; retry = null; savedConversation(null); renderMessages([]); setPending(false);
-    await loadConversations();
+    byId('rename-dialog').close();
+    await loadConversations(epoch);
+  } catch (error) { if (epoch === generation) byId('rename-error').textContent = showError(error); }
+  finally { byId('rename-save').disabled = false; }
+});
+byId('delete-conversation').addEventListener('click', async () => {
+  if (pending || !menuConversation) return;
+  const target = menuConversation;
+  closeConversationMenu();
+  if (!confirm(`Delete "${target.title}" and all its messages?`)) return;
+  const epoch = generation;
+  setPending(true);
+  try {
+    await requestJSON(`/api/conversations/${encodeURIComponent(target.id)}`, {method: 'DELETE'});
+    if (epoch !== generation) return;
+    if (activeId === target.id) {
+      activeId = null; retry = null; savedConversation(null); renderMessages([]);
+    }
+    await loadConversations(epoch);
   } catch (error) { if (epoch === generation) composerError.textContent = showError(error); }
+  finally { if (epoch === generation) setPending(false); }
 });
 form.addEventListener('submit', async event => {
   event.preventDefault(); if (pending || !user) return;
@@ -210,6 +311,7 @@ form.addEventListener('submit', async event => {
     const label = document.createElement('h2'); label.className = 'result-label'; label.textContent = 'You';
     const body = document.createElement('p'); body.className = 'message-text'; body.textContent = message;
     row.append(label, body); conversation.append(row); conversation.classList.remove('hidden'); hero.classList.add('has-conversation');
+    conversation.scrollTop = conversation.scrollHeight;
     renderedRequests = new Set([...renderedRequests, request.request_id]);
     }
     input.value = '';

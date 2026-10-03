@@ -100,11 +100,36 @@ def test_browser_register_history_reload_memory_and_delete(browser_app):
     submit_question(driver, 'Fresh topic')
     assert 'Sleep apnea' not in driver.find_element(By.CSS_SELECTOR, '.assistant-message').text
     assert len(driver.find_elements(By.CSS_SELECTOR, '.conversation-choice')) == 2
+    driver.find_element(By.CSS_SELECTOR, '.conversation-actions-toggle').click()
     driver.find_element(By.ID, 'delete-conversation').click()
     driver.switch_to.alert.accept()
     wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, '.conversation-choice')) == 1)
     driver.find_element(By.CSS_SELECTOR, '.conversation-choice').click()
     wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, '.user-message')) == 2)
+
+
+def test_browser_rename_and_delete_from_conversation_menu(browser_app):
+    driver, url = browser_app
+    driver.set_window_size(1280, 900)
+    driver.delete_all_cookies()
+    driver.get(url)
+    register_ui(driver, 'rename@example.com')
+    submit_question(driver, 'Original title')
+    driver.find_element(By.CSS_SELECTOR, '.conversation-actions-toggle').click()
+    assert driver.find_element(By.ID, 'conversation-menu').is_displayed()
+    driver.find_element(By.ID, 'rename-conversation').click()
+    name = driver.find_element(By.ID, 'rename-input')
+    name.clear(); name.send_keys('Coverage notes')
+    driver.find_element(By.ID, 'rename-save').click()
+    wait = WebDriverWait(driver, 15)
+    wait.until(lambda d: d.find_element(By.CSS_SELECTOR, '.conversation-choice').text == 'Coverage notes')
+    driver.refresh()
+    wait.until(lambda d: d.find_element(By.CSS_SELECTOR, '.conversation-choice').text == 'Coverage notes')
+    assert not driver.find_elements(By.CSS_SELECTOR, '.chat-toolbar')
+    driver.find_element(By.CSS_SELECTOR, '.conversation-actions-toggle').click()
+    driver.find_element(By.ID, 'delete-conversation').click()
+    driver.switch_to.alert.accept()
+    wait.until(lambda d: not d.find_elements(By.CSS_SELECTOR, '.conversation-choice'))
 
 
 def test_browser_logout_other_account_and_login_restore(browser_app):
@@ -145,15 +170,98 @@ def test_browser_failure_retry_and_mobile_focus(browser_app):
     field = driver.find_element(By.ID, 'medical-input'); field.click()
     assert field.value_of_css_property('outline-style') == 'none'
     assert driver.execute_script('return document.documentElement.scrollWidth <= window.innerWidth')
+    assert not driver.find_element(By.ID, 'capabilities').is_displayed()
+    composer_bottom = driver.execute_script('return document.querySelector(".composer").getBoundingClientRect().bottom')
+    viewport_bottom = driver.execute_script('return window.innerHeight')
+    assert viewport_bottom - 60 <= composer_bottom <= viewport_bottom
+    driver.find_element(By.ID, 'toggle-history').click()
+    assert driver.find_element(By.ID, 'history-panel').is_displayed()
+    assert not driver.find_element(By.CSS_SELECTOR, '.sidebar-heading .home-link').is_displayed()
+    assert not driver.find_elements(By.ID, 'new-conversation-shortcut')
+    assert driver.execute_script('return document.documentElement.scrollWidth <= window.innerWidth')
+
+
+def test_composer_stays_at_bottom_while_messages_scroll(browser_app):
+    driver, url = browser_app
+    driver.set_window_size(1280, 900)
+    driver.delete_all_cookies()
+    driver.get(url)
+    register_ui(driver, 'composer@example.com')
+    assert driver.find_element(By.ID, 'capabilities').is_displayed()
+    empty_layout = driver.execute_script('''
+        const panel = document.querySelector('.chat-panel').getBoundingClientRect();
+        const composer = document.querySelector('.composer').getBoundingClientRect();
+        return {panelCenter: (panel.top + panel.bottom) / 2,
+                composerCenter: (composer.top + composer.bottom) / 2};
+    ''')
+    assert abs(empty_layout['composerCenter'] - empty_layout['panelCenter']) < 90
     driver.find_element(By.CSS_SELECTOR, '.action-pill').click()
-    assert 'insurance policy' in field.get_attribute('value')
+    assert 'insurance policy' in driver.find_element(By.ID, 'medical-input').get_attribute('value')
+    submit_question(driver, 'A detailed question about ' + 'coverage ' * 300)
+    assert not driver.find_element(By.ID, 'capabilities').is_displayed()
+    layout = driver.execute_script('''
+        const composer = document.querySelector('.composer').getBoundingClientRect();
+        const messages = document.querySelector('#conversation');
+        return {
+          composerBottom: composer.bottom,
+          viewportBottom: window.innerHeight,
+          composerTop: composer.top,
+          messagesBottom: messages.getBoundingClientRect().bottom,
+          scrollable: messages.scrollHeight > messages.clientHeight,
+          atLatestMessage: messages.scrollHeight - messages.clientHeight - messages.scrollTop < 2,
+        };
+    ''')
+    assert layout['viewportBottom'] - 60 <= layout['composerBottom'] <= layout['viewportBottom']
+    assert layout['messagesBottom'] <= layout['composerTop']
+    assert layout['scrollable']
+    assert layout['atLatestMessage']
+
+
+def test_history_panel_collapses_and_new_conversation_stays_available(browser_app):
+    driver, url = browser_app
+    driver.set_window_size(1280, 900)
+    driver.delete_all_cookies()
+    driver.get(url)
+    register_ui(driver, 'sidebar@example.com')
+    gutters = driver.execute_script('''
+        return {left: document.querySelector('#history-panel').getBoundingClientRect().left,
+                right: window.innerWidth - document.querySelector('.chat-panel').getBoundingClientRect().right};
+    ''')
+    assert 0 <= gutters['left'] <= 32
+    assert 0 <= gutters['right'] <= 32
+    submit_question(driver, 'What is covered?')
+    toggle = driver.find_element(By.ID, 'toggle-history')
+    chat = driver.find_element(By.CSS_SELECTOR, '.chat-panel')
+    expanded_width = chat.size['width']
+    toggle.click()
+    assert toggle.get_attribute('aria-expanded') == 'false'
+    assert driver.find_element(By.ID, 'history-panel').is_displayed()
+    assert not driver.find_element(By.CSS_SELECTOR, '.sidebar-heading .home-link').is_displayed()
+    assert chat.size['width'] > expanded_width
+    assert not driver.find_elements(By.ID, 'new-conversation-shortcut')
+    toggle.click()
+    assert toggle.get_attribute('aria-expanded') == 'true'
+    assert driver.find_element(By.ID, 'history-panel').is_displayed()
+    driver.find_element(By.ID, 'new-conversation').click()
+    assert not driver.find_elements(By.CSS_SELECTOR, '.user-message')
 
 
 def test_compact_status_and_versioned_assets(browser_app):
     driver, url = browser_app
+    driver.delete_all_cookies()
     driver.get(url)
+    register_ui(driver, 'status@example.com')
     wait = WebDriverWait(driver, 15)
     wait.until(lambda d: d.find_element(By.ID, 'check-connection').get_attribute('data-state') == 'connected')
     assert driver.find_element(By.ID, 'connection-status').text == 'Connected'
+    assert driver.execute_script('return document.querySelector("#history-panel").contains(document.querySelector("#account-controls"))')
+    assert driver.execute_script('return document.querySelector("#history-panel").contains(document.querySelector("#check-connection"))')
+    footer_gap = driver.execute_script('''
+        return document.querySelector('#history-panel').getBoundingClientRect().bottom
+          - document.querySelector('.sidebar-footer').getBoundingClientRect().bottom;
+    ''')
+    assert 0 <= footer_gap < 24
+    assert driver.execute_script('return document.querySelector("#history-panel").contains(document.querySelector("#toggle-history"))')
+    assert driver.find_element(By.ID, 'toggle-history').location['x'] < driver.find_element(By.CSS_SELECTOR, '.sidebar-heading .home-link').location['x']
     assert '?v=' in driver.find_element(By.CSS_SELECTOR, 'script[src]').get_attribute('src')
     assert '?v=' in driver.find_element(By.CSS_SELECTOR, 'link[rel=stylesheet]').get_attribute('href')

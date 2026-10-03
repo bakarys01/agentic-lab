@@ -23,7 +23,8 @@ class Store:
                     csrf_token TEXT NOT NULL, expires_at REAL NOT NULL);
                 CREATE TABLE IF NOT EXISTS conversations (
                     id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                    title TEXT NOT NULL, created_at REAL NOT NULL, updated_at REAL NOT NULL);
+                    title TEXT NOT NULL, created_at REAL NOT NULL, updated_at REAL NOT NULL,
+                    title_custom INTEGER NOT NULL DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS requests (
                     id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
                     content TEXT NOT NULL, status TEXT NOT NULL, response TEXT);
@@ -35,6 +36,8 @@ class Store:
                 CREATE INDEX IF NOT EXISTS conversations_owner ON conversations(user_id, updated_at);
                 CREATE INDEX IF NOT EXISTS messages_conversation ON messages(conversation_id, sequence);
             ''')
+            if 'title_custom' not in {row['name'] for row in db.execute('PRAGMA table_info(conversations)')}:
+                db.execute('ALTER TABLE conversations ADD COLUMN title_custom INTEGER NOT NULL DEFAULT 0')
             # This application runs one worker. Interrupted turns remain retryable.
             db.execute("UPDATE requests SET status='failed' WHERE status='pending'")
             db.execute("UPDATE messages SET status='failed' WHERE status='pending'")
@@ -65,8 +68,16 @@ class Store:
     def create_conversation(self, user_id):
         result = {'id': str(uuid.uuid4()), 'title': 'New conversation', 'updated_at': time.time()}
         with self.connect() as db:
-            db.execute('INSERT INTO conversations VALUES (?,?,?,?,?)', (result['id'], user_id, result['title'], result['updated_at'], result['updated_at']))
+            db.execute('INSERT INTO conversations(id,user_id,title,created_at,updated_at) VALUES (?,?,?,?,?)', (result['id'], user_id, result['title'], result['updated_at'], result['updated_at']))
         return result
+
+    def rename_conversation(self, user_id, conversation_id, title):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            self.owned(db, user_id, conversation_id)
+            updated_at = time.time()
+            db.execute('UPDATE conversations SET title=?, title_custom=1, updated_at=? WHERE id=?', (title, updated_at, conversation_id))
+        return {'id': conversation_id, 'title': title, 'updated_at': updated_at}
 
     def messages(self, user_id, conversation_id):
         with self.connect() as db:
@@ -100,7 +111,7 @@ class Store:
             else:
                 db.execute('INSERT INTO requests VALUES (?,?,?,?,NULL)', (request_id, conversation_id, content, 'pending'))
                 self._insert_message(db, conversation_id, request_id, 'user', content, 'pending')
-            db.execute("UPDATE conversations SET title=CASE WHEN title='New conversation' THEN ? ELSE title END, updated_at=? WHERE id=?", (content[:80], time.time(), conversation_id))
+            db.execute("UPDATE conversations SET title=CASE WHEN title_custom=0 AND title='New conversation' THEN ? ELSE title END, updated_at=? WHERE id=?", (content[:80], time.time(), conversation_id))
         return None
 
     @staticmethod

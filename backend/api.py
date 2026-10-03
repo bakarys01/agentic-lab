@@ -14,7 +14,7 @@ from starlette.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
 from starlette.types import Scope
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from dotenv import load_dotenv
 from backend.storage import Store
 from backend.auth import install_auth
@@ -52,6 +52,18 @@ class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=8000, description="User question for the healthcare concierge")
     conversation_id: uuid.UUID
     request_id: uuid.UUID
+
+
+class ConversationTitle(BaseModel):
+    title: str = Field(min_length=1, max_length=80)
+
+    @field_validator('title')
+    @classmethod
+    def nonempty_title(cls, value: str) -> str:
+        title = value.strip()
+        if not title:
+            raise ValueError('Enter a conversation title.')
+        return title
 
 
 class ChatResponse(BaseModel):
@@ -116,6 +128,10 @@ def create_api_app(concierge: Any | None = None, db_path: str | Path | None = No
     @app.get('/api/conversations/{conversation_id}/messages')
     def messages(conversation_id: uuid.UUID, request: Request):
         return {'messages': get_store().messages(identity(request)['user']['id'], str(conversation_id))}
+
+    @app.patch('/api/conversations/{conversation_id}')
+    def rename_conversation(conversation_id: uuid.UUID, body: ConversationTitle, request: Request):
+        return get_store().rename_conversation(identity(request)['user']['id'], str(conversation_id), body.title)
 
     @app.delete('/api/conversations/{conversation_id}', status_code=204)
     def delete_conversation(conversation_id: uuid.UUID, request: Request):

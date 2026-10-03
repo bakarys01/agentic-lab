@@ -2,21 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
   <title>MediNova — Health Concierge</title>
-  <link rel="stylesheet" href="/styles.css?v=20260925-accounts-1" />
-  <script src="/app.js?v=20260925-accounts-1" defer></script>
+  <link rel="stylesheet" href="/styles.css?v=20261003-conversation-actions" />
+  <script src="/app.js?v=20261003-conversation-actions" defer></script>
 </head>
 <body>
-  <header class="browser-bar">
-    <a class="home-link" href="/" aria-label="MediNova home">MediNova<span class="brand-dot" aria-hidden="true"></span></a>
-    <div class="header-actions">
-      <div id="account-controls" class="hidden"><span id="account-email"></span><button id="logout" class="text-button" type="button">Sign out</button></div>
-      <button id="check-connection" class="connection-button" type="button" data-state="checking" title="Check concierge connection"><span class="status-light" aria-hidden="true"></span><span id="connection-status" role="status">Checking</span></button>
-    </div>
-  </header>
   <main class="hero">
     <section id="auth-panel" class="auth-panel" aria-labelledby="auth-title">
+      <a class="home-link auth-brand" href="/" aria-label="MediNova home">MediNova<span class="brand-dot" aria-hidden="true"></span></a>
       <h1 id="auth-title">Welcome back</h1>
       <p>Sign in to continue your conversations.</p>
       <form id="auth-form">
@@ -31,14 +25,28 @@
       <button id="auth-toggle" class="text-button" type="button">Create an account</button>
     </section>
     <div id="chat-workspace" class="chat-workspace hidden">
-      <aside class="history-panel" aria-label="Conversation history">
+      <aside id="history-panel" class="history-panel" aria-label="Conversation history">
+        <div class="sidebar-heading">
+          <button id="toggle-history" class="icon-button" type="button" aria-controls="history-panel" aria-expanded="true" aria-label="Hide conversation history" title="Hide conversation history">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="19" height="17" rx="2"/><path d="M8.5 3.5v17"/></svg>
+          </button>
+          <a class="home-link" href="/" aria-label="MediNova home">MediNova<span class="brand-dot" aria-hidden="true"></span></a>
+        </div>
         <button id="new-conversation" type="button">New conversation</button>
         <nav id="conversation-list" aria-label="Your conversations"></nav>
+        <div class="sidebar-footer">
+          <div id="account-controls" class="hidden"><span id="account-email"></span><button id="logout" class="text-button" type="button">Sign out</button></div>
+          <button id="check-connection" class="connection-button" type="button" data-state="checking" title="Check concierge connection"><span class="status-light" aria-hidden="true"></span><span id="connection-status" role="status">Checking</span></button>
+        </div>
       </aside>
       <section class="chat-panel" aria-label="Chat">
-        <div class="chat-toolbar"><span>Your conversation</span><button id="delete-conversation" class="text-button" type="button" disabled>Delete conversation</button></div>
         <div class="welcome"><h1>How can I help?</h1><p>Healthcare and insurance, made clearer.</p></div>
         <section id="conversation" class="conversation hidden" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions text"></section>
+        <section id="capabilities" class="capabilities" aria-label="Example questions">
+          <button class="action-pill" type="button" data-prompt="How much would I pay for mental health therapy under my insurance policy?">Does my insurance cover therapy?</button>
+          <button class="action-pill" type="button" data-prompt="What are the common treatment options for sleep apnea?">What treatments help sleep apnea?</button>
+          <button class="action-pill" type="button" data-prompt="What is the difference between a copay and a deductible?">What is a copay or deductible?</button>
+        </section>
         <div class="composer">
           <form class="ask-form" id="ask-form" aria-label="Medical question form">
             <input id="medical-input" name="message" type="text" required maxlength="8000" placeholder="Ask a question…" aria-label="Medical question" autocomplete="off" />
@@ -46,13 +54,24 @@
           </form>
           <p id="composer-error" class="composer-error" role="alert"></p>
         </div>
-        <section id="capabilities" class="capabilities" aria-label="Example questions">
-          <button class="action-pill" type="button" data-prompt="How much would I pay for mental health therapy under my insurance policy?">Does my insurance cover therapy?</button>
-          <button class="action-pill" type="button" data-prompt="What are the common treatment options for sleep apnea?">What treatments help sleep apnea?</button>
-          <button class="action-pill" type="button" data-prompt="What is the difference between a copay and a deductible?">What is a copay or deductible?</button>
-        </section>
       </section>
     </div>
+    <div id="conversation-menu" class="conversation-menu hidden" role="menu" aria-label="Conversation actions">
+      <button id="rename-conversation" type="button" role="menuitem">Rename</button>
+      <button id="delete-conversation" class="danger-action" type="button" role="menuitem">Delete</button>
+    </div>
+    <dialog id="rename-dialog" class="rename-dialog" aria-labelledby="rename-title">
+      <form id="rename-form">
+        <h2 id="rename-title">Rename conversation</h2>
+        <label for="rename-input">Conversation name</label>
+        <input id="rename-input" type="text" required maxlength="80" />
+        <p id="rename-error" class="composer-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button id="rename-cancel" class="text-button" type="button">Cancel</button>
+          <button id="rename-save" type="submit">Save</button>
+        </div>
+      </form>
+    </dialog>
   </main>
 </body>
 </html>
