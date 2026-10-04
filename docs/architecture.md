@@ -31,6 +31,8 @@ The A2A servers must already be running for the concierge to delegate. If an act
 
 The same four services are described by docker-compose.yml. Set both model tokens in .env and run docker compose up --build. docker-compose.https.yml adds the optional Caddy proxy; it is not needed for local development. Compose configuration can be checked without starting containers with docker compose --env-file .env.example config --quiet. The backend listens on port 8000; specialist ports are internal to the Compose network.
 
+If the browser reports "Unable to connect", first check `docker compose ps`. All four services must remain `Up`; closing a foreground `docker compose up` terminal stops the stack. Run `docker compose up -d --build` to keep it running, then open http://127.0.0.1:8000/api/health and confirm `status: ok`. If the services are up but a chat still fails, inspect `docker compose logs --tail 100 backend policy-agent` and the browser network response for `/api/chat`. A healthy Agent Card alone does not prove a model-backed policy answer works.
+
 ## Running architecture
 
 ~~~mermaid
