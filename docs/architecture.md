@@ -72,7 +72,7 @@ The concierge's smolagents tool names are generated as ask_policy, ask_research 
 | tools/delegation.py and a2a_clients/client_utils.py | Turn a synchronous manager tool call into an A2A client request |
 | tools/mcp_connector.py and mcp_servers/healthcare.py | Discover allowed MCP tools and serve list_doctors over stdio |
 | a2a_servers/{serve,app,card,executor}.py | Start any configured A2A agent; publish its Agent Card and JSON-RPC route |
-| backend/{api,auth,storage,server}.py | HTTP API, authentication, SQLite, static files and server entry point |
+| backend/{api,auth,storage,server,title_generation}.py | HTTP API, authentication, SQLite, static files, server entry point and automatic chat titles |
 | frontend/ | Browser UI served by the backend |
 | main.py and examples/run_agent.py | Interactive CLI and one-shot configured agent runner |
 | tests/ | Python regression, frontend and browser checks |
@@ -104,6 +104,8 @@ A delegate is named under its manager's delegates list. AgentRuntime reads that 
 4. The concierge chooses one or more generated ask_* tools. tools/delegation.py calls a2a_clients/client_utils.py; the client reads the specialist's Agent Card and sends an A2A text request.
 5. a2a_servers/executor.py runs the configured specialist in a worker thread and emits a text answer. Policy uses search_policy over the shared PDF. Research uses DuckDuckGoSearchTool. Healthcare provider uses MCP list_doctors over the local JSON directory.
 6. The concierge synthesizes the specialist results. Metadata records names of tools actually called and the concierge run latency. The API validates, persists and returns the answer.
+
+After the first successful answer, the API schedules a separate background call to the `models.title` profile (currently OpenAI gpt-4o-mini) using `prompts/title.md`. It sends only truncated copies of that first question and answer and stores a short topic title in SQLite. The chat answer is returned independently; the browser checks the conversation list briefly for the new title. A failed title call leaves the provisional first-question title in place. `PATCH /api/conversations/{id}` marks a manual title, and a conditional SQLite update ensures an in-flight generated title cannot overwrite it. To change the title model, edit `models.title`; to change the naming instructions, edit `prompts/title.md`.
 
 The A2A server publishes /.well-known/agent-card.json and accepts JSON-RPC at /. Agent Cards use the configured agent description and endpoint. The implementation is request/response text only, with in-memory A2A task stores; it does not implement streaming, persistent remote tasks or effective cancellation. Conversation history stays in the backend and is not sent as a specialist conversation; the manager reformulates a standalone specialist question.
 
