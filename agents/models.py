@@ -9,6 +9,7 @@ def create_model(name: str, runtime: str):
 
     supported = {
         ("smolagents", "openai"),
+        ("langchain", "openai"),
         ("langchain", "huggingface"),
     }
 
@@ -32,6 +33,11 @@ def create_model(name: str, runtime: str):
             model_id=settings["model_id"],
             api_key=api_key,
         )
+
+    if provider == "openai":
+        from langchain_openai import ChatOpenAI
+
+        return ChatOpenAI(model=settings["model_id"], api_key=api_key, temperature=0)
 
     from langchain_huggingface import (
         ChatHuggingFace,
