@@ -4,15 +4,19 @@ This document describes the code in this repository. [The roadmap](roadmap.md) t
 
 ## Start here
 
-From the repository root, use Python 3.13 and uv:
+From the repository root, copy `.env.example` to `.env` and set `OPENAI_API_KEY` and `HF_TOKEN`. The policy and research agents use OpenAI gpt-4o; the healthcare provider uses Hugging Face openai/gpt-oss-20b. The insurance PDF and doctor directory must exist at `data/2026AnthemgHIPSBC.pdf` and `data/doctors.json`. Never commit `.env` or the conversation database.
+
+Start the complete application, including every configured specialist, with one command:
 
 ~~~bash
-uv sync
+docker compose up -d --build
 ~~~
 
-Copy .env.example to .env and set OPENAI_API_KEY and HF_TOKEN. The policy and research agents use OpenAI gpt-4o; the healthcare provider uses Hugging Face openai/gpt-oss-20b. The insurance PDF and doctor directory must exist at data/2026AnthemgHIPSBC.pdf and data/doctors.json. Never commit .env or the conversation database.
+Open http://127.0.0.1:8000, create an account, and start a conversation. `docker compose ps` shows the backend and three specialists; wait until all four are healthy. `docker compose down` stops the services while preserving the named database volume. Compose starts the specialists for you, so adding an agent does not require opening another terminal when its service is added to `docker-compose.yml`. The optional `docker-compose.https.yml` adds a Caddy proxy and is not needed locally. Check configuration without starting containers with `docker compose --env-file .env.example config --quiet`.
 
-Open four terminals and run one command in each:
+### Run components individually (optional)
+
+For development or testing one agent independently, install Python 3.13 and uv, run `uv sync`, then open four terminals and run one command in each:
 
 ~~~bash
 uv run --env-file .env python -m a2a_servers.serve policy
@@ -21,7 +25,7 @@ uv run --env-file .env python -m a2a_servers.serve healthcare_provider
 uv run --env-file .env python -m backend.server
 ~~~
 
-The commands above are separate long-running processes, not a single shell script. Open http://127.0.0.1:8000, create an account, and start a conversation. For a command-line check, use:
+These are separate long-running processes, not a single shell script. For a command-line check while the A2A specialists are running, use:
 
 ~~~bash
 uv run --env-file .env python -m examples.run_agent concierge "What is my deductible, what are common treatments for depression, and which psychiatrists are in Paris?"
@@ -29,7 +33,7 @@ uv run --env-file .env python -m examples.run_agent concierge "What is my deduct
 
 The A2A servers must already be running for the concierge to delegate. If an activated environment points to another project, use uv run without activating it. On Windows, the project's .venv/Scripts/python.exe is an alternative; use uv's --env-file option for command-line clients that do not load .env themselves.
 
-The same four services are described by docker-compose.yml. Set both model tokens in .env and run docker compose up --build. docker-compose.https.yml adds the optional Caddy proxy; it is not needed for local development. Compose configuration can be checked without starting containers with docker compose --env-file .env.example config --quiet. The backend listens on port 8000; specialist ports are internal to the Compose network.
+The backend listens on port 8000; specialist ports are internal to the Compose network.
 
 If the browser reports "Unable to connect", first check `docker compose ps`. All four services must remain `Up`; closing a foreground `docker compose up` terminal stops the stack. Run `docker compose up -d --build` to keep it running, then open http://127.0.0.1:8000/api/health and confirm `status: ok`. If the services are up but a chat still fails, inspect `docker compose logs --tail 100 backend policy-agent` and the browser network response for `/api/chat`. A healthy Agent Card alone does not prove a model-backed policy answer works.
 

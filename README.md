@@ -1,6 +1,6 @@
 # Agentic Lab — MediNova Healthcare Concierge
 
-MediNova is a modular healthcare concierge reference application. A manager agent routes questions over A2A to three specialists: insurance policy, health research and provider directory. The provider specialist uses MCP to query a local doctor directory. The browser application adds accounts and persistent conversations.
+MediNova is a modular healthcare concierge reference application. A manager agent routes questions over A2A to three specialists: insurance policy, health research and provider directory. Each specialist accesses its tools through MCP. The browser application adds accounts and persistent conversations.
 
 The repository has two detailed documents:
 
@@ -9,13 +9,15 @@ The repository has two detailed documents:
 
 ## Quick start
 
-Use Python 3.13 and uv. From the repository root:
+From the repository root, copy `.env.example` to `.env` and set `OPENAI_API_KEY` and `HF_TOKEN`. Ensure the sample insurance PDF and doctor directory are present in `data/`. Start the complete application with one command:
 
 ~~~bash
-uv sync
+docker compose up -d --build
 ~~~
 
-Copy .env.example to .env and set OPENAI_API_KEY and HF_TOKEN. The sample insurance PDF and doctor directory must be present in data/. Start these four commands in separate terminals:
+Compose starts the backend and all configured specialist services. Open http://127.0.0.1:8000, create an account, and start chatting. Use `docker compose ps` to check that all four services are healthy; `docker compose down` stops them. The conversation database remains in the Compose volume.
+
+To run or debug components independently without Docker, install Python 3.13 and uv, then run `uv sync`. Start these commands in separate terminals:
 
 ~~~bash
 uv run --env-file .env python -m a2a_servers.serve policy
@@ -24,16 +26,10 @@ uv run --env-file .env python -m a2a_servers.serve healthcare_provider
 uv run --env-file .env python -m backend.server
 ~~~
 
-Open http://127.0.0.1:8000. To run a single configured agent from the CLI:
+With the specialist services running, you can also call a configured agent from the CLI:
 
 ~~~bash
 uv run --env-file .env python -m examples.run_agent concierge "What is my deductible, what treatments exist for depression, and which psychiatrists are in Paris?"
-~~~
-
-Docker Compose also defines the backend and three specialist services:
-
-~~~bash
-docker compose up --build
 ~~~
 
 Keep model credentials in .env and keep specialist A2A endpoints private. See the [architecture guide](docs/architecture.md) for the complete setup, contracts and extension steps.
