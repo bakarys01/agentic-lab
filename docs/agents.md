@@ -1,112 +1,73 @@
-# Guide des agents MediNova
+# MediNova : présenter les agents en entretien technique
 
-Ce document explique le comportement des agents actuellement intégrés à MediNova. Pour démarrer l'application et comprendre les composants techniques, voir le [guide d'architecture](architecture.md). La configuration effective se trouve dans [`config/agents.yaml`](../config/agents.yaml) ; les consignes détaillées de chaque agent sont versionnées dans [`prompts/`](../prompts/).
+Ce document est un fil conducteur pour expliquer **ce qui fonctionne aujourd'hui**, pourquoi l'architecture a été choisie et quelles en sont les limites. Il ne remplace pas le [guide d'architecture](architecture.md), qui contient les commandes, les contrats de configuration et la procédure détaillée pour ajouter un agent.
 
-## Parcours d'une question
+## Le projet en une minute
+
+> MediNova est un assistant de santé modulaire. Un concierge reçoit la question de l'utilisateur, identifie les domaines concernés et délègue à des agents spécialisés. Les échanges entre agents passent par A2A ; les spécialistes accèdent à leurs outils et à leurs sources par MCP. Le concierge réunit les réponses en distinguant les faits du contrat d'assurance, les informations médicales générales et les résultats de l'annuaire. L'application propose une interface web, des comptes et des conversations persistantes.
+
+**Pourquoi plusieurs agents ?** Les trois domaines n'ont ni les mêmes sources ni les mêmes règles de réponse. La séparation rend le routage explicite, limite chaque spécialiste aux outils utiles à son domaine et permet d'ajouter une capacité sans réécrire tout le concierge. Elle n'élimine pas les erreurs des modèles : la qualité des sources et la vérification des réponses restent essentielles.
+
+## Suivre une requête de bout en bout
 
 ```text
-Utilisateur → interface/API → concierge → A2A → agent(s) spécialisé(s)
-                                        → MCP → outil(s) → source(s) de données
-                       ← réponses des spécialistes ←
-            ← réponse synthétisée par le concierge ←
+Utilisateur → navigateur → backend/API → concierge
+                                    │
+                                    └─ A2A → spécialiste(s) → MCP → outil(s) → données
+                                    ← réponses des spécialistes ←
+Utilisateur ← réponse synthétisée par le concierge ← backend/API
 ```
 
-Le **concierge** décide quels spécialistes consulter. A2A transporte sa question vers le service du spécialiste choisi et lui renvoie une réponse textuelle. Le spécialiste utilise MCP pour découvrir et appeler les outils autorisés qui accèdent à ses sources. Le concierge rassemble ensuite les résultats. Une question peut mobiliser plusieurs spécialistes ; aucun nombre fixe d'agents n'est inscrit dans son prompt.
+1. Le backend authentifie l'utilisateur, retrouve sa conversation et transmet au concierge la nouvelle question avec un historique récent et borné.
+2. Le concierge choisit un ou plusieurs spécialistes à partir de leurs descriptions et de son prompt. Il envoie à chacun une **question autonome** ; l'historique complet ne traverse pas A2A.
+3. Chaque spécialiste reçoit la demande sur son service A2A, utilise les outils MCP autorisés pour son domaine, puis renvoie une réponse textuelle.
+4. Le concierge synthétise ces réponses, conserve les sources et les incertitudes pertinentes ; le backend enregistre la réponse et les noms des spécialistes réellement appelés.
 
-Les noms `ask_policy`, `ask_research` et `ask_healthcare_provider` sont générés à partir de la liste `delegates` du concierge. Leur description vient du champ `description` de chaque spécialiste : elle aide le modèle à choisir le bon agent, avec les règles de [`prompts/concierge.md`](../prompts/concierge.md). Le champ `tools` de chaque spécialiste indique les outils MCP qu'il peut effectivement utiliser ; `mcp_servers` indique où les découvrir. Un outil absent de la liste `tools` n'est pas présenté à l'agent, même si le serveur MCP l'expose.
+**Exemple à raconter.** Pour « Quelle est ma franchise, quels sont les traitements courants de la dépression et trouve-moi un psychiatre à Paris ? », le concierge peut appeler `policy`, `research` et `healthcare_provider`. Il doit présenter séparément la franchise trouvée dans le PDF, les informations médicales issues du web et les médecins présents dans l'annuaire. Il ne peut pas conclure qu'un médecin trouvé est couvert par l'assurance ou disponible pour un rendez-vous.
 
-| Agent | Rôle | Outil ou délégation | Source principale |
+## Expliquer chaque agent sans se perdre dans le code
+
+| Agent | Ce qu'il apporte | Outil MCP et source | Limite à connaître |
 | --- | --- | --- | --- |
-| `concierge` | Oriente et synthétise | `ask_*` via A2A ; `tools: []` | Réponses des spécialistes |
-| `policy` | Répond sur le contrat d'assurance | `search_policy` via MCP | PDF d'assurance partagé |
-| `research` | Recherche des informations médicales générales | `web_search` via MCP | Résultats de recherche web |
-| `healthcare_provider` | Cherche des professionnels de santé | `list_doctors` via MCP | Annuaire JSON local |
+| **Concierge** | Oriente la question et rassemble les réponses. | Délégations `ask_*` via A2A ; aucun outil MCP propre. | Ne doit pas inventer une réponse de spécialiste ou croiser des résultats pour déduire une couverture. |
+| **Policy** | Répond sur la couverture, la franchise, la coassurance et les exclusions du contrat chargé. | `search_policy` cherche des passages et numéros de page dans un PDF partagé. | Recherche textuelle non exhaustive ; le PDF n'est pas propre à chaque utilisateur. |
+| **Research** | Fournit des informations médicales générales sur des pathologies et traitements. | `web_search` renvoie titres, URL et extraits de résultats web. | Les extraits ne prouvent pas la fiabilité clinique ; ce n'est pas un diagnostic. |
+| **Healthcare provider** | Recherche des médecins par lieu et spécialité. | `list_doctors` filtre un annuaire JSON local. | Annuaire statique : aucune garantie de disponibilité, de pertinence clinique ou d'appartenance au réseau d'assurance. |
 
-## Concierge
+Le concierge fonctionne actuellement avec **smolagents** et un modèle OpenAI. Les trois spécialistes fonctionnent avec **LangChain** : `policy` et `research` utilisent le profil OpenAI par défaut ; `healthcare_provider` utilise un profil Hugging Face. Ces choix sont déclarés dans [`config/agents.yaml`](../config/agents.yaml). Les instructions de comportement sont dans les fichiers [`prompts/`](../prompts/) ; les adaptateurs qui construisent les agents sont dans [`agents/runtime.py`](../agents/runtime.py). Le champ `role` documente manager ou spécialiste, tandis que les délégations et le runtime déterminent concrètement le comportement.
 
-**Quand intervient-il ?** Il reçoit chaque question du chat. Il est construit dans le processus backend avec le rôle `manager`, le runtime `smolagents` et le modèle `default` configuré dans `config/agents.yaml`. Le backend lui transmet la question et un extrait borné des échanges précédents. Il ne dispose pas d'outil MCP propre (`tools: []`).
+## Défendre les choix techniques
 
-**Comment travaille-t-il ?** Il choisit les délégations pertinentes d'après les descriptions des spécialistes et son prompt. Pour chaque domaine, il reformule une question autonome avec les contraintes utiles, puis appelle le spécialiste par A2A. Il peut, par exemple, consulter `policy` pour une franchise et `healthcare_provider` pour des psychiatres à Paris dans le même tour. Il compose une réponse qui distingue les faits du contrat, les informations médicales générales et les résultats de l'annuaire. Le backend enregistre les noms des spécialistes réellement appelés dans `agents_used`.
+**Pourquoi A2A ?** Le concierge et les spécialistes sont des services séparés. A2A fournit un échange agent-à-agent : le concierge découvre la carte du spécialiste, lui envoie une question et reçoit sa réponse. Les outils de délégation `ask_policy`, `ask_research` et `ask_healthcare_provider` sont générés à partir de la configuration ; leurs descriptions aident le modèle à choisir. Aujourd'hui, l'échange est textuel et de type requête/réponse, sans streaming ni persistance des tâches distantes.
 
-**Limites.** Il doit s'appuyer sur les réponses des spécialistes plutôt que déduire lui-même une couverture, une disponibilité de rendez-vous ou une appartenance au réseau d'assurance. L'historique est conservé dans le backend ; chaque appel A2A transmet une question autonome, pas toute la conversation. Si aucun spécialiste ne couvre le sujet, le concierge doit indiquer l'information manquante.
+**Pourquoi MCP ?** Les spécialistes ont besoin de capacités d'accès aux données, pas d'un couplage direct à chaque source dans leur logique. MCP expose `search_policy`, `web_search` et `list_doctors` de manière uniforme. La configuration sélectionne explicitement les outils de chaque agent avec `tools`, puis limite ceux que chaque serveur MCP peut exposer avec `allowed_tools`. Les serveurs MCP actuels utilisent `stdio` : ce sont des sous-processus lancés par le client MCP du spécialiste, pas des services HTTP supplémentaires.
 
-**À consulter :** [`prompts/concierge.md`](../prompts/concierge.md), [`agents/runtime.py`](../agents/runtime.py), [`tools/delegation.py`](../tools/delegation.py).
+**Pourquoi configuration et prompts séparés ?** Le YAML référence agents, modèles, profils d'exécution, délégations, outils, serveurs MCP et ports A2A ; les prompts définissent le comportement métier. Cela facilite l'ajout d'un spécialiste lorsque son runtime et son fournisseur de modèle sont déjà pris en charge. Le YAML seul ne peut pas créer un nouvel adaptateur ou rendre un agent externe entièrement configurable : ces cas demandent encore du code.
 
-## Policy : contrat d'assurance
+## Expliquer l'infrastructure
 
-**Quand l'appeler ?** Pour les questions sur la couverture, la franchise, les quotes-parts, la coassurance ou les exclusions du contrat chargé dans l'application. Ce spécialiste utilise `langchain` et le profil de modèle `default`.
+**En local**, `docker compose up -d --build` lance quatre services : le backend et un service A2A pour chacun des trois spécialistes. Le navigateur, l'API et le concierge partagent le processus backend ; les spécialistes communiquent avec lui sur le réseau privé Compose. Le backend expose le port 8000 sur la machine. Chaque spécialiste lance à la demande son serveur MCP en sous-processus `stdio`, puis utilise sa source : PDF local, web ou annuaire JSON.
 
-**Parcours.** Le concierge l'interroge par A2A. Son runtime charge le serveur MCP `policy_documents`, ne conserve que l'outil `search_policy` autorisé dans la configuration, puis l'agent recherche des passages pertinents dans `data/2026AnthemgHIPSBC.pdf`. L'outil renvoie jusqu'à trois pages correspondantes, avec leurs numéros et des extraits. L'agent formule sa réponse à partir de ces passages et cite la page quand elle est disponible.
+Le backend conserve comptes, sessions et conversations dans **SQLite** sur un volume Docker nommé, qui survit à `docker compose down`. Les clés des fournisseurs de modèles sont passées par variables d'environnement. Un fichier Compose HTTPS optionnel ajoute un proxy Caddy ; les services A2A ne sont pas destinés à être exposés publiquement. Le contrôle de santé vérifie surtout l'accessibilité des cartes A2A : il ne valide ni les identifiants de modèle, ni les outils MCP, ni la qualité d'une réponse réelle.
 
-**Limites.** Ce n'est pas un moteur d'interprétation exhaustif du contrat : la recherche classe les pages par présence des termes de la requête et peut manquer un passage formulé autrement. Le PDF est partagé par l'application ; ce n'est pas un contrat propre à chaque utilisateur. L'agent ne recherche pas de médecins et ne fournit pas de conseil médical. Si la réponse n'est pas trouvée, il doit le dire.
+**Si on me demande comment ajouter un agent :** je définis d'abord son périmètre et son prompt ; je crée ou réutilise les outils MCP et leurs sources ; je déclare l'agent, son modèle, ses outils et son serveur A2A dans le YAML ; je l'ajoute aux `delegates` du concierge et aux services Compose ; enfin je vérifie un appel direct, puis une question qui doit provoquer sa délégation. Le [guide d'architecture](architecture.md#add-a-specialist) donne les étapes et un exemple de configuration.
 
-**À consulter :** [`prompts/policy.md`](../prompts/policy.md), [`mcp_servers/policy.py`](../mcp_servers/policy.py).
+## Évolution prévue : Medication Agent
 
-## Research : information médicale générale
+Cet agent **n'est pas encore implémenté**. L'idée est de séparer trois besoins derrière MCP :
 
-**Quand l'appeler ?** Pour une question générale sur une pathologie, des symptômes, des traitements, des procédures ou des options de soins. Ce spécialiste utilise `langchain` et le profil de modèle `default`.
-
-**Parcours.** Après l'appel A2A, l'agent découvre `web_search` sur le serveur MCP `research_web`. Cet outil lance une recherche DDGS et renvoie au plus dix résultats, avec titre, URL et extrait. Le prompt demande à l'agent de privilégier les sources médicales et de santé publique fiables et de citer les URL lorsqu'elles sont disponibles.
-
-**Limites.** Les extraits de recherche ne constituent pas une vérification clinique des pages, et la qualité des résultats dépend du web et du service de recherche. L'agent fournit des informations générales, pas un diagnostic ni un avis médical personnalisé. Il ne détermine pas la couverture d'assurance et ne consulte pas l'annuaire des médecins.
-
-**À consulter :** [`prompts/research.md`](../prompts/research.md), [`mcp_servers/research.py`](../mcp_servers/research.py).
-
-## Healthcare provider : recherche de professionnels
-
-**Quand l'appeler ?** Pour chercher des médecins selon une ville, une région ou une spécialité. Ce spécialiste utilise `langchain` et le profil de modèle `provider_search` configuré pour Hugging Face.
-
-**Parcours.** Après l'appel A2A, l'agent découvre `list_doctors` sur le serveur MCP `healthcare_providers`. L'outil lit `data/doctors.json` et filtre les entrées par `state`, `city` et `specialty` ; les critères fournis se cumulent et la comparaison ignore la casse. Il renvoie les entrées correspondantes en JSON. Si aucun critère n'est fourni, l'outil renvoie une erreur et le prompt demande une précision à l'utilisateur.
-
-**Limites.** L'annuaire est un jeu de données local et statique. Un résultat ne prouve ni la disponibilité d'un rendez-vous, ni l'appartenance du médecin au réseau de l'assureur, ni son adéquation clinique au besoin de l'utilisateur. L'agent ne doit pas inventer de coordonnées ou de spécialités absentes des résultats.
-
-**À consulter :** [`prompts/healthcare_provider.md`](../prompts/healthcare_provider.md), [`mcp_servers/healthcare.py`](../mcp_servers/healthcare.py).
-
-## Medication : informations sur les médicaments (prévu)
-
-**Statut.** Cet agent est une proposition pour la prochaine extension de MediNova. Il n'est pas encore déclaré dans `config/agents.yaml`, accessible par A2A ou connecté à des outils MCP. Les noms ci-dessous décrivent le contrat envisagé, pas des fonctions déjà disponibles.
-
-**Objectif.** Répondre aux questions sur l'identité d'un médicament, ses informations médicales et ses données de coût en interrogeant des sources distinctes. Comme les autres spécialistes, il serait appelé par le concierge via A2A, puis accéderait à ses outils via MCP.
-
-```text
-Concierge ── A2A ──> Medication Agent
-                         │
-                        MCP
-                         │
-          ┌──────────────┼──────────────┐
-          ▼              ▼              ▼
- get_medication()  search_medical_info()  get_cost_info()
-          │              │              │
-  PostgreSQL/API      RAG hybride     PostgreSQL/API
-          │              │              │
-  identité et forme   RCP et notice   prix et remboursement
-```
-
-| Outil MCP envisagé | Données recherchées | Source envisagée |
+| Outil envisagé | Question traitée | Source envisagée |
 | --- | --- | --- |
-| `get_medication()` | Nom, substance, codes CIS/CIP, dosage, forme et présentations | Base structurée PostgreSQL et/ou API |
-| `search_medical_info()` | Indications, contre-indications, effets indésirables, précautions et interactions | RCP et notices indexés par une recherche hybride (texte et vecteurs) |
-| `get_cost_info()` | Prix, remboursement et présentations concernées | Base structurée PostgreSQL et/ou API |
+| `get_medication()` | Identifier nom, substance, codes CIS/CIP, dosage, forme et présentations. | PostgreSQL ou API de données structurées. |
+| `search_medical_info()` | Retrouver indications, contre-indications, effets indésirables, précautions et interactions dans les RCP et notices. | Recherche hybride sur documents : texte et vecteurs. |
+| `get_cost_info()` | Obtenir prix, remboursement et présentations concernées. | PostgreSQL ou API de données structurées. |
 
-**Frontière à respecter.** L'identification d'un médicament, son information clinique et son coût doivent conserver leurs sources et leur contexte. Un prix ou un taux de remboursement ne doit pas être présenté comme la prise en charge effective par le contrat de l'utilisateur : cette question relève de `policy`. L'agent ne doit ni inventer une indication, ni prescrire un traitement personnalisé. Les sources exactes, leur mise à jour et les règles de rapprochement entre codes CIS/CIP, présentations, documents et tarifs restent à définir avant l'implémentation.
+Le point technique important sera de **relier correctement** les identifiants du médicament, ses présentations, les documents médicaux et les tarifs, tout en conservant la provenance et la date des données. Un prix ou un taux de remboursement général ne prouvera pas la prise en charge effective du contrat de l'utilisateur : cette dernière relève de `policy`. Les sources exactes et leur rythme de mise à jour restent à choisir.
 
-## Exemple : une question qui traverse plusieurs agents
+## Questions probables et réponses courtes
 
-Pour « Quelle est ma franchise, quels sont les traitements courants de la dépression et trouve-moi un psychiatre à Paris ? », le parcours attendu est le suivant. Il illustre le routage, sans garantir une réponse ou des résultats particuliers.
+**« Que se passe-t-il si un agent se trompe ou ne répond pas ? »** Le concierge doit conserver l'incertitude ou signaler l'absence de résultat. La séparation des sources aide à localiser l'erreur, mais aucune garantie automatique de justesse médicale n'existe aujourd'hui. Il faut évaluer les réponses, surveiller les services et améliorer les sources.
 
-1. Le concierge sépare les trois besoins et appelle `ask_policy`, `ask_research` et `ask_healthcare_provider` avec des questions autonomes.
-2. A2A transmet chaque question au serveur du spécialiste concerné.
-3. Chaque spécialiste utilise son outil MCP : `search_policy` interroge le PDF, `web_search` renvoie des sources web et `list_doctors` filtre l'annuaire par ville et spécialité.
-4. Les spécialistes renvoient leurs réponses textuelles au concierge, qui les rassemble en conservant leurs sources et leurs incertitudes. Il ne déduit pas que les médecins trouvés sont couverts par le contrat.
+**« Pourquoi ne pas donner tous les outils à un seul agent ? »** Le routage par domaine réduit les confusions entre contrat, information médicale et annuaire. Chaque spécialiste reçoit uniquement les outils déclarés pour son rôle. Le coût est une orchestration réseau supplémentaire, qu'il faut mesurer et surveiller.
 
-## Ajouter un spécialiste
-
-La structure commune reste la même : **définition → prompt → modèle/runtime → outils MCP → exposition A2A → délégation par le concierge**. Pour un nouveau spécialiste interne :
-
-1. Définir précisément son domaine, ses sources autorisées et ses limites. Créer `prompts/NOM.md` avec ces règles.
-2. Créer ou réutiliser un serveur MCP pour ses sources. Déclarer le serveur et ses `allowed_tools` dans `config/agents.yaml`.
-3. Ajouter `agents.NOM` dans ce même fichier avec une `description` utile au routage, `role: specialist`, un runtime et un modèle pris en charge, `prompt: NOM`, la liste explicite `tools` (même vide) et `mcp_servers`.
-4. Ajouter `a2a_servers.NOM.port`, puis `NOM` à `agents.concierge.delegates`. Le lanceur générique `python -m a2a_servers.serve NOM` suffit ; aucun client ou serveur A2A propre à l'agent n'est nécessaire.
-5. Ajouter son service, ses variables d'environnement, son adresse accessible et son contrôle de santé dans `docker-compose.yml`, puis le raccorder au backend. Vérifier le chargement de la définition, la carte A2A, un appel direct et une question au concierge qui exige ce nouveau domaine.
-
-Le [guide d'architecture](architecture.md#add-a-specialist) donne un exemple de configuration et les limites des adaptateurs actuels. Une entrée YAML ne suffit pas à introduire un runtime, un fournisseur de modèle ou un type d'échange non encore pris en charge. Le générateur de titre de conversation utilise aussi un modèle et un prompt, mais **ce n'est pas un agent délégué** : il ne fait pas partie de ce parcours A2A/MCP.
+**« Est-ce prêt pour la production ? »** C'est une application de référence fonctionnelle, avec authentification, persistance et services conteneurisés. Les limites à annoncer clairement sont les sources de démonstration, l'absence d'authentification applicative sur les services A2A, l'absence de streaming et de traçage distribué, ainsi que l'absence d'évaluation automatisée de la qualité médicale des réponses. Les services A2A doivent rester sur un réseau privé.
