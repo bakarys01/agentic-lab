@@ -1,6 +1,6 @@
 # Architecture and contributor guide
 
-This document describes the code in this repository. [The roadmap](roadmap.md) tracks future experiments. The reference application is MediNova, a healthcare concierge that routes a question to independent specialists. Configuration selects an agent's prompt, runtime, model, tools, delegates and network port; Python adapters implement the supported combinations.
+This document describes the code in this repository. [The agent guide](agents.md) explains each agent's behavior in French; [the roadmap](roadmap.md) tracks future experiments. The reference application is MediNova, a healthcare concierge that routes a question to independent specialists. Configuration selects an agent's prompt, runtime, model, tools, delegates and network port; Python adapters implement the supported combinations.
 
 ## Start here
 

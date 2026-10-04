@@ -2,9 +2,10 @@
 
 MediNova is a modular healthcare concierge reference application. A manager agent routes questions over A2A to three specialists: insurance policy, health research and provider directory. Each specialist accesses its tools through MCP. The browser application adds accounts and persistent conversations.
 
-The repository has two detailed documents:
+The repository has three detailed documents:
 
 - [Architecture and contributor guide](docs/architecture.md): actual components, setup, configuration, request flow, adding an agent, tests and limits.
+- [Agent guide (French)](docs/agents.md): each agent's role, request flow, sources, limits and extension steps.
 - [Roadmap](docs/roadmap.md): future experiments and evidence needed to complete them.
 
 ## Quick start
