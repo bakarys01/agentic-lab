@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediNova — Architecture Agentique Healthcare</title>
+<style>
+:root{
+  --bg:#07111f;--panel:#0d1b2d;--panel2:#10243b;--text:#eaf2ff;--muted:#9fb2ca;
+  --line:#213a58;--accent:#6ee7f9;--accent2:#a78bfa;--good:#86efac;--warn:#fde68a;
+  --shadow:0 18px 50px rgba(0,0,0,.28)
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#06101d,#091829 45%,#07111f);color:var(--text)}
+a{color:inherit;text-decoration:none}
+.shell{display:grid;grid-template-columns:280px minmax(0,1fr);min-height:100vh}
+aside{position:sticky;top:0;height:100vh;padding:28px 22px;border-right:1px solid var(--line);background:rgba(6,16,29,.88);backdrop-filter:blur(16px);overflow:auto}
+.brand{font-size:22px;font-weight:800;letter-spacing:-.03em}.brand span{color:var(--accent)}
+.kicker{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;margin:4px 0 26px}
+nav a{display:block;padding:9px 11px;margin:3px 0;border-radius:10px;color:var(--muted)}
+nav a:hover{background:var(--panel2);color:var(--text)}
+main{max-width:1180px;width:100%;padding:58px 54px 90px}
+.hero{padding:38px;border:1px solid var(--line);border-radius:24px;background:radial-gradient(circle at 85% 15%,rgba(110,231,249,.16),transparent 32%),linear-gradient(135deg,rgba(167,139,250,.08),rgba(13,27,45,.94));box-shadow:var(--shadow)}
+.eyebrow{color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:12px}
+h1{font-size:46px;line-height:1.05;margin:10px 0 18px;letter-spacing:-.045em}
+h2{font-size:29px;margin:58px 0 18px;letter-spacing:-.025em}h3{font-size:19px;margin:28px 0 10px}
+p{color:#c7d5e8}.lead{font-size:19px;max-width:850px}.muted{color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}.pill{padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:#0b1b2d;color:#cfe2f7;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:18px;background:rgba(13,27,45,.78);padding:21px;box-shadow:0 10px 28px rgba(0,0,0,.12)}
+.card h3{margin-top:0}.icon{font-size:27px}.tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.diagram{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#071522;padding:22px;margin:18px 0}
+pre{margin:0;color:#d9e8f8;font:13px/1.55 "SFMono-Regular",Consolas,monospace;white-space:pre}
+.flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:20px 0}
+.node{border:1px solid #315270;background:#0d2035;padding:12px 16px;border-radius:13px;font-weight:700}.arrow{color:var(--accent);font-size:20px}
+.toolrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:15px}.tool{padding:15px;border:1px solid var(--line);border-radius:14px;background:#0a192a}.tool code{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{padding:13px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#10243b;color:#e8f3ff}td{color:#c7d5e8}
+.callout{border-left:3px solid var(--accent);padding:14px 18px;background:rgba(110,231,249,.06);border-radius:0 12px 12px 0;margin:20px 0}
+.good{border-left-color:var(--good);background:rgba(134,239,172,.06)}
+code{font-family:"SFMono-Regular",Consolas,monospace;color:#b8f4ff}
+hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+.footer{margin-top:70px;color:var(--muted);font-size:13px}
+@media(max-width:950px){.shell{display:block}aside{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line)}nav{display:none}main{padding:30px 20px}.grid,.grid4,.toolrow{grid-template-columns:1fr}h1{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside>
+  <div class="brand">Medi<span>Nova</span></div>
+  <div class="kicker">Agentic Healthcare Architecture</div>
+  <nav>
+    <a href="#vision">01 — Vision</a>
+    <a href="#architecture">02 — Architecture globale</a>
+    <a href="#concierge">03 — Concierge</a>
+    <a href="#agents">04 — Les 4 agents</a>
+    <a href="#mcp">05 — MCP & Tools</a>
+    <a href="#data">06 — Data Platform</a>
+    <a href="#retrieval">07 — Retrieval</a>
+    <a href="#flows">08 — Flux end-to-end</a>
+    <a href="#governance">09 — Gouvernance</a>
+    <a href="#repo">10 — Repository</a>
+  </nav>
+</aside>
+
+<main>
+<section class="hero" id="vision">
+  <div class="eyebrow">Architecture de référence</div>
+  <h1>MediNova<br>Agentic Healthcare</h1>
+  <p class="lead">Un Concierge orchestre quatre spécialistes via A2A. Chaque spécialiste accède à des capacités métier via MCP. Les tools choisissent le backend adapté : SQL pour les faits structurés, Hybrid RAG pour les documents, API lorsque la donnée doit être interrogée à la source.</p>
+  <div class="pills"><span class="pill">A2A</span><span class="pill">MCP</span><span class="pill">PostgreSQL</span><span class="pill">Qdrant</span><span class="pill">Hybrid RAG</span><span class="pill">Prefect</span></div>
+</section>
+
+<section id="architecture">
+<h2>01. Architecture globale</h2>
+<div class="callout good"><strong>Principe central :</strong> le Concierge orchestre les compétences, les spécialistes orchestrent les tools, et les tools accèdent aux données.</div>
+<div class="flow">
+  <div class="node">👤 User</div><div class="arrow">→</div>
+  <div class="node">🧠 Concierge</div><div class="arrow">— A2A →</div>
+  <div class="node">Specialist Agent</div><div class="arrow">— MCP →</div>
+  <div class="node">Business Tool</div><div class="arrow">→</div>
+  <div class="node">SQL / RAG / API</div>
+</div>
+<div class="grid4">
+  <div class="card"><div class="icon">💊</div><h3>Medication</h3><p>Médicament, information médicale, interactions et coût.</p></div>
+  <div class="card"><div class="icon">💉</div><h3>Vaccination</h3><p>Calendrier vaccinal et information documentaire vaccinale.</p></div>
+  <div class="card"><div class="icon">🧪</div><h3>Biology</h3><p>Recommandations, bilans types et actes NABM.</p></div>
+  <div class="card"><div class="icon">🩺</div><h3>Medical Recommendations</h3><p>Recommandations officielles de prise en charge et bonnes pratiques HAS.</p></div>
+</div>
+</section>
+
+<section id="concierge">
+<h2>02. Concierge Agent</h2>
+<p>Le Concierge est le point d’entrée. Il comprend l’intention, décompose une demande multi-domaines, sélectionne un ou plusieurs spécialistes, délègue via A2A puis synthétise leurs résultats.</p>
+<div class="grid">
+  <div class="card"><span class="tag">Il fait</span><h3>Orchestration</h3><p>Intent detection, routing, décomposition, appels A2A, agrégation et réponse finale.</p></div>
+  <div class="card"><span class="tag">Il ne fait pas</span><h3>Accès Data</h3><p>Pas d’accès direct à PostgreSQL ou Qdrant, pas de RAG médical direct, pas d’invention lorsqu’un spécialiste ne retourne pas l’information.</p></div>
+</div>
+<div class="diagram"><pre>User question
+     │
+     ▼
+┌───────────────┐
+│   Concierge   │
+│ understand    │
+│ decompose     │
+│ route         │
+└───────┬───────┘
+        │ A2A
+   ┌────┼──────────────┬─────────────────┐
+   ▼    ▼              ▼                 ▼
+💊 Medication   💉 Vaccination   🧪 Biology   🩺 Medical Recommendations</pre></div>
+</section>
+
+<section id="agents">
+<h2>03. Les quatre Specialist Agents</h2>
+
+<div class="card">
+<span class="tag">Agent 01</span><h3>💊 Medication Agent</h3>
+<p><strong>Objectif.</strong> Répondre aux questions sur l’identité d’un médicament, ses informations médicales, ses interactions et ses données de coût en s’appuyant sur la source et le backend adaptés.</p>
+<div class="toolrow">
+ <div class="tool"><code>get_medication()</code><p>Identité, substance, dosage, forme, ATC, composants.</p><strong>→ SQL</strong></div>
+ <div class="tool"><code>search_medical_info()</code><p>Indications, précautions, contre-indications, effets indésirables, monographies.</p><strong>→ Hybrid RAG</strong></div>
+ <div class="tool"><code>check_interactions()</code><p>Interaction exacte puis contexte documentaire si nécessaire.</p><strong>→ SQL + RAG</strong></div>
+ <div class="tool"><code>get_cost_info()</code><p>Présentation, prix et données de remboursement disponibles.</p><strong>→ SQL / API</strong></div>
+</div>
+</div>
+
+<br>
+<div class="card">
+<span class="tag">Agent 02</span><h3>💉 Vaccination Agent</h3>
+<p><strong>Objectif.</strong> Répondre aux questions portant sur le calendrier vaccinal et les informations/recommandations vaccinales intégrées.</p>
+<div class="grid">
+ <div class="tool"><code>get_schedule()</code><p>Interrogation déterministe du calendrier structuré.</p><strong>→ SQL</strong></div>
+ <div class="tool"><code>search_vaccine_info()</code><p>Recherche de passages documentaires pertinents.</p><strong>→ Hybrid RAG</strong></div>
+</div>
+</div>
+
+<br>
+<div class="card">
+<span class="tag">Agent 03</span><h3>🧪 Biology Agent</h3>
+<p><strong>Objectif.</strong> Exploiter les données Bioreco : recommandations de biologie médicale, bilans types et actes NABM.</p>
+<div class="grid">
+ <div class="tool"><code>search_reco()</code><p>Recommandations documentaires.</p><strong>→ Hybrid RAG</strong></div>
+ <div class="tool"><code>get_lab_panel()</code><p>Bilans types structurés.</p><strong>→ SQL</strong></div>
+ <div class="tool"><code>get_NABM_act()</code><p>Actes NABM structurés.</p><strong>→ SQL</strong></div>
+</div>
+</div>
+
+<br>
+<div class="card">
+<span class="tag">Agent 04</span><h3>🩺 Medical Recommendations Agent</h3>
+<p><strong>Objectif.</strong> Répondre aux questions portant sur les recommandations officielles de prise en charge, diagnostic, prévention et bonnes pratiques intégrées depuis la HAS.</p>
+<div class="tool"><code>search_recommendations()</code><p>Recherche hybride dans les sections de recommandations HAS avec conservation de la provenance.</p><strong>→ Hybrid RAG</strong></div>
+</div>
+</section>
+
+<section id="mcp">
+<h2>04. MCP & design des Tools</h2>
+<p>MCP n’est ni une base de données ni un moteur de recherche. Il expose à chaque spécialiste les capacités métier qu’il peut appeler.</p>
+<div class="diagram"><pre>Specialist Agent
+       │
+       │ MCP
+       ▼
+┌────────────────────┐
+│ Domain MCP Server  │
+├────────────────────┤
+│ business_tool_A()  │ ─────→ backend adapté
+│ business_tool_B()  │ ─────→ backend adapté
+│ business_tool_C()  │ ─────→ backend adapté
+└────────────────────┘</pre></div>
+<p>On privilégie quelques tools métier cohérents plutôt qu’une multitude de micro-tools. Chaque résultat doit transporter sa provenance : source, identifiant, URL si disponible, version/date et timestamp de récupération.</p>
+</section>
+
+<section id="data">
+<h2>05. Sources & Data Platform</h2>
+<table>
+<thead><tr><th>Source</th><th>Contenu exploité</th><th>Agent</th></tr></thead>
+<tbody>
+<tr><td>ANSM / BCBV3</td><td>Monographies, composants, indications, classification ATC</td><td>Medication</td></tr>
+<tr><td>ANSM interactions</td><td>Interactions médicament / substance</td><td>Medication</td></tr>
+<tr><td>HAS</td><td>Recommandations médicales</td><td>Medical Recommendations</td></tr>
+<tr><td>Bioreco</td><td>Recommandations, bilans types, actes NABM</td><td>Biology</td></tr>
+<tr><td>Calendrier vaccinal</td><td>Données et contenu vaccinal</td><td>Vaccination</td></tr>
+<tr><td>Orphanet</td><td>Maladies rares, HPO, fréquences</td><td><strong>Hors périmètre agentique actuel</strong></td></tr>
+</tbody>
+</table>
+
+<h3>Évolution du pipeline</h3>
+<p>Le pipeline existant reste utile : adapters, normalisation, versioning, incrémental, Prefect et Qdrant. MediNova ajoute une bifurcation entre données structurées et documents.</p>
+<div class="diagram"><pre>                    MEDICAL SOURCES
+                           │
+                           ▼
+                        Adapters
+                           │
+                           ▼
+                      Normalization
+                           │
+                ┌──────────┴──────────┐
+                ▼                     ▼
+         Structured Data          Documents
+                │                     │
+                ▼                     ▼
+           PostgreSQL              Qdrant
+                                  Dense + Sparse
+                │                     │
+                └──────────┬──────────┘
+                           ▼
+                        MCP Tools
+                           │
+                           ▼
+                   Specialist Agents</pre></div>
+
+<h3>Ingestion incrémentale</h3>
+<div class="flow"><div class="node">Source</div><div class="arrow">→</div><div class="node">Fetch</div><div class="arrow">→</div><div class="node">Normalize</div><div class="arrow">→</div><div class="node">Validate</div><div class="arrow">→</div><div class="node">Version / Hash</div><div class="arrow">→</div><div class="node">SQL / Qdrant</div></div>
+<p>Les changements sont classés en <code>NEW</code>, <code>MODIFIED</code>, <code>UNCHANGED</code> et <code>DELETED</code>. Seuls les éléments concernés sont recalculés ou réindexés.</p>
+<div class="callout"><strong>Responsabilités séparées :</strong> Prefect orchestre la Data. Le Concierge orchestre les agents.</div>
+</section>
+
+<section id="retrieval">
+<h2>06. Retrieval Architecture</h2>
+<table>
+<thead><tr><th>Besoin</th><th>Backend</th></tr></thead>
+<tbody>
+<tr><td>Identité médicament, substance, ATC, composants</td><td>SQL</td></tr>
+<tr><td>Monographie / information médicale</td><td>Hybrid RAG</td></tr>
+<tr><td>Interaction exacte</td><td>SQL</td></tr>
+<tr><td>Contexte d’une interaction</td><td>Hybrid RAG</td></tr>
+<tr><td>Prix / remboursement</td><td>SQL / API</td></tr>
+<tr><td>Calendrier vaccinal structuré</td><td>SQL</td></tr>
+<tr><td>Information vaccinale documentaire</td><td>Hybrid RAG</td></tr>
+<tr><td>Recommandation biologique</td><td>Hybrid RAG</td></tr>
+<tr><td>Bilan type / acte NABM</td><td>SQL</td></tr>
+<tr><td>Recommandation HAS</td><td>Hybrid RAG</td></tr>
+</tbody>
+</table>
+
+<div class="diagram"><pre>                       Query
+                         │
+               ┌─────────┴─────────┐
+               ▼                   ▼
+        Dense Retrieval     Sparse Retrieval
+           BGE-M3               SPLADE
+               │                   │
+               └─────────┬─────────┘
+                         ▼
+                    Fusion / Rank
+                         │
+                         ▼
+                    Top documents
+                         │
+                         ▼
+                  Specialist Agent</pre></div>
+</section>
+
+<section id="flows">
+<h2>07. Flux end-to-end</h2>
+<h3>Question médicament</h3>
+<div class="diagram"><pre>"Quels sont les effets indésirables de la sertraline ?"
+
+User
+ │
+ ▼
+Concierge
+ │ A2A
+ ▼
+Medication Agent
+ │ MCP
+ ▼
+search_medical_info()
+ │
+ ▼
+Hybrid RAG → documents médicament
+ │
+ ▼
+Medication Agent → Concierge → User</pre></div>
+
+<h3>Question multi-agent</h3>
+<div class="diagram"><pre>User
+ │
+ ▼
+Concierge
+ │ décompose
+ ├────────────────────────────┐
+ ▼                            ▼
+Medication Agent        Medical Recommendations Agent
+ │ MCP                         │ MCP
+ ▼                             ▼
+check_interactions()     search_recommendations()
+ │                             │
+SQL + RAG                  Hybrid RAG / HAS
+ │                             │
+ └──────────────┬──────────────┘
+                ▼
+             Concierge
+                │
+             synthèse
+                ▼
+               User</pre></div>
+</section>
+
+<section id="governance">
+<h2>08. Provenance, sécurité & observabilité</h2>
+<div class="grid">
+<div class="card"><h3>Provenance</h3><p>Chaque résultat conserve autant que possible <code>source</code>, <code>source_id</code>, document/section, URL, version, date de mise à jour et date de récupération.</p></div>
+<div class="card"><h3>Garde-fous</h3><p>Information médicale ≠ décision clinique. Un résultat absent ne devient jamais une affirmation. Une synthèse générée n’est pas présentée comme une source.</p></div>
+<div class="card"><h3>Data observability</h3><p>Runs Prefect, documents chargés, changements, erreurs de normalisation, embeddings, indexation et latence.</p></div>
+<div class="card"><h3>Agentic observability</h3><p>Routing, appels A2A, appels MCP, échecs tools, sources récupérées, empty retrievals et latence end-to-end.</p></div>
+</div>
+
+<h3>Évaluation</h3>
+<div class="flow"><div class="node">Routing</div><div class="arrow">→</div><div class="node">Tool selection</div><div class="arrow">→</div><div class="node">Retrieval</div><div class="arrow">→</div><div class="node">Grounded answer</div><div class="arrow">→</div><div class="node">Provenance</div></div>
+</section>
+
+<section id="repo">
+<h2>09. Structure cible du repository</h2>
+<div class="diagram"><pre>medinova/
+├── backend/
+│   └── api/
+├── concierge/
+│   ├── agent.py
+│   ├── routing.py
+│   └── prompts/
+├── agents/
+│   ├── medication/
+│   ├── vaccination/
+│   ├── biology/
+│   └── medical_recommendations/
+├── mcp/
+│   ├── medication/tools/
+│   ├── vaccination/tools/
+│   ├── biology/tools/
+│   └── medical_recommendations/tools/
+├── data_pipeline/
+│   ├── adapters/
+│   ├── normalization/
+│   ├── validation/
+│   ├── embeddings/
+│   ├── indexing/
+│   └── flows/
+├── retrieval/
+│   ├── sql/
+│   └── hybrid/
+├── storage/
+│   ├── postgres/
+│   └── qdrant/
+├── evaluation/
+├── observability/
+└── tests/</pre></div>
+
+<h3>Règles d’architecture à retenir</h3>
+<div class="grid">
+ <div class="card"><strong>Dataset ≠ Agent</strong><p>Un agent représente une capacité/domaine métier, pas une source.</p></div>
+ <div class="card"><strong>Tool = capacité métier</strong><p>Pas de prolifération de micro-tools techniques.</p></div>
+ <div class="card"><strong>Backend selon le besoin</strong><p>Fait structuré → SQL. Document → RAG. Donnée dynamique → API si nécessaire.</p></div>
+ <div class="card"><strong>Provenance first</strong><p>Une information importante doit rester rattachable à sa source.</p></div>
+</div>
+
+<div class="callout good" style="margin-top:30px"><strong>Architecture finale :</strong> User → Concierge → A2A → Specialist Agent → MCP → Business Tool → SQL / Hybrid RAG / API → source médicale.</div>
+<div class="footer">MediNova · Architecture Agentique Healthcare · Documentation de référence</div>
+</section>
+</main>
+</div>
+</body>
+</html>
