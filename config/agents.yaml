@@ -3,6 +3,7 @@ version: 1
 agents:
   policy:
     role: specialist
+    runtime: langchain
     description: >-
       Answers questions about the user's insurance policy, including coverage,
       deductibles, copays, coinsurance and exclusions. Does not give medical advice
@@ -11,9 +12,12 @@ agents:
     execution: policy
     tools:
       - search_policy
+    mcp_servers:
+      - policy_documents
 
   research:
     role: specialist
+    runtime: langchain
     description: >-
       Researches general medical questions about conditions, symptoms and
       treatments using web sources. Does not determine insurance coverage
@@ -21,11 +25,14 @@ agents:
     prompt: research
     tools:
       - web_search
+    mcp_servers:
+      - research_web
 
   concierge:
     role: manager
     description: Coordinates insurance and healthcare research specialists.
     prompt: concierge
+    tools: []
     delegates:
       - policy
       - research
@@ -39,6 +46,8 @@ agents:
     runtime: langchain
     model: provider_search
     prompt: healthcare_provider
+    tools:
+      - list_doctors
     mcp_servers:
       - healthcare_providers
 
@@ -65,16 +74,19 @@ models:
     model_id: openai/gpt-oss-20b
     api_key_env: HF_TOKEN
 
-tools:
-  search_policy:
-    kind: instance
-    target: tools.policy_tools:search_policy
-
-  web_search:
-    kind: factory
-    target: smolagents:DuckDuckGoSearchTool
-
 mcp_servers:
+  policy_documents:
+    transport: stdio
+    script: mcp_servers/policy.py
+    allowed_tools:
+      - search_policy
+
+  research_web:
+    transport: stdio
+    script: mcp_servers/research.py
+    allowed_tools:
+      - web_search
+
   healthcare_providers:
     transport: stdio
     script: mcp_servers/healthcare.py

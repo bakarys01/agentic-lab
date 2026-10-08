@@ -16,7 +16,7 @@ def test_run_returns_text_and_includes_recent_history(monkeypatch):
     monkeypatch.setattr(runtime_module, "create_model", lambda **_: object())
     monkeypatch.setattr(runtime_module, "ToolCallingAgent", lambda **_: fake_agent)
 
-    runtime = AgentRuntime(load_agent_definition("policy"))
+    runtime = AgentRuntime(load_agent_definition("concierge"))
     history = [
         {"role": "user", "content": "Tell me about therapy"},
         {"role": "assistant", "content": "Which benefit?"},
@@ -26,6 +26,62 @@ def test_run_returns_text_and_includes_recent_history(monkeypatch):
     task = fake_agent.run.call_args.args[0]
     assert "Tell me about therapy" in task
     assert "User question:\nWhat is the cost?" in task
+
+
+def test_langchain_agent_receives_only_tools_selected_by_definition(monkeypatch):
+    import agents.runtime as runtime_module
+
+    discovered = []
+    async def fake_load(server):
+        discovered.append(server)
+        return [SimpleNamespace(name="search_policy"), SimpleNamespace(name="unused_tool")]
+
+    class FakeAgent:
+        async def ainvoke(self, payload):
+            return {"messages": [SimpleNamespace(content="Policy answer")]}
+
+    captured = {}
+    def fake_create_agent(**kwargs):
+        captured.update(kwargs)
+        return FakeAgent()
+
+    monkeypatch.setattr(runtime_module, "load_mcp_tools", fake_load)
+    monkeypatch.setattr(runtime_module, "create_model", lambda **_: object())
+    monkeypatch.setattr(runtime_module, "create_agent", fake_create_agent)
+    runtime = AgentRuntime(load_agent_definition("policy"))
+
+    assert runtime.run("What is the deductible?") == "Policy answer"
+    assert discovered == ["policy_documents"]
+    assert [tool.name for tool in captured["tools"]] == ["search_policy"]
+
+
+def test_missing_selected_mcp_tool_fails_before_model_call(monkeypatch):
+    import agents.runtime as runtime_module
+
+    async def fake_load(server):
+        return [SimpleNamespace(name="different_tool")]
+
+    monkeypatch.setattr(runtime_module, "load_mcp_tools", fake_load)
+    monkeypatch.setattr(runtime_module, "create_model", lambda **_: pytest.fail("Model should not be created"))
+    runtime = AgentRuntime(load_agent_definition("policy"))
+    with pytest.raises(ValueError, match="search_policy"):
+        runtime.run("Question")
+
+
+def test_duplicate_selected_tool_across_mcp_servers_is_rejected(monkeypatch):
+    from dataclasses import replace
+    import agents.runtime as runtime_module
+
+    async def fake_load(server):
+        return [SimpleNamespace(name="search_policy")]
+
+    monkeypatch.setattr(runtime_module, "load_mcp_tools", fake_load)
+    definition = replace(
+        load_agent_definition("policy"),
+        mcp_servers=("policy_documents", "another_server"),
+    )
+    with pytest.raises(ValueError, match="Duplicate tool names"):
+        AgentRuntime(definition).run("Question")
 
 
 def test_run_does_not_reuse_previous_history(monkeypatch):

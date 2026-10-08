@@ -341,6 +341,7 @@ form.addEventListener('submit', async event => {
     }
   } catch (error) {
     if (epoch !== generation) return;
+    if (error.name === 'TypeError') setConnectionStatus('offline', 'Offline');
     composerError.textContent = showError(error); input.value = message;
     if (activeId) { try { await loadMessages(activeId, epoch); } catch { /* Preserve the actionable request error. */ } }
   } finally { if (epoch === generation) { setPending(false); input.focus({preventScroll: true}); } }
@@ -348,6 +349,13 @@ form.addEventListener('submit', async event => {
 quickPills.forEach(pill => pill.addEventListener('click', () => {
   if (pending || !user) return; input.value = pill.dataset.prompt; input.focus();
 }));
+function setConnectionStatus(state, label) {
+  const button = byId('check-connection');
+  button.dataset.state = state;
+  byId('connection-status').textContent = label;
+  button.setAttribute('aria-label', `Concierge ${label.toLowerCase()}. Check connection`);
+  button.disabled = false;
+}
 async function checkConnection() {
   const button = byId('check-connection'); button.disabled = true;
   let state = 'offline'; let label = 'Offline';
@@ -357,8 +365,7 @@ async function checkConnection() {
       state = data.status === 'ok' ? 'connected' : 'limited'; label = state === 'connected' ? 'Connected' : 'Limited';
     }
   } catch { /* The offline indicator represents health failures. */ }
-  button.dataset.state = state; byId('connection-status').textContent = label;
-  button.setAttribute('aria-label', `Concierge ${label.toLowerCase()}. Check connection`); button.disabled = false;
+  setConnectionStatus(state, label);
 }
 byId('check-connection').addEventListener('click', checkConnection);
 setPending(false);

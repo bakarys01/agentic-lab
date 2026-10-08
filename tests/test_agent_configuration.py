@@ -1,7 +1,31 @@
 import pytest
 
 from a2a_clients import client_utils
+from agents.config_loader import load_agent_definition, load_mcp_config
 from tools import delegation
+
+
+@pytest.mark.parametrize(
+    "name,server,tool",
+    [
+        ("policy", "policy_documents", "search_policy"),
+        ("research", "research_web", "web_search"),
+        ("healthcare_provider", "healthcare_providers", "list_doctors"),
+    ],
+)
+def test_specialist_tools_are_selected_from_mcp(name, server, tool):
+    definition = load_agent_definition(name)
+    assert definition.runtime == "langchain"
+    assert definition.tools == (tool,)
+    assert definition.mcp_servers == (server,)
+    assert tool in load_mcp_config(server)["allowed_tools"]
+
+
+def test_concierge_keeps_empty_tool_selector_and_a2a_delegates():
+    definition = load_agent_definition("concierge")
+    assert definition.tools == ()
+    assert definition.mcp_servers == ()
+    assert definition.delegates == ("policy", "research", "healthcare_provider")
 
 
 @pytest.mark.parametrize(

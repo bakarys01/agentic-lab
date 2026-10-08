@@ -19,7 +19,7 @@ from agents.models import create_model
 from prompts.loader import load_prompt
 from tools.delegation import AgentTool, invoke_a2a_agent
 from tools.mcp_connector import load_mcp_tools
-from tools.registry import create_tool
+
 
 class AgentRuntime:
     def __init__(
@@ -57,17 +57,24 @@ class AgentRuntime:
                 "Memory, policies and structured input/output are not supported yet."
             )
 
-        if definition.runtime == "smolagents" and definition.mcp_servers:
+        if definition.runtime == "smolagents" and (
+            definition.mcp_servers or definition.tools
+        ):
             raise NotImplementedError(
                 "MCP tools currently require the LangChain runtime."
             )
 
-        if definition.runtime == "langchain" and (
-            definition.tools or definition.delegates
-        ):
+        if definition.runtime == "langchain" and definition.delegates:
             raise NotImplementedError(
-                "The LangChain adapter currently supports MCP tools only."
+                "The LangChain adapter does not support delegates."
             )
+
+        if (
+            definition.runtime == "langchain"
+            and definition.tools
+            and not definition.mcp_servers
+        ):
+            raise ValueError("Selected tools require an MCP server.")
 
     @staticmethod
     def _validate_question(question: str) -> None:
@@ -125,15 +132,14 @@ class AgentRuntime:
         question: str,
         history: list[dict[str, Any]] | None,
     ) -> tuple[ToolCallingAgent, str]:
-        tools = [create_tool(name) for name in self.definition.tools]
-        tools.extend(
+        tools = [
             AgentTool(
                 agent_name=delegate.definition.name,
                 description=delegate.definition.description,
                 invoke=partial(invoke_a2a_agent, delegate.definition.name),
             )
             for delegate in self.delegates
-        )
+        ]
         agent = ToolCallingAgent(
             model=create_model(
                 name=self.definition.model,
@@ -154,15 +160,24 @@ class AgentRuntime:
         return agent, str(agent.run(task))
 
     async def _run_langchain(self, question: str) -> str:
-        tool_groups = [
-            await load_mcp_tools(server_name)
-            for server_name in self.definition.mcp_servers
+        tool_groups = []
+        if self.definition.tools:
+            tool_groups = [
+                await load_mcp_tools(server_name)
+                for server_name in self.definition.mcp_servers
+            ]
+        selected = set(self.definition.tools)
+        tools = [
+            tool for group in tool_groups for tool in group
+            if tool.name in selected
         ]
-        tools = [tool for group in tool_groups for tool in group]
 
         names = [tool.name for tool in tools]
         if len(names) != len(set(names)):
             raise ValueError("Duplicate tool names across MCP servers.")
+        missing = selected - set(names)
+        if missing:
+            raise ValueError(f"Selected MCP tools not found: {sorted(missing)}")
 
         agent = create_agent(
             model=create_model(
@@ -197,7 +212,6 @@ class AgentRuntime:
                 and isinstance(block.get("text"), str)
             )
         )
-
 
     def get_health(self) -> dict[str, Any]:
         services = {self.definition.name: {"status": "available"}}

@@ -18,10 +18,10 @@ Baseline rechecked on **2026-10-02**. Status describes repository implementation
 | --- | --- | --- |
 | Web UI and FastAPI | [IMPLEMENTED] | `frontend/`, `backend/api.py`; local same-origin app, no separate frontend build |
 | Accounts, history and memory | [IMPLEMENTED] | `backend/auth.py`, `backend/storage.py`, `agents/conversation_memory.py`; SQLite and bounded per-conversation context |
-| Modular agents | [IMPLEMENTED] | `config/agents.yaml`, `agents/runtime.py`; concierge, policy and research use smolagents/OpenAI, healthcare provider uses LangChain/Hugging Face |
+| Modular agents | [IMPLEMENTED] | `config/agents.yaml`, `agents/runtime.py`; concierge uses smolagents/OpenAI and A2A delegates; specialists use LangChain with OpenAI or Hugging Face and MCP tools |
 | Specialist A2A communication | [IMPLEMENTED] | Generic `a2a_servers/serve.py` and `a2a_clients/client_utils.py`; concierge calls all three specialists over local JSON-RPC, without streaming or service authentication |
-| Policy retrieval | [IMPLEMENTED] | `tools/policy_tools.py`; lexical page scoring over one shared PDF |
-| Research search | [IMPLEMENTED] | Configured DuckDuckGo tool and `prompts/research.md`; source guidance in the prompt |
+| Policy retrieval | [IMPLEMENTED] | `mcp_servers/policy.py`; MCP tool with lexical page scoring over one shared PDF |
+| Research search | [IMPLEMENTED] | `mcp_servers/research.py`; MCP web search with source URLs and guidance in `prompts/research.md` |
 | Provider directory via MCP | [IMPLEMENTED] | `mcp_servers/healthcare.py` exposes `list_doctors` over stdio to the LangChain specialist; static local JSON data |
 | Container configuration | [IMPLEMENTED] | `Dockerfile.agent`, `Dockerfile.backend`, `docker-compose.yml` and HTTPS override; Compose configuration parses, but a full container run has not been validated here |
 | Regression tests | [IMPLEMENTED] | `tests/`; deterministic substitutes, not live AI quality benchmarks |
@@ -36,16 +36,16 @@ Detailed current behavior, startup and test commands, and identity/storage contr
 
 | Layer | Responsibility | Current baseline | Planned investigations |
 | --- | --- | --- | --- |
-| Agent framework | Reasoning loop, state and internal orchestration | smolagents and a LangChain MCP specialist | LangGraph, Strands, Google ADK, Microsoft Agent Framework |
+| Agent framework | Reasoning loop, state and internal orchestration | smolagents concierge and LangChain MCP specialists | LangGraph, Strands, Google ADK, Microsoft Agent Framework |
 | A2A | Agent-to-agent communication | Concierge to Policy, Research and Healthcare Provider | Preserve the boundary when replacing implementations |
-| Tools / MCP | Agent-to-tool, data and service access | Local policy/search tools; MCP stdio for the provider directory | MCP comparison for additional tool boundaries |
+| Tools / MCP | Agent-to-tool, data and service access | MCP stdio for policy, research and provider directory | Evaluate further data boundaries, authorization and protocol overhead |
 | Model/provider | Inference and model access | Configured OpenAI gpt-4o and Hugging Face gpt-oss-20b | Claude, Gemini; Bedrock, Vertex AI, Azure; selected open models |
 | Runtime/cloud | Hosting, identity, network, scaling and operations | Local Python processes and Compose definitions | Validate containers, then AWS, GCP, Azure and managed runtimes |
 | Evaluation/operations | Evidence, traces, costs and experiment provenance | Regression tests and basic metadata | Benchmark, OpenTelemetry, experiment tracking and FinOps |
 
 Framework, model family, provider API and runtime are different variables. For example, using Strands does not by itself mean the application runs on AgentCore or calls Bedrock. Candidate integrations must be checked for support, regional availability, quotas and cost at implementation time; this roadmap is not a compatibility guarantee.
 
-The following diagram is **[PLANNED] target separation**, not the current deployed topology:
+The following diagram shows the current A2A and MCP boundaries. The model/provider adapter box represents an area for future experiments:
 
 ```mermaid
 flowchart TD
@@ -57,7 +57,7 @@ flowchart TD
     C -->|A2A| H[Healthcare provider agent]
     P -->|MCP| PT[Policy / retrieval service]
     R -->|MCP| RT[Search service]
-    H -->|MCP: implemented| HT[Provider directory service]
+    H -->|MCP| HT[Provider directory service]
     PT --> D[(Documents / data)]
     RT --> W[Web]
     HT --> J[(Doctor directory)]
@@ -66,7 +66,7 @@ flowchart TD
     R -.-> M
 ```
 
-Modularity does not require a separate process for every box. Today frontend, API and concierge share the backend process. Three specialists have separate A2A services; the provider's MCP server is a stdio subprocess. Add further services only when the experiment or deployment needs that boundary.
+Modularity does not require a separate network service for every box. Today frontend, API and concierge share the backend process. Three specialists have separate A2A services; their MCP servers are stdio subprocesses. Add further services only when the experiment or deployment needs that boundary.
 
 ## Ordered delivery phases
 
@@ -74,7 +74,7 @@ Follow the phase order below. Security and cost controls apply from the beginnin
 
 ### 1. Finish the current V1 — [IN PROGRESS]
 
-**Learn:** agent loops, tools, tool calling, model-driven routing and A2A boundaries with smolagents/OpenAI.
+**Learn:** agent loops, tool calling, model-driven routing, A2A boundaries and MCP tool access with smolagents and LangChain.
 
 **Existing:** browser chat, account/history flows, backend API, concierge and specialists, bounded memory, tests and documentation.
 
@@ -104,9 +104,9 @@ Follow the phase order below. Security and cost controls apply from the beginnin
 
 **Learn:** agent-to-tool interoperability, contracts, error handling and authorization.
 
-**Existing:** the healthcare provider already uses an MCP stdio tool to query a static doctor directory.
+**Existing:** policy, research and healthcare-provider specialists use MCP stdio tools. The agent's tools list selects from tools discovered on its configured servers.
 
-**Deliver:** compare moving selected policy/search capabilities behind MCP while keeping A2A between agents. Keep model, framework and evaluation workload fixed for the first comparison. Add integration tests and trace propagation; preserve service-side authorization independently of model decisions.
+**Deliver:** measure the behavior and overhead of the migrated policy/search capabilities against the earlier local-tool baseline. Add trace propagation and service-side authorization independently of model decisions. The migration also changed the specialist framework, so any causal comparison must account for that difference.
 
 **Exit evidence:** the same evaluation suite runs against local-tool and MCP variants, with functional differences and protocol overhead reported. Installing a development assistant's MCP/plugin does not count as implementing MCP inside MediNova.
 

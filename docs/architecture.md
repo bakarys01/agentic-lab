@@ -1,18 +1,22 @@
 # Architecture and contributor guide
 
-This document describes the code in this repository. [The roadmap](roadmap.md) tracks future experiments. The reference application is MediNova, a healthcare concierge that routes a question to independent specialists. Configuration selects an agent's prompt, runtime, model, tools, delegates and network port; Python adapters implement the supported combinations.
+This document describes the code in this repository. [The agent guide](agents.md) explains each agent's behavior in French; [the roadmap](roadmap.md) tracks future experiments. The reference application is MediNova, a healthcare concierge that routes a question to independent specialists. Configuration selects an agent's prompt, runtime, model, tools, delegates and network port; Python adapters implement the supported combinations.
 
 ## Start here
 
-From the repository root, use Python 3.13 and uv:
+From the repository root, copy `.env.example` to `.env` and set `OPENAI_API_KEY` and `HF_TOKEN`. The policy and research agents use OpenAI gpt-4o; the healthcare provider uses Hugging Face openai/gpt-oss-20b. The insurance PDF and doctor directory must exist at `data/2026AnthemgHIPSBC.pdf` and `data/doctors.json`. Never commit `.env` or the conversation database.
+
+Start the complete application, including every configured specialist, with one command:
 
 ~~~bash
-uv sync
+docker compose up -d --build
 ~~~
 
-Copy .env.example to .env and set OPENAI_API_KEY and HF_TOKEN. The policy and research agents use OpenAI gpt-4o; the healthcare provider uses Hugging Face openai/gpt-oss-20b. The insurance PDF and doctor directory must exist at data/2026AnthemgHIPSBC.pdf and data/doctors.json. Never commit .env or the conversation database.
+Open http://127.0.0.1:8000, create an account, and start a conversation. `docker compose ps` shows the backend and three specialists; wait until all four are healthy. `docker compose down` stops the services while preserving the named database volume. Compose starts the specialists for you, so adding an agent does not require opening another terminal when its service is added to `docker-compose.yml`. The optional `docker-compose.https.yml` adds a Caddy proxy and is not needed locally. Check configuration without starting containers with `docker compose --env-file .env.example config --quiet`.
 
-Open four terminals and run one command in each:
+### Run components individually (optional)
+
+For development or testing one agent independently, install Python 3.13 and uv, run `uv sync`, then open four terminals and run one command in each:
 
 ~~~bash
 uv run --env-file .env python -m a2a_servers.serve policy
@@ -21,7 +25,7 @@ uv run --env-file .env python -m a2a_servers.serve healthcare_provider
 uv run --env-file .env python -m backend.server
 ~~~
 
-The commands above are separate long-running processes, not a single shell script. Open http://127.0.0.1:8000, create an account, and start a conversation. For a command-line check, use:
+These are separate long-running processes, not a single shell script. For a command-line check while the A2A specialists are running, use:
 
 ~~~bash
 uv run --env-file .env python -m examples.run_agent concierge "What is my deductible, what are common treatments for depression, and which psychiatrists are in Paris?"
@@ -29,7 +33,9 @@ uv run --env-file .env python -m examples.run_agent concierge "What is my deduct
 
 The A2A servers must already be running for the concierge to delegate. If an activated environment points to another project, use uv run without activating it. On Windows, the project's .venv/Scripts/python.exe is an alternative; use uv's --env-file option for command-line clients that do not load .env themselves.
 
-The same four services are described by docker-compose.yml. Set both model tokens in .env and run docker compose up --build. docker-compose.https.yml adds the optional Caddy proxy; it is not needed for local development. Compose configuration can be checked without starting containers with docker compose --env-file .env.example config --quiet. The backend listens on port 8000; specialist ports are internal to the Compose network.
+The backend listens on port 8000; specialist ports are internal to the Compose network.
+
+If the browser reports "Unable to connect", first check `docker compose ps`. All four services must remain `Up`; closing a foreground `docker compose up` terminal stops the stack. Run `docker compose up -d --build` to keep it running, then open http://127.0.0.1:8000/api/health and confirm `status: ok`. If the services are up but a chat still fails, inspect `docker compose logs --tail 100 backend policy-agent` and the browser network response for `/api/chat`. A healthy Agent Card alone does not prove a model-backed policy answer works.
 
 ## Running architecture
 
@@ -41,9 +47,9 @@ flowchart LR
     C -->|A2A JSON-RPC| P[Policy A2A server]
     C -->|A2A JSON-RPC| R[Research A2A server]
     C -->|A2A JSON-RPC| H[Healthcare provider A2A server]
-    P --> PT[Local search_policy tool]
+    P -->|MCP stdio| PT[search_policy]
     PT --> PDF[(Insurance PDF)]
-    R --> RT[Local web_search tool]
+    R -->|MCP stdio| RT[web_search]
     RT --> Web[(Web)]
     H -->|MCP stdio| HM[list_doctors]
     HM --> Doctors[(doctors.json)]
@@ -53,7 +59,7 @@ flowchart LR
     H -.-> HF[Hugging Face model]
 ~~~
 
-The browser, API and concierge share the backend process. Each specialist has its own A2A server process. The healthcare provider's MCP server is a stdio subprocess started by its MCP client, not a fourth network endpoint. A2A carries agent-to-agent requests; MCP connects an agent to a tool. The policy and research tools are still local Python tools.
+The browser, API and concierge share the backend process. Each specialist has its own A2A server process. Each specialist's MCP server is a stdio subprocess started by its MCP client, not another network endpoint. A2A carries concierge-to-specialist requests; MCP connects specialists to tools, which read the PDF, doctor directory or web. The current sample uses one MCP server per specialist, but the configuration permits multiple agents to reference the same server.
 
 The concierge's smolagents tool names are generated as ask_policy, ask_research and ask_healthcare_provider. Their descriptions come from each specialist's AgentDefinition. The model chooses tools using those descriptions and prompts/concierge.md; no fixed number of specialists is written into the prompt. Each tool calls the generic A2A client. The specialist server constructs the same AgentRuntime for its configured agent and returns a text message.
 
@@ -61,16 +67,16 @@ The concierge's smolagents tool names are generated as ask_policy, ask_research 
 
 | Path | Responsibility |
 | --- | --- |
-| config/agents.yaml | Agent definitions, model references, execution profiles, tool registry, MCP server settings and A2A ports |
+| config/agents.yaml | Agent definitions, model references, execution profiles, selected tools, MCP server settings and A2A ports |
 | agents/definition.py | Immutable AgentDefinition schema and defaults |
 | agents/config_loader.py | Read and validate the configuration; resolve MCP script paths |
 | agents/runtime.py | Build an agent, choose its framework adapter, run it, report tool usage and check delegate A2A cards |
 | agents/models.py | Create a model from a model profile and its credential environment variable |
 | agents/conversation_memory.py | Select a bounded suffix of completed conversation pairs |
 | prompts/*.md and prompts/loader.py | Versioned instructions, loaded by configured prompt name |
-| tools/registry.py and tools/policy_tools.py | Resolve local smolagents tools; search the shared PDF |
+| mcp_servers/{policy,research,healthcare}.py | Expose the policy PDF search, source-attributed web search and doctor directory as MCP tools |
 | tools/delegation.py and a2a_clients/client_utils.py | Turn a synchronous manager tool call into an A2A client request |
-| tools/mcp_connector.py and mcp_servers/healthcare.py | Discover allowed MCP tools and serve list_doctors over stdio |
+| tools/mcp_connector.py | Connect to configured stdio MCP servers and enforce each server's allowed_tools list |
 | a2a_servers/{serve,app,card,executor}.py | Start any configured A2A agent; publish its Agent Card and JSON-RPC route |
 | backend/{api,auth,storage,server,title_generation}.py | HTTP API, authentication, SQLite, static files, server entry point and automatic chat titles |
 | frontend/ | Browser UI served by the backend |
@@ -83,16 +89,15 @@ The generic A2A launcher is python -m a2a_servers.serve NAME. There are no agent
 
 config/agents.yaml has version: 1. Its main sections are:
 
-- agents: name to role, description, prompt and optional runtime, model, tools, mcp_servers, delegates, execution, memory, policies, input and output.
+- agents: name to role, description, prompt and optional runtime, model, tools, mcp_servers, delegates, execution, memory, policies, input and output. Keep tools as the agent's explicit selection, including tools: [] when it uses none.
 - execution_profiles: named max_steps values.
 - models: provider, model_id and api_key_env.
-- tools: local smolagents components, either a prebuilt instance or a zero-argument factory referenced as module:object.
-- mcp_servers: stdio script and allowed tool names.
+- mcp_servers: stdio script and server-level allowed tool names. An agent receives only the intersection of its tools selection and these allowlists; a selected tool missing from the connected servers causes an error before model invocation.
 - a2a_servers: agent name to port. A corresponding public URL may be set in the environment as NAME_IN_UPPERCASE_AGENT_PUBLIC_URL.
 
 Defaults from AgentDefinition are runtime=smolagents, model=default, execution=default, memory=none and text input/output. role accepts manager or specialist, but the current runtime does not branch on role: delegates and runtime determine what the agent does. Invalid names, profiles and settings fail early in the loaders.
 
-Supported combinations are currently smolagents + OpenAI + local tools/delegates, or LangChain + Hugging Face + MCP tools. The LangChain adapter does not yet accept local tools or delegates; the smolagents adapter does not yet accept MCP. Memory modes other than none, policy plugins and structured input/output are declared in the schema but rejected by AgentRuntime. New providers or frameworks require a tested change to agents/models.py or agents/runtime.py; YAML alone cannot create an unsupported adapter.
+Supported combinations are currently smolagents + OpenAI + A2A delegates for the concierge, and LangChain + OpenAI or Hugging Face + MCP tools for specialists. The LangChain adapter does not accept delegates; the smolagents adapter does not accept MCP tools. Memory modes other than none, policy plugins and structured input/output are declared in the schema but rejected by AgentRuntime. New providers or frameworks require a tested change to agents/models.py or agents/runtime.py; YAML alone cannot create an unsupported adapter.
 
 A delegate is named under its manager's delegates list. AgentRuntime reads that delegate's local definition for validation and tool description, but the actual invocation crosses A2A. This means a completely external agent without a local AgentDefinition is not yet supported by configuration alone. A2A ports live in YAML; changing only an old *_AGENT_PORT environment variable has no effect. A2A_BIND_HOST controls the listen address, whereas NAME_AGENT_PUBLIC_URL is the reachable URL announced on the Agent Card and used by clients.
 
@@ -102,7 +107,7 @@ A delegate is named under its manager's delegates list. AgentRuntime reads that 
 2. backend/storage.py records a pending request in SQLite and supplies completed conversation turns. Reusing a completed request_id returns its stored response; failed turns remain retryable.
 3. backend/api.py calls AgentRuntime.answer_query_with_metadata on the concierge. agents/conversation_memory.py keeps at most six complete user/assistant pairs and a 16,000-character serialized budget. The question and bounded context enter a fresh smolagents execution.
 4. The concierge chooses one or more generated ask_* tools. tools/delegation.py calls a2a_clients/client_utils.py; the client reads the specialist's Agent Card and sends an A2A text request.
-5. a2a_servers/executor.py runs the configured specialist in a worker thread and emits a text answer. Policy uses search_policy over the shared PDF. Research uses DuckDuckGoSearchTool. Healthcare provider uses MCP list_doctors over the local JSON directory.
+5. a2a_servers/executor.py runs the configured specialist in a worker thread and emits a text answer. The specialist discovers tools over MCP and the runtime exposes only names in its tools list. Policy uses search_policy over the shared PDF, research uses web_search through DDGS, and healthcare provider uses list_doctors over the local JSON directory.
 6. The concierge synthesizes the specialist results. Metadata records names of tools actually called and the concierge run latency. The API validates, persists and returns the answer.
 
 After the first successful answer, the API schedules a separate background call to the `models.title` profile (currently OpenAI gpt-4o-mini) using `prompts/title.md`. It sends only truncated copies of that first question and answer and stores a short topic title in SQLite. The chat answer is returned independently; the browser checks the conversation list briefly for the new title. A failed title call leaves the provisional first-question title in place. `PATCH /api/conversations/{id}` marks a manual title, and a conditional SQLite update ensures an in-flight generated title cannot overwrite it. To change the title model, edit `models.title`; to change the naming instructions, edit `prompts/title.md`.
@@ -116,11 +121,11 @@ GET /api/health checks the three specialist Agent Card endpoints and reports the
 For a new internal agent, follow this order:
 
 1. Write prompts/NAME.md with its domain, grounding rules and response expectations. Keep routing instructions in the manager prompt generic.
-2. Add agents.NAME in config/agents.yaml with a clear description and prompt: NAME. Choose runtime and model. For a local smolagents capability, register a Tool in tools and reference it under tools. For an MCP capability, add a dedicated script under mcp_servers, register its stdio connection and allowed_tools, then reference it from mcp_servers on the agent. Do not put prompt text or credentials in YAML.
+2. Add agents.NAME in config/agents.yaml with a clear description, prompt: NAME, runtime: langchain, a supported model, explicit tools list and mcp_servers references. Create or reuse an MCP server script and register its stdio connection and allowed_tools. Do not put prompt text or credentials in YAML. If tools is empty, the specialist receives no tools, even when its server exposes some.
 3. Add a2a_servers.NAME.port with a free port, and add NAME to agents.concierge.delegates. Start python -m a2a_servers.serve NAME; no new A2A server Python module is needed. Set NAME_AGENT_PUBLIC_URL only when the client's reachable address differs from the local default.
 4. Test definition loading, Agent Card creation, direct A2A communication and a concierge question that requires this agent. Check the server access log for a POST to /. Update the Compose services and model credentials if the agent must run in containers.
 
-A compact example for a new smolagents specialist:
+A compact example for a new MCP-backed specialist:
 
 ~~~yaml
 agents:
@@ -128,20 +133,29 @@ agents:
     role: specialist
     description: Answers nutrition questions from its approved sources.
     prompt: nutrition
+    runtime: langchain
     tools: [search_nutrition]
+    mcp_servers: [nutrition_sources]
 
   concierge:
     role: manager
     prompt: concierge
     description: Coordinates specialist agents.
+    tools: []
     delegates: [policy, research, healthcare_provider, nutrition]
+
+mcp_servers:
+  nutrition_sources:
+    transport: stdio
+    script: mcp_servers/nutrition.py
+    allowed_tools: [search_nutrition]
 
 a2a_servers:
   nutrition:
     port: 9996
 ~~~
 
-This is a fragment to merge into the existing file, not a replacement for its other sections. search_nutrition must be registered under tools, and prompts/nutrition.md must exist. A different model/provider or framework needs an adapter supported by create_model and AgentRuntime first. For a third-party A2A agent, the client transport is reusable, but local definition/validation and endpoint configuration need extending before it becomes configuration-only.
+This is a fragment to merge into the existing file, not a replacement for its other sections. The MCP server must expose search_nutrition, and prompts/nutrition.md must exist. A different model/provider or framework needs an adapter supported by create_model and AgentRuntime first. For a third-party A2A agent, the client transport is reusable, but local definition/validation and endpoint configuration need extending before it becomes configuration-only.
 
 ## API, operations and limits
 

@@ -113,41 +113,6 @@ def load_model_config(name: str) -> dict[str, str]:
 
     return dict(settings)
 
-def load_tool_config(name: str) -> dict[str, str]:
-    with CONFIG_PATH.open(encoding="utf-8") as file:
-        config = yaml.safe_load(file)
-
-    if not isinstance(config, dict) or config.get("version") != 1:
-        raise ValueError("Expected configuration with version: 1.")
-
-    tools = config.get("tools")
-    if not isinstance(tools, dict) or name not in tools:
-        raise ValueError(f"Unknown tool: {name}")
-
-    settings = tools[name]
-    if not isinstance(settings, dict) or set(settings) != {"kind", "target"}:
-        raise ValueError(f"Tool {name} must define kind and target.")
-
-    if not all(
-        isinstance(value, str) and value.strip()
-        for value in settings.values()
-    ):
-        raise ValueError("Tool settings must be non-empty strings.")
-
-    if settings["kind"] not in {"instance", "factory"}:
-        raise ValueError(f"Invalid tool kind: {settings['kind']}")
-
-    module, separator, attribute = settings["target"].partition(":")
-    if (
-        not separator
-        or not all(part.isidentifier() for part in module.split("."))
-        or not attribute.isidentifier()
-    ):
-        raise ValueError("Tool target must use module:object syntax.")
-
-    return dict(settings)
-
-
 def load_mcp_config(name: str) -> dict:
     with CONFIG_PATH.open(encoding="utf-8") as file:
         config = yaml.safe_load(file)
