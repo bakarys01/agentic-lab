@@ -46,7 +46,7 @@ Le concierge fonctionne actuellement avec **smolagents** et un modèle OpenAI. L
 
 ## Expliquer l'infrastructure
 
-**En local**, `docker compose up -d --build` lance quatre services : le backend et un service A2A pour chacun des trois spécialistes. Le navigateur, l'API et le concierge partagent le processus backend ; les spécialistes communiquent avec lui sur le réseau privé Compose. Le backend expose le port 8000 sur la machine. Chaque spécialiste lance à la demande son serveur MCP en sous-processus `stdio`, puis utilise sa source : PDF local, web ou annuaire JSON.
+**En local**, `docker compose up -d --build` lance le backend et un service A2A pour chacun des trois spécialistes. Le navigateur, l'API et le concierge partagent le processus backend ; les spécialistes communiquent avec lui sur le réseau privé Compose. Le backend expose le port 8000 sur la machine. Chaque spécialiste lance à la demande son serveur MCP en sous-processus `stdio`, puis utilise sa source : PDF local, web ou annuaire JSON.
 
 Le backend conserve comptes, sessions et conversations dans **SQLite** sur un volume Docker nommé, qui survit à `docker compose down`. Les clés des fournisseurs de modèles sont passées par variables d'environnement. Un fichier Compose HTTPS optionnel ajoute un proxy Caddy ; les services A2A ne sont pas destinés à être exposés publiquement. Le contrôle de santé vérifie surtout l'accessibilité des cartes A2A : il ne valide ni les identifiants de modèle, ni les outils MCP, ni la qualité d'une réponse réelle.
 

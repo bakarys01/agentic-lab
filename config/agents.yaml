@@ -30,13 +30,14 @@ agents:
 
   concierge:
     role: manager
-    description: Coordinates insurance and healthcare research specialists.
+    description: Coordinates insurance, healthcare, and medication specialists.
     prompt: concierge
     tools: []
     delegates:
       - policy
       - research
       - healthcare_provider
+      - medication
 
   healthcare_provider:
     role: specialist
@@ -50,6 +51,19 @@ agents:
       - list_doctors
     mcp_servers:
       - healthcare_providers
+
+  medication:
+    role: specialist
+    runtime: langchain
+    description: >-
+      Finds structured medication facts, including CIS/CIP codes, pharmaceutical
+      forms, presentations, substances and dosages in the BDPM sample. Does not
+      answer questions about indications, safety, prices or insurance coverage.
+    prompt: medication
+    tools:
+      - get_medication
+    mcp_servers:
+      - medication_catalog
 
 execution_profiles:
   default:
@@ -93,6 +107,17 @@ mcp_servers:
     allowed_tools:
       - list_doctors
 
+  medication_catalog:
+    transport: stdio
+    script: mcp_servers/medication.py
+    allowed_tools:
+      - get_medication
+    env_vars:
+      - PGHOST
+      - PGDATABASE
+      - PGUSER
+      - PGPASSWORD
+
 
 a2a_servers:
   policy:
@@ -101,3 +126,5 @@ a2a_servers:
     port: 9998
   healthcare_provider:
     port: 9997
+  medication:
+    port: 9996

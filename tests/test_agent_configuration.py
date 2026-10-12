@@ -11,6 +11,7 @@ from tools import delegation
         ("policy", "policy_documents", "search_policy"),
         ("research", "research_web", "web_search"),
         ("healthcare_provider", "healthcare_providers", "list_doctors"),
+        ("medication", "medication_catalog", "get_medication"),
     ],
 )
 def test_specialist_tools_are_selected_from_mcp(name, server, tool):
@@ -21,11 +22,17 @@ def test_specialist_tools_are_selected_from_mcp(name, server, tool):
     assert tool in load_mcp_config(server)["allowed_tools"]
 
 
+def test_medication_mcp_declares_only_database_environment():
+    assert load_mcp_config("medication_catalog")["env_vars"] == (
+        "PGHOST", "PGDATABASE", "PGUSER", "PGPASSWORD"
+    )
+
+
 def test_concierge_keeps_empty_tool_selector_and_a2a_delegates():
     definition = load_agent_definition("concierge")
     assert definition.tools == ()
     assert definition.mcp_servers == ()
-    assert definition.delegates == ("policy", "research", "healthcare_provider")
+    assert definition.delegates == ("policy", "research", "healthcare_provider", "medication")
 
 
 @pytest.mark.parametrize(
@@ -34,6 +41,7 @@ def test_concierge_keeps_empty_tool_selector_and_a2a_delegates():
         ("policy", 9999),
         ("research", 9998),
         ("healthcare_provider", 9997),
+        ("medication", 9996),
     ],
 )
 def test_specialist_url_uses_configured_port_and_public_url(
@@ -50,7 +58,7 @@ def test_specialist_url_uses_configured_port_and_public_url(
     )
     assert client_utils.get_agent_url(name) == "http://localhost:23456"
 
-@pytest.mark.parametrize("name", ["policy", "research", "healthcare_provider"])
+@pytest.mark.parametrize("name", ["policy", "research", "healthcare_provider", "medication"])
 def test_delegation_uses_configured_specialist_url(monkeypatch, name):
     monkeypatch.setenv(
         f"{name.upper()}_AGENT_PUBLIC_URL", "http://localhost:23456"

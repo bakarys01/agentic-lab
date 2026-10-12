@@ -4,7 +4,7 @@ This document describes the code in this repository. [The agent guide](agents.md
 
 ## Start here
 
-From the repository root, copy `.env.example` to `.env` and set `OPENAI_API_KEY` and `HF_TOKEN`. The policy and research agents use OpenAI gpt-4o; the healthcare provider uses Hugging Face openai/gpt-oss-20b. The insurance PDF and doctor directory must exist at `data/2026AnthemgHIPSBC.pdf` and `data/doctors.json`. Never commit `.env` or the conversation database.
+From the repository root, copy `.env.example` to `.env` and set `OPENAI_API_KEY`, `HF_TOKEN` and `MEDICATION_DB_PASSWORD`. The policy and research agents use OpenAI gpt-4o; the healthcare provider uses Hugging Face openai/gpt-oss-20b. The insurance PDF and doctor directory must exist at `data/2026AnthemgHIPSBC.pdf` and `data/doctors.json`. Never commit `.env` or the conversation database.
 
 Start the complete application, including every configured specialist, with one command:
 
@@ -12,7 +12,7 @@ Start the complete application, including every configured specialist, with one 
 docker compose up -d --build
 ~~~
 
-Open http://127.0.0.1:8000, create an account, and start a conversation. `docker compose ps` shows the backend and three specialists; wait until all four are healthy. `docker compose down` stops the services while preserving the named database volume. Compose starts the specialists for you, so adding an agent does not require opening another terminal when its service is added to `docker-compose.yml`. The optional `docker-compose.https.yml` adds a Caddy proxy and is not needed locally. Check configuration without starting containers with `docker compose --env-file .env.example config --quiet`.
+Open http://127.0.0.1:8000, create an account, and start a conversation. `docker compose ps` shows the backend, three specialists and PostgreSQL; wait until all five are healthy. `docker compose down` stops the services while preserving their named volumes. Compose starts the specialists for you, so adding an agent does not require opening another terminal when its service is added to `docker-compose.yml`. The optional `docker-compose.https.yml` adds a Caddy proxy and is not needed locally. Check configuration without starting containers with `docker compose --env-file .env.example config --quiet`.
 
 ### Run components individually (optional)
 
@@ -35,7 +35,7 @@ The A2A servers must already be running for the concierge to delegate. If an act
 
 The backend listens on port 8000; specialist ports are internal to the Compose network.
 
-If the browser reports "Unable to connect", first check `docker compose ps`. All four services must remain `Up`; closing a foreground `docker compose up` terminal stops the stack. Run `docker compose up -d --build` to keep it running, then open http://127.0.0.1:8000/api/health and confirm `status: ok`. If the services are up but a chat still fails, inspect `docker compose logs --tail 100 backend policy-agent` and the browser network response for `/api/chat`. A healthy Agent Card alone does not prove a model-backed policy answer works.
+If the browser reports "Unable to connect", first check `docker compose ps`. All four application services must remain `Up`; closing a foreground `docker compose up` terminal stops the stack. Run `docker compose up -d --build` to keep it running, then open http://127.0.0.1:8000/api/health and confirm `status: ok`. If the services are up but a chat still fails, inspect `docker compose logs --tail 100 backend policy-agent` and the browser network response for `/api/chat`. A healthy Agent Card alone does not prove a model-backed policy answer works.
 
 ## Running architecture
 

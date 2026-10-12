@@ -12,9 +12,13 @@ from tools.mcp_connector import load_mcp_tools
         ("policy_documents", "search_policy"),
         ("research_web", "web_search"),
         ("healthcare_providers", "list_doctors"),
+        ("medication_catalog", "get_medication"),
     ],
 )
-def test_configured_mcp_server_exposes_selected_tool(server, expected):
+def test_configured_mcp_server_exposes_selected_tool(server, expected, monkeypatch):
+    if server == "medication_catalog":
+        for name in ("PGHOST", "PGDATABASE", "PGUSER", "PGPASSWORD"):
+            monkeypatch.setenv(name, "test-value")
     async def check():
         tools = await load_mcp_tools(server)
         assert [tool.name for tool in tools] == [expected]

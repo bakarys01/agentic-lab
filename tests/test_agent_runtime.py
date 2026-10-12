@@ -149,11 +149,28 @@ def test_health_checks_all_a2a_delegate_cards(monkeypatch, available):
 
     assert visited == [
         f"http://{name}.example:1234/.well-known/agent-card.json"
-        for name in ("policy", "research", "healthcare_provider")
+        for name in ("policy", "research", "healthcare_provider", "medication")
     ]
     expected = "available" if available else "unavailable"
     assert all(
         health["services"][name]["status"] == expected
-        for name in ("policy", "research", "healthcare_provider")
+        for name in ("policy", "research", "healthcare_provider", "medication")
     )
     assert health["status"] == ("ok" if available else "degraded")
+
+
+def test_langchain_runtime_reuses_event_loop_across_questions(monkeypatch):
+    import asyncio
+
+    runtime = AgentRuntime(load_agent_definition("medication"))
+    loop_ids = []
+
+    async def fake_run(question):
+        loop_ids.append(id(asyncio.get_running_loop()))
+        return question
+
+    monkeypatch.setattr(runtime, "_run_langchain", fake_run)
+
+    assert runtime.run("first") == "first"
+    assert runtime.run("second") == "second"
+    assert loop_ids[0] == loop_ids[1]
