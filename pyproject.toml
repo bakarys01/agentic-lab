@@ -24,6 +24,17 @@ dependencies = [
     "uvicorn>=0.53.0",
 ]
 
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/medinova"]
+
+[tool.pytest.ini_options]
+addopts = "-p no:cacheprovider"
+tmp_path_retention_policy = "none"
+
 [dependency-groups]
 dev = [
     "pytest>=8.1.0",

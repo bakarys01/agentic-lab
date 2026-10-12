@@ -1,6 +1,6 @@
 import os
 
-from agents.config_loader import load_model_config
+from medinova.agents.config_loader import load_model_config
 
 
 def create_model(name: str, runtime: str):

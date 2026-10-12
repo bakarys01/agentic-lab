@@ -1,8 +1,8 @@
 import pytest
 
-from a2a_clients import client_utils
-from agents.config_loader import load_agent_definition, load_mcp_config
-from tools import delegation
+from medinova.a2a_clients import client_utils
+from medinova.agents.config_loader import load_agent_definition, load_mcp_config
+from medinova.tools import delegation
 
 
 @pytest.mark.parametrize(

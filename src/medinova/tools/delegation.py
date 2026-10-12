@@ -3,7 +3,7 @@ from collections.abc import Callable
 
 from smolagents import Tool
 
-from a2a_clients.client_utils import ask_a2a_agent, get_agent_url
+from medinova.a2a_clients.client_utils import ask_a2a_agent, get_agent_url
 
 
 def invoke_a2a_agent(agent_name: str, question: str) -> str:

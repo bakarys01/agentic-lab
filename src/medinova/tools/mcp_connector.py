@@ -6,7 +6,7 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_mcp_adapters.sessions import StdioConnection
 from mcp.client.stdio import get_default_environment
 
-from agents.config_loader import load_mcp_config
+from medinova.agents.config_loader import load_mcp_config
 
 
 async def load_mcp_tools(server_name: str) -> list[BaseTool]:

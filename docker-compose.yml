@@ -23,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.agent
-    entrypoint: ["python", "-m", "scrapping.import_medications"]
+    entrypoint: ["python", "-m", "medinova.scrapping.import_medications"]
     command: ["--limit", "500"]
     environment:
       PGHOST: medication-db
@@ -58,7 +58,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.agent
-    command: ["python", "-m", "a2a_servers.serve", "policy"]
+    command: ["python", "-m", "medinova.a2a_servers.serve", "policy"]
     environment:
       A2A_BIND_HOST: "0.0.0.0"
       POLICY_AGENT_PUBLIC_URL: "http://policy-agent:9999"
@@ -77,7 +77,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.agent
-    command: ["python", "-m", "a2a_servers.serve", "research"]
+    command: ["python", "-m", "medinova.a2a_servers.serve", "research"]
     environment:
       A2A_BIND_HOST: "0.0.0.0"
       RESEARCH_AGENT_PUBLIC_URL: "http://research-agent:9998"
@@ -96,7 +96,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.agent
-    command: ["python", "-m", "a2a_servers.serve", "healthcare_provider"]
+    command: ["python", "-m", "medinova.a2a_servers.serve", "healthcare_provider"]
     environment:
       A2A_BIND_HOST: "0.0.0.0"
       HEALTHCARE_PROVIDER_AGENT_PUBLIC_URL: "http://healthcare-provider-agent:9997"
@@ -115,7 +115,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.agent
-    command: ["python", "-m", "a2a_servers.serve", "medication"]
+    command: ["python", "-m", "medinova.a2a_servers.serve", "medication"]
     environment:
       A2A_BIND_HOST: "0.0.0.0"
       MEDICATION_AGENT_PUBLIC_URL: "http://medication-agent:9996"

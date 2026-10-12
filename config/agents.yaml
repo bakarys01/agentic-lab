@@ -91,25 +91,25 @@ models:
 mcp_servers:
   policy_documents:
     transport: stdio
-    script: mcp_servers/policy.py
+    script: src/medinova/mcp_servers/policy.py
     allowed_tools:
       - search_policy
 
   research_web:
     transport: stdio
-    script: mcp_servers/research.py
+    script: src/medinova/mcp_servers/research.py
     allowed_tools:
       - web_search
 
   healthcare_providers:
     transport: stdio
-    script: mcp_servers/healthcare.py
+    script: src/medinova/mcp_servers/healthcare.py
     allowed_tools:
       - list_doctors
 
   medication_catalog:
     transport: stdio
-    script: mcp_servers/medication.py
+    script: src/medinova/mcp_servers/medication.py
     allowed_tools:
       - get_medication
     env_vars:

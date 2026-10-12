@@ -4,8 +4,8 @@ from datetime import date
 
 import pytest
 
-import scrapping.import_medications as medication_import
-from scrapping.import_medications import parse_source_date, select_records
+import medinova.scrapping.import_medications as medication_import
+from medinova.scrapping.import_medications import parse_source_date, select_records
 
 
 SPECIALTIES = "\n".join(

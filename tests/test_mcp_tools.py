@@ -2,8 +2,8 @@ import asyncio
 
 import pytest
 
-from agents.models import create_model
-from tools.mcp_connector import load_mcp_tools
+from medinova.agents.models import create_model
+from medinova.tools.mcp_connector import load_mcp_tools
 
 
 @pytest.mark.parametrize(
@@ -32,7 +32,7 @@ def test_configured_mcp_server_exposes_selected_tool(server, expected, monkeypat
 
 
 def test_research_tool_preserves_source_urls(monkeypatch):
-    from mcp_servers import research
+    from medinova.mcp_servers import research
 
     class FakeSearch:
         def __enter__(self):

@@ -4,8 +4,8 @@ import os
 import uvicorn
 from dotenv import load_dotenv
 
-from agents.config_loader import load_a2a_config
-from a2a_servers.app import create_a2a_app
+from medinova.agents.config_loader import load_a2a_config
+from medinova.a2a_servers.app import create_a2a_app
 
 def run_server(agent_name: str) -> None:
     load_dotenv()

@@ -1,14 +1,15 @@
 """Expose the shared insurance PDF through MCP."""
 
 from functools import lru_cache
-from pathlib import Path
 
 import pymupdf
 from mcp.server.fastmcp import FastMCP
 
+from medinova.paths import PROJECT_ROOT
+
 
 mcp = FastMCP("policy_documents")
-POLICY_PATH = Path(__file__).resolve().parent.parent / "data" / "2026AnthemgHIPSBC.pdf"
+POLICY_PATH = PROJECT_ROOT / "data" / "2026AnthemgHIPSBC.pdf"
 
 
 @lru_cache(maxsize=1)

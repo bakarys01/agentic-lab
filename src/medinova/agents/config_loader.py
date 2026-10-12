@@ -4,14 +4,11 @@ import re
 
 import yaml
 
-from agents.definition import AgentDefinition
+from medinova.agents.definition import AgentDefinition
+from medinova.paths import PROJECT_ROOT
 
 
-CONFIG_PATH = (
-    Path(__file__).resolve().parent.parent
-    / "config"
-    / "agents.yaml"
-)
+CONFIG_PATH = PROJECT_ROOT / "config" / "agents.yaml"
 
 TUPLE_FIELDS = {"tools", "mcp_servers", "delegates", "policies"}
 

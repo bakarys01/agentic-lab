@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from backend import title_generation
+from medinova.backend import title_generation
 
 
 def test_title_generation_uses_small_configured_model_and_bounded_input(monkeypatch):

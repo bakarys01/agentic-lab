@@ -12,14 +12,14 @@ from langchain.agents import create_agent
 from langchain.agents.middleware import ModelCallLimitMiddleware
 from smolagents import ToolCallingAgent
 
-from a2a_clients.client_utils import get_agent_url
-from agents.config_loader import load_agent_definition, load_execution_profile
-from agents.conversation_memory import recent_history
-from agents.definition import AgentDefinition
-from agents.models import create_model
-from prompts.loader import load_prompt
-from tools.delegation import AgentTool, invoke_a2a_agent
-from tools.mcp_connector import load_mcp_tools
+from medinova.a2a_clients.client_utils import get_agent_url
+from medinova.agents.config_loader import load_agent_definition, load_execution_profile
+from medinova.agents.conversation_memory import recent_history
+from medinova.agents.definition import AgentDefinition
+from medinova.agents.models import create_model
+from medinova.prompts.loader import load_prompt
+from medinova.tools.delegation import AgentTool, invoke_a2a_agent
+from medinova.tools.mcp_connector import load_mcp_tools
 
 
 class AgentRuntime:

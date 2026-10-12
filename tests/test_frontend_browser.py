@@ -12,7 +12,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-from backend.api import create_api_app
+from medinova.backend.api import create_api_app
 
 
 class BrowserConcierge:

@@ -3,7 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from backend.api import create_api_app
+from medinova.backend.api import create_api_app
 
 
 @pytest.fixture

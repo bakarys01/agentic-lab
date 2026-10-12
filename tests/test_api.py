@@ -6,14 +6,14 @@ import pytest
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 
-from backend.api import create_api_app
-from backend.storage import Store
+from medinova.backend.api import create_api_app
+from medinova.backend.storage import Store
 
 
 @pytest.fixture(autouse=True)
 def isolated_db(tmp_path, monkeypatch):
     monkeypatch.setenv('DATABASE_PATH', str(tmp_path / 'api.sqlite3'))
-    monkeypatch.setattr('backend.api.generate_title', lambda question, answer: 'Test conversation')
+    monkeypatch.setattr('medinova.backend.api.generate_title', lambda question, answer: 'Test conversation')
 
 
 class TestClient(BaseTestClient):
@@ -193,14 +193,14 @@ def test_chat_can_call_async_specialist_from_sync_tool():
 
 
 def test_default_factory_connects_real_concierge(monkeypatch):
-    import backend.api as api
+    import medinova.backend.api as api
     monkeypatch.setattr(api, "build_concierge", FakeConcierge)
     response = TestClient(api.create_api_app()).post("/api/chat", json={"message": "Hello"})
     assert response.json()["answer"] == "This is a test answer."
 
 
 def test_missing_concierge_returns_unavailable(monkeypatch):
-    import backend.api as api
+    import medinova.backend.api as api
 
     def unavailable_concierge():
         raise RuntimeError("Concierge unavailable")
