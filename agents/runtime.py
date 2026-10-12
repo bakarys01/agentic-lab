@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import threading
 from functools import partial
 from time import perf_counter
 from typing import Any
@@ -35,6 +36,10 @@ class AgentRuntime:
         self.definition = definition
         self.instructions = load_prompt(definition.prompt)
         self.max_steps = load_execution_profile(definition.execution)
+        self._langchain_runner = (
+            asyncio.Runner() if definition.runtime == "langchain" else None
+        )
+        self._langchain_lock = threading.Lock()
 
         path = (*ancestry, definition.name)
         self.delegates = tuple(
@@ -93,7 +98,8 @@ class AgentRuntime:
                 raise NotImplementedError(
                     "Conversation history is not supported by the LangChain adapter."
                 )
-            return asyncio.run(self._run_langchain(question))
+            with self._langchain_lock:
+                return self._langchain_runner.run(self._run_langchain(question))
 
         _, answer = self._execute_smolagents(question, history)
         return answer

@@ -15,6 +15,7 @@ COPY tools/ ./tools/
 COPY prompts/ ./prompts/
 COPY config/ ./config/
 COPY mcp_servers/ ./mcp_servers/
+COPY scrapping/ ./scrapping/
 COPY data/2026AnthemgHIPSBC.pdf data/doctors.json ./data/
 
 RUN useradd --create-home --shell /usr/sbin/nologin appuser \

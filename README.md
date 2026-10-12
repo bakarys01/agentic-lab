@@ -10,13 +10,17 @@ The repository has three detailed documents:
 
 ## Quick start
 
-From the repository root, copy `.env.example` to `.env` and set `OPENAI_API_KEY` and `HF_TOKEN`. Ensure the sample insurance PDF and doctor directory are present in `data/`. Start the complete application with one command:
+From the repository root, copy `.env.example` to `.env` and set `OPENAI_API_KEY`, `HF_TOKEN` and a strong `MEDICATION_DB_PASSWORD`. Ensure the sample insurance PDF and doctor directory are present in `data/`. Start the complete application with one command:
 
 ~~~bash
 docker compose up -d --build
 ~~~
 
-Compose starts the backend and all configured specialist services. Open http://127.0.0.1:8000, create an account, and start chatting. Use `docker compose ps` to check that all four services are healthy; `docker compose down` stops them. The conversation database remains in the Compose volume.
+Compose starts the backend, three specialist services and PostgreSQL. Open http://127.0.0.1:8000, create an account, and start chatting. Use `docker compose ps` to check that all five services are healthy; `docker compose down` stops them. The database volumes remain intact. PostgreSQL has only its schema for now; no medications have been imported.
+
+To load a reproducible sample of 500 real specialties and all their related presentations and compositions from the [French public medication database (BDPM)](https://base-donnees-publique.medicaments.gouv.fr/telechargement), run `docker compose --profile import run --rm medication-importer`. This is a separate, on-demand import; it replaces the previous BDPM sample in one database transaction and records each source file's URL, update date and SHA-256. To change the sample size, append `--limit N` to the command.
+
+To inspect the tables in a browser, set `PGADMIN_EMAIL` and `PGADMIN_PASSWORD` in `.env`, then run `docker compose --profile admin up -d pgadmin` and open http://127.0.0.1:5050. Sign in with those pgAdmin credentials and open the preconfigured **MediNova medications** server; when prompted, enter `MEDICATION_DB_PASSWORD`. The interface is only bound to the local machine. Stop it with `docker compose stop pgadmin`.
 
 To run or debug components independently without Docker, install Python 3.13 and uv, then run `uv sync`. Start these commands in separate terminals:
 

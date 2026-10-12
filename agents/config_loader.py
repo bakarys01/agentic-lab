@@ -1,5 +1,6 @@
 from dataclasses import fields
 from pathlib import Path
+import re
 
 import yaml
 
@@ -127,7 +128,11 @@ def load_mcp_config(name: str) -> dict:
     settings = servers[name]
     required = {"transport", "script", "allowed_tools"}
 
-    if not isinstance(settings, dict) or set(settings) != required:
+    if (
+        not isinstance(settings, dict)
+        or not required <= set(settings)
+        or set(settings) - required - {"env_vars"}
+    ):
         raise ValueError(
             f"MCP server {name} must define "
             "transport, script and allowed_tools."
@@ -156,10 +161,18 @@ def load_mcp_config(name: str) -> dict:
     ):
         raise ValueError("allowed_tools must be a non-empty list of names.")
 
+    env_vars = settings.get("env_vars", [])
+    if not isinstance(env_vars, list) or any(
+        not isinstance(name, str) or not re.fullmatch(r"[A-Z][A-Z0-9_]*", name)
+        for name in env_vars
+    ) or len(env_vars) != len(set(env_vars)):
+        raise ValueError("env_vars must be a list of unique environment variable names.")
+
     return {
         "transport": "stdio",
         "script": str(script_path),
         "allowed_tools": tuple(allowed),
+        "env_vars": tuple(env_vars),
     }
 
 def load_a2a_config(name: str) -> dict[str, int]:
