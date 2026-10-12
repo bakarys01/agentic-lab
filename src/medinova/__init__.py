@@ -1,0 +1,1 @@
+"""MediNova healthcare concierge application."""

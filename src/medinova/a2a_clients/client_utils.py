@@ -9,7 +9,7 @@ from a2a.types import (
     SendMessageConfiguration,
     SendMessageRequest,
 )
-from agents.config_loader import load_a2a_config
+from medinova.agents.config_loader import load_a2a_config
 
 def get_agent_url(name: str) -> str:
     port = load_a2a_config(name)["port"]

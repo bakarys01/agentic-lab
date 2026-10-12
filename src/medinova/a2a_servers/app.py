@@ -3,9 +3,9 @@ from a2a.server.routes import create_agent_card_routes, create_jsonrpc_routes
 from a2a.server.tasks import InMemoryTaskStore
 from starlette.applications import Starlette
 
-from agents.config_loader import load_a2a_config
-from a2a_servers.card import create_agent_card
-from a2a_servers.executor import RuntimeAgentExecutor
+from medinova.agents.config_loader import load_a2a_config
+from medinova.a2a_servers.card import create_agent_card
+from medinova.a2a_servers.executor import RuntimeAgentExecutor
 
 
 def create_a2a_app(agent_name: str, public_url: str | None = None) -> Starlette:

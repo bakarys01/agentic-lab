@@ -1,7 +1,7 @@
 import argparse
 
-from agents.config_loader import load_agent_definition
-from agents.runtime import AgentRuntime
+from medinova.agents.config_loader import load_agent_definition
+from medinova.agents.runtime import AgentRuntime
 
 
 def main() -> None:

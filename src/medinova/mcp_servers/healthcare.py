@@ -1,12 +1,12 @@
 import json
-from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
+
+from medinova.paths import PROJECT_ROOT
 
 
 mcp = FastMCP("doctorserver")
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DOCTORS_FILE = PROJECT_ROOT / "data" / "doctors.json"
 
 with DOCTORS_FILE.open("r", encoding="utf-8") as file:

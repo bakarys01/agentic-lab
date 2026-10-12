@@ -2,7 +2,7 @@ import os
 
 import uvicorn
 
-from backend.api import app
+from medinova.backend.api import app
 
 
 HOST = os.getenv("BACKEND_HOST", "127.0.0.1")

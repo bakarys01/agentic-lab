@@ -4,12 +4,12 @@ from unittest.mock import Mock
 import httpx
 import pytest
 
-from agents.config_loader import load_agent_definition
-from agents.runtime import AgentRuntime
+from medinova.agents.config_loader import load_agent_definition
+from medinova.agents.runtime import AgentRuntime
 
 
 def test_run_returns_text_and_includes_recent_history(monkeypatch):
-    import agents.runtime as runtime_module
+    import medinova.agents.runtime as runtime_module
 
     fake_agent = Mock()
     fake_agent.run.return_value = "Policy answer"
@@ -29,7 +29,7 @@ def test_run_returns_text_and_includes_recent_history(monkeypatch):
 
 
 def test_langchain_agent_receives_only_tools_selected_by_definition(monkeypatch):
-    import agents.runtime as runtime_module
+    import medinova.agents.runtime as runtime_module
 
     discovered = []
     async def fake_load(server):
@@ -56,7 +56,7 @@ def test_langchain_agent_receives_only_tools_selected_by_definition(monkeypatch)
 
 
 def test_missing_selected_mcp_tool_fails_before_model_call(monkeypatch):
-    import agents.runtime as runtime_module
+    import medinova.agents.runtime as runtime_module
 
     async def fake_load(server):
         return [SimpleNamespace(name="different_tool")]
@@ -70,7 +70,7 @@ def test_missing_selected_mcp_tool_fails_before_model_call(monkeypatch):
 
 def test_duplicate_selected_tool_across_mcp_servers_is_rejected(monkeypatch):
     from dataclasses import replace
-    import agents.runtime as runtime_module
+    import medinova.agents.runtime as runtime_module
 
     async def fake_load(server):
         return [SimpleNamespace(name="search_policy")]
@@ -85,7 +85,7 @@ def test_duplicate_selected_tool_across_mcp_servers_is_rejected(monkeypatch):
 
 
 def test_run_does_not_reuse_previous_history(monkeypatch):
-    import agents.runtime as runtime_module
+    import medinova.agents.runtime as runtime_module
 
     fake_agent = Mock()
     fake_agent.run.return_value = "Answer"
@@ -107,7 +107,7 @@ def test_run_does_not_reuse_previous_history(monkeypatch):
 
 
 def test_metadata_reports_only_called_delegates(monkeypatch):
-    import agents.runtime as runtime_module
+    import medinova.agents.runtime as runtime_module
 
     fake_agent = Mock()
     fake_agent.run.return_value = "Combined answer"
@@ -128,7 +128,7 @@ def test_metadata_reports_only_called_delegates(monkeypatch):
 
 @pytest.mark.parametrize("available", [True, False])
 def test_health_checks_all_a2a_delegate_cards(monkeypatch, available):
-    import agents.runtime as runtime_module
+    import medinova.agents.runtime as runtime_module
 
     visited = []
     monkeypatch.setattr(

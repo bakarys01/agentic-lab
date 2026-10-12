@@ -16,13 +16,14 @@ from starlette.responses import FileResponse
 from starlette.types import Scope
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from dotenv import load_dotenv
-from backend.storage import Store
-from backend.title_generation import generate_title
-from backend.auth import install_auth
-from agents.config_loader import load_agent_definition
-from agents.runtime import AgentRuntime
+from medinova.backend.storage import Store
+from medinova.backend.title_generation import generate_title
+from medinova.backend.auth import install_auth
+from medinova.agents.config_loader import load_agent_definition
+from medinova.agents.runtime import AgentRuntime
+from medinova.paths import PROJECT_ROOT
 
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+load_dotenv(PROJECT_ROOT / ".env")
 logger = logging.getLogger(__name__)
 
 
@@ -112,7 +113,7 @@ def create_api_app(concierge: Any | None = None, db_path: str | Path | None = No
             if store is None:
                 path = Path(db_path or os.getenv('DATABASE_PATH', 'data/concierge.sqlite3'))
                 if not path.is_absolute():
-                    path = Path(__file__).resolve().parent.parent / path
+                    path = PROJECT_ROOT / path
                 store = Store(path)
         return store
 
@@ -232,7 +233,7 @@ def create_api_app(concierge: Any | None = None, db_path: str | Path | None = No
             finally:
                 query_lock.release()
 
-    frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+    frontend_dir = PROJECT_ROOT / "frontend"
     if frontend_dir.exists():
         app.mount("/", FrontendFiles(directory=str(frontend_dir), html=True), name="frontend")
 

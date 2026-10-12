@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from mcp_servers.medication import get_medication
+from medinova.mcp_servers.medication import get_medication
 
 
 class FakeCursor:

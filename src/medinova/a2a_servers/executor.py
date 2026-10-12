@@ -4,8 +4,8 @@ from a2a.helpers import new_text_message
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 
-from agents.config_loader import load_agent_definition
-from agents.runtime import AgentRuntime
+from medinova.agents.config_loader import load_agent_definition
+from medinova.agents.runtime import AgentRuntime
 
 
 class RuntimeAgentExecutor(AgentExecutor):

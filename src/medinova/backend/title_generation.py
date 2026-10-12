@@ -5,8 +5,8 @@ import os
 from openai import OpenAI
 from pydantic import BaseModel
 
-from agents.config_loader import load_model_config
-from prompts.loader import load_prompt
+from medinova.agents.config_loader import load_model_config
+from medinova.prompts.loader import load_prompt
 
 
 class TitleResult(BaseModel):

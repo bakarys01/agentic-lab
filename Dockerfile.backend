@@ -10,15 +10,10 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Install locked production dependencies
 COPY pyproject.toml uv.lock README.md ./
+COPY src/ ./src/
 
 RUN uv sync --frozen --no-dev
 
-# Backend + Concierge + A2A clients
-COPY backend/ ./backend/
-COPY agents/ ./agents/
-COPY a2a_clients/ ./a2a_clients/
-COPY tools/ ./tools/
-COPY prompts/ ./prompts/
 COPY config/ ./config/
 
 # Frontend is served directly by FastAPI
@@ -39,4 +34,4 @@ ENV BACKEND_HOST=0.0.0.0 \
 
 EXPOSE 8000
 
-CMD ["python", "-m", "backend.server"]
+CMD ["python", "-m", "medinova.backend.server"]

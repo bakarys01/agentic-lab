@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from backend.api import create_api_app
+from medinova.backend.api import create_api_app
 from test_auth import register
 
 
@@ -74,7 +74,7 @@ def test_persistence_across_app_restart_and_session_revocation(tmp_path):
 
 
 def test_pending_turn_blocks_deletion_and_interrupted_request_is_retryable(tmp_path):
-    from backend.storage import Store
+    from medinova.backend.storage import Store
     client, agent, conversation = setup(tmp_path)
     user_id = client.get('/api/auth/me').json()['user']['id']
     store = Store(tmp_path/'history.sqlite3')

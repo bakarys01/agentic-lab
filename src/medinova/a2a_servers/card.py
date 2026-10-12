@@ -1,6 +1,6 @@
 from a2a.types import AgentCapabilities, AgentCard, AgentInterface, AgentSkill
 
-from agents.config_loader import load_agent_definition
+from medinova.agents.config_loader import load_agent_definition
 
 
 def create_agent_card(agent_name: str, public_url: str) -> AgentCard:

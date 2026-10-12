@@ -1,4 +1,4 @@
-from agents.conversation_memory import recent_history
+from medinova.agents.conversation_memory import recent_history
 
 
 def pair(question, answer):
