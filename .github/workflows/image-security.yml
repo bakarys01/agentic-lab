@@ -2,20 +2,8 @@ name: Container security
 
 on:
   pull_request:
-    paths:
-      - Dockerfile.agent
-      - Dockerfile.backend
-      - pyproject.toml
-      - uv.lock
-      - .github/workflows/image-security.yml
   push:
     branches: [master]
-    paths:
-      - Dockerfile.agent
-      - Dockerfile.backend
-      - pyproject.toml
-      - uv.lock
-      - .github/workflows/image-security.yml
   schedule:
     - cron: "17 5 * * 1"
   workflow_dispatch:
