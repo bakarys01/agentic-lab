@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.9.5"
+          python-version: "3.13"
+          enable-cache: false
+
+      - name: Check lockfile and install dependencies
+        run: uv sync --locked
+
+      - name: Run Python tests
+        run: uv run --locked python -B -m pytest tests -q --ignore=tests/test_frontend_browser.py
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Run frontend tests
+        run: node --test tests/frontend.test.cjs
+
+      - name: Build Python wheel
+        run: uv build --wheel
