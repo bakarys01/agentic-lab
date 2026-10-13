@@ -42,6 +42,8 @@ Keep model credentials in .env and keep specialist A2A endpoints private. See th
 
 ## Checks
 
+GitHub Actions runs the lockfile check, Python tests (excluding Selenium), frontend tests and wheel build on every pull request and push to `master`. These checks need no API credentials or running services.
+
 ~~~bash
 uv run python -B -m pytest tests -q
 node --test tests/frontend.test.cjs
