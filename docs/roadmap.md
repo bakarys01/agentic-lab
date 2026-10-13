@@ -8,7 +8,7 @@ The professional goal is to explain where technologies belong, why one approach 
 
 ## Status and evidence
 
-Baseline rechecked on **2026-10-02**. Status describes repository implementation, not Jira ticket creation or an unverified running environment:
+Baseline rechecked on **2026-10-14**. Status describes repository implementation, not Jira ticket creation or an unverified running environment:
 
 - **[IMPLEMENTED]**: concrete code or documentation exists; its validation limits must still be stated.
 - **[IN PROGRESS]**: part of a phase exists, but its completion criteria are not met.
@@ -16,19 +16,21 @@ Baseline rechecked on **2026-10-02**. Status describes repository implementation
 
 | Capability | Status | Evidence / limitation |
 | --- | --- | --- |
-| Web UI and FastAPI | [IMPLEMENTED] | `frontend/`, `backend/api.py`; local same-origin app, no separate frontend build |
-| Accounts, history and memory | [IMPLEMENTED] | `backend/auth.py`, `backend/storage.py`, `agents/conversation_memory.py`; SQLite and bounded per-conversation context |
-| Modular agents | [IMPLEMENTED] | `config/agents.yaml`, `agents/runtime.py`; concierge uses smolagents/OpenAI and A2A delegates; specialists use LangChain with OpenAI or Hugging Face and MCP tools |
-| Specialist A2A communication | [IMPLEMENTED] | Generic `a2a_servers/serve.py` and `a2a_clients/client_utils.py`; concierge calls all three specialists over local JSON-RPC, without streaming or service authentication |
-| Policy retrieval | [IMPLEMENTED] | `mcp_servers/policy.py`; MCP tool with lexical page scoring over one shared PDF |
-| Research search | [IMPLEMENTED] | `mcp_servers/research.py`; MCP web search with source URLs and guidance in `prompts/research.md` |
-| Provider directory via MCP | [IMPLEMENTED] | `mcp_servers/healthcare.py` exposes `list_doctors` over stdio to the LangChain specialist; static local JSON data |
-| Container configuration | [IMPLEMENTED] | `Dockerfile.agent`, `Dockerfile.backend`, `docker-compose.yml` and HTTPS override; Compose configuration parses, but a full container run has not been validated here |
+| Web UI and FastAPI | [IMPLEMENTED] | `frontend/`, `src/medinova/backend/api.py`; local same-origin app, no separate frontend build |
+| Accounts, history and memory | [IMPLEMENTED] | `src/medinova/backend/auth.py`, `src/medinova/backend/storage.py`, `src/medinova/agents/conversation_memory.py`; SQLite and bounded per-conversation context |
+| Modular agents | [IMPLEMENTED] | `config/agents.yaml`, `src/medinova/agents/runtime.py`; concierge uses smolagents/OpenAI and A2A delegates; four specialists use LangChain with OpenAI or Hugging Face and MCP tools |
+| Specialist A2A communication | [IMPLEMENTED] | Generic `src/medinova/a2a_servers/serve.py` and `src/medinova/a2a_clients/client_utils.py`; concierge calls four specialists over local JSON-RPC, without streaming or service authentication |
+| Policy retrieval | [IMPLEMENTED] | `src/medinova/mcp_servers/policy.py`; MCP tool with lexical page scoring over one shared PDF |
+| Research search | [IMPLEMENTED] | `src/medinova/mcp_servers/research.py`; MCP web search with source URLs and guidance in `src/medinova/prompts/research.md` |
+| Provider directory via MCP | [IMPLEMENTED] | `src/medinova/mcp_servers/healthcare.py` exposes `list_doctors` over stdio to the LangChain specialist; static local JSON data |
+| Medication catalog via MCP | [IMPLEMENTED] | `src/medinova/mcp_servers/medication.py` exposes `get_medication` over stdio; structured sample from the French BDPM in PostgreSQL, imported on demand |
+| Container configuration | [IMPLEMENTED] | `Dockerfile.agent`, `Dockerfile.backend`, `docker-compose.yml` and HTTPS override; the local Compose stack has been exercised manually, while image security scans are still pending |
 | Regression tests | [IMPLEMENTED] | `tests/`; deterministic substitutes, not live AI quality benchmarks |
 | Request metadata | [IMPLEMENTED] | Concierge latency, selected specialists and idempotency IDs; not distributed observability |
 | V1 completion | [IN PROGRESS] | Functional local foundation exists; final validation and operational gaps remain |
 | Benchmark, tracing, additional provider adapters | [PLANNED] | No AI quality dataset, distributed traces or general provider adapter registry |
-| Alternative frameworks, Terraform, CI/CD and clouds | [PLANNED] | No deployment artifacts or measured comparisons |
+| Baseline CI | [IMPLEMENTED] | `.github/workflows/ci.yml` checks the lockfile, Ruff lint, deterministic tests including an in-memory A2A exchange, wheel build, committed secrets and locked production dependencies; `image-security.yml` scans both built images for fixable critical vulnerabilities on relevant changes and weekly; no live AI evaluation |
+| Alternative frameworks, Terraform and clouds | [PLANNED] | No deployment artifacts or measured comparisons |
 
 Detailed current behavior, startup and test commands, and identity/storage contracts belong in [architecture](architecture.md). Do not interpret existing test coverage as evidence of answer quality or production readiness.
 
@@ -37,8 +39,8 @@ Detailed current behavior, startup and test commands, and identity/storage contr
 | Layer | Responsibility | Current baseline | Planned investigations |
 | --- | --- | --- | --- |
 | Agent framework | Reasoning loop, state and internal orchestration | smolagents concierge and LangChain MCP specialists | LangGraph, Strands, Google ADK, Microsoft Agent Framework |
-| A2A | Agent-to-agent communication | Concierge to Policy, Research and Healthcare Provider | Preserve the boundary when replacing implementations |
-| Tools / MCP | Agent-to-tool, data and service access | MCP stdio for policy, research and provider directory | Evaluate further data boundaries, authorization and protocol overhead |
+| A2A | Agent-to-agent communication | Concierge to Policy, Research, Healthcare Provider and Medication | Preserve the boundary when replacing implementations |
+| Tools / MCP | Agent-to-tool, data and service access | MCP stdio for policy, research, provider directory and medication catalog | Evaluate further data boundaries, authorization and protocol overhead |
 | Model/provider | Inference and model access | Configured OpenAI gpt-4o and Hugging Face gpt-oss-20b | Claude, Gemini; Bedrock, Vertex AI, Azure; selected open models |
 | Runtime/cloud | Hosting, identity, network, scaling and operations | Local Python processes and Compose definitions | Validate containers, then AWS, GCP, Azure and managed runtimes |
 | Evaluation/operations | Evidence, traces, costs and experiment provenance | Regression tests and basic metadata | Benchmark, OpenTelemetry, experiment tracking and FinOps |
@@ -55,18 +57,22 @@ flowchart TD
     C -->|A2A| P[Policy agent]
     C -->|A2A| R[Research agent]
     C -->|A2A| H[Healthcare provider agent]
+    C -->|A2A| Med[Medication agent]
     P -->|MCP| PT[Policy / retrieval service]
     R -->|MCP| RT[Search service]
     H -->|MCP| HT[Provider directory service]
+    Med -->|MCP| MT[Medication catalog service]
     PT --> D[(Documents / data)]
     RT --> W[Web]
     HT --> J[(Doctor directory)]
+    MT --> PG[(PostgreSQL medication data)]
     C -.-> M[Model/provider adapters]
     P -.-> M
     R -.-> M
+    Med -.-> M
 ```
 
-Modularity does not require a separate network service for every box. Today frontend, API and concierge share the backend process. Three specialists have separate A2A services; their MCP servers are stdio subprocesses. Add further services only when the experiment or deployment needs that boundary.
+Modularity does not require a separate network service for every box. Today frontend, API and concierge share the backend process. Four specialists have separate A2A services; their MCP servers are stdio subprocesses. Add further services only when the experiment or deployment needs that boundary.
 
 ## Ordered delivery phases
 
@@ -201,7 +207,7 @@ Record unavoidable differences rather than claiming causality from them. Live we
 
 Store commit, dependency versions, dataset/evaluator versions, framework, model/provider, prompt version, generation settings, corpus/index version, embedding model, chunk size, top-k, reranker, runtime/region, repetitions and timestamps with results. Separate inference and infrastructure costs, document the pricing date, and include failed requests. MLflow is a candidate experiment tracker, not an existing integration.
 
-Prompts are versioned in `prompts/*.md` and selected from `config/agents.yaml`. Future evaluations should record the prompt file hashes and configuration revision alongside each run. Keep experiment results with the evaluation artifacts when that work begins; this documentation directory remains limited to the architecture guide and roadmap.
+Prompts are versioned in `src/medinova/prompts/*.md` and selected from `config/agents.yaml`. Future evaluations should record the prompt file hashes and configuration revision alongside each run. Keep experiment results with the evaluation artifacts when that work begins; architecture, agents and roadmap documents remain separate from evaluation artifacts.
 
 ## RAG / data engineering track — [PLANNED]
 
@@ -211,11 +217,11 @@ Target pipeline: document extraction → chunking → embeddings → vector stor
 
 Evaluate retrieval against labeled source passages independently of generated answers. Then evaluate answer grounding and citation correctness against the retrieved evidence. Keep corpus/version, data permissions and tenant isolation explicit before adding personal document ingestion.
 
-## Testing and delivery track — [PLANNED]
+## Testing and delivery track — [IN PROGRESS]
 
 The current flat `tests/` layout works for the existing regression suite. As coverage grows, consider `tests/unit/`, `tests/integration/`, `tests/evals/` and `tests/e2e/`; these directories do not exist today. Cover tools/parsers/retrieval, A2A/MCP/provider contracts, AI quality and the complete UI-to-answer path separately.
 
-Build delivery automation incrementally with GitHub Actions or another justified CI system: lint → type checking → unit/integration tests → small bounded AI evaluation suite → image build/security scan → registry → Terraform/deployment → staging smoke tests. Keep offline deterministic checks separate from paid live evaluations. Never interpret a passing mocked browser test as validation of the real provider chain.
+GitHub Actions already runs a lockfile check, a focused Ruff ruleset, deterministic Python and frontend tests, an in-memory A2A client/server contract test, a wheel build, Gitleaks on committed history and pip-audit on locked production dependencies. A separate workflow builds and scans both application images for fixable critical vulnerabilities on relevant changes and weekly. Remaining delivery work is broader A2A/MCP integration coverage, branch protection after the new checks pass on GitHub, then type checking, bounded AI evaluations, registry, Terraform/deployment and staging smoke tests. Keep offline deterministic checks separate from paid live evaluations. Never interpret a passing mocked browser test as validation of the real provider chain.
 
 ## Security and FinOps throughout the phases — [PLANNED extensions]
 
