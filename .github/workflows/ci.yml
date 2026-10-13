@@ -31,6 +31,9 @@ jobs:
       - name: Check lockfile and install dependencies
         run: uv sync --locked
 
+      - name: Lint Python source and tests
+        run: uv run --locked ruff check --select E4,E7,E9,F src tests
+
       - name: Run Python tests
         run: uv run --locked python -B -m pytest tests -q --ignore=tests/test_frontend_browser.py
 
@@ -45,3 +48,42 @@ jobs:
 
       - name: Build Python wheel
         run: uv build --wheel
+
+  dependency-audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.9.5"
+          python-version: "3.13"
+          enable-cache: false
+
+      - name: Audit locked production dependencies
+        run: |
+          uv export --locked --no-dev --no-emit-project --no-hashes --format requirements-txt --output-file "$RUNNER_TEMP/requirements.txt" --quiet
+          uvx --from pip-audit==2.10.0 pip-audit --no-deps --disable-pip -r "$RUNNER_TEMP/requirements.txt"
+
+  secrets:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Scan committed secrets
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"

@@ -67,7 +67,9 @@ def register_ui(driver, email):
     wait.until(lambda d: d.find_element(By.ID, 'auth-panel').is_displayed())
     if driver.find_element(By.ID, 'auth-title').text != 'Create your account':
         driver.find_element(By.ID, 'auth-toggle').click()
-    field = driver.find_element(By.ID, 'auth-email'); field.clear(); field.send_keys(email)
+    field = driver.find_element(By.ID, 'auth-email')
+    field.clear()
+    field.send_keys(email)
     driver.find_element(By.ID, 'auth-password').send_keys('browser-password-123')
     driver.find_element(By.ID, 'auth-submit').click()
     wait.until(lambda d: d.find_element(By.ID, 'chat-workspace').is_displayed())
@@ -76,7 +78,8 @@ def register_ui(driver, email):
 def submit_question(driver, question):
     field = driver.find_element(By.ID, 'medical-input')
     WebDriverWait(driver, 15).until(lambda d: field.is_enabled())
-    field.clear(); field.send_keys(question)
+    field.clear()
+    field.send_keys(question)
     driver.find_element(By.CSS_SELECTOR, '#ask-form button[type=submit]').click()
     WebDriverWait(driver, 15).until(lambda d: d.find_element(By.CSS_SELECTOR, '#ask-form button[type=submit]').is_enabled())
 
@@ -119,7 +122,8 @@ def test_browser_rename_and_delete_from_conversation_menu(browser_app):
     assert driver.find_element(By.ID, 'conversation-menu').is_displayed()
     driver.find_element(By.ID, 'rename-conversation').click()
     name = driver.find_element(By.ID, 'rename-input')
-    name.clear(); name.send_keys('Coverage notes')
+    name.clear()
+    name.send_keys('Coverage notes')
     driver.find_element(By.ID, 'rename-save').click()
     wait = WebDriverWait(driver, 15)
     wait.until(lambda d: d.find_element(By.CSS_SELECTOR, '.conversation-choice').text == 'Coverage notes')
@@ -159,7 +163,6 @@ def test_browser_failure_retry_and_mobile_focus(browser_app):
     driver.delete_all_cookies()
     driver.get(url)
     register_ui(driver, 'mobile@example.com')
-    wait = WebDriverWait(driver, 15)
     driver.find_element(By.ID, 'new-conversation').click()
     submit_question(driver, 'Trigger failure')
     assert 'unavailable' in driver.find_element(By.ID, 'composer-error').text
@@ -167,7 +170,8 @@ def test_browser_failure_retry_and_mobile_focus(browser_app):
     assert len(driver.find_elements(By.CSS_SELECTOR, '.user-message')) == 1
     submit_question(driver, 'x' * 1000)
     assert driver.find_element(By.CSS_SELECTOR, '.assistant-message').is_displayed()
-    field = driver.find_element(By.ID, 'medical-input'); field.click()
+    field = driver.find_element(By.ID, 'medical-input')
+    field.click()
     assert field.value_of_css_property('outline-style') == 'none'
     assert driver.execute_script('return document.documentElement.scrollWidth <= window.innerWidth')
     assert not driver.find_element(By.ID, 'capabilities').is_displayed()

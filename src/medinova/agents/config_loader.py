@@ -1,5 +1,4 @@
 from dataclasses import fields
-from pathlib import Path
 import re
 
 import yaml
