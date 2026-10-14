@@ -42,7 +42,7 @@ Keep model credentials in .env and keep specialist A2A endpoints private. See th
 
 ## Checks
 
-GitHub Actions runs Ruff lint, the lockfile check, Python tests (excluding Selenium), frontend tests, a wheel build, a committed-secret scan and an audit of locked production dependencies on every pull request and push to `master`. A separate workflow builds and scans both application images for fixable critical vulnerabilities on relevant PRs, weekly and on demand. These checks need no model API credentials or running application services; vulnerability audits query advisory databases online.
+GitHub Actions runs Ruff lint, the lockfile check, Python tests (excluding Selenium), frontend tests, a wheel build, a committed-secret scan and an audit of locked production dependencies on every pull request and push to `master`. A separate workflow builds and scans both application images for fixable critical vulnerabilities on every PR and push to `master`, weekly and on demand. These checks need no model API credentials or running application services; vulnerability audits query advisory databases online.
 
 ~~~bash
 uv run python -B -m pytest tests -q
