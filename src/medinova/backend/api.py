@@ -18,9 +18,16 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from dotenv import load_dotenv
 from medinova.backend.storage import Store
 from medinova.backend.title_generation import generate_title
+from medinova.backend.observability import (
+    finish_chat_observation,
+    observation_parent,
+    start_chat_observation,
+)
 from medinova.backend.auth import install_auth
 from medinova.agents.config_loader import load_agent_definition
 from medinova.agents.runtime import AgentRuntime
+from medinova.agents.metrics import AgentMetrics, parse_agent_metrics
+from medinova.agents.trace_context import current_trace_parent
 from medinova.paths import PROJECT_ROOT
 
 load_dotenv(PROJECT_ROOT / ".env")
@@ -205,23 +212,36 @@ def create_api_app(concierge: Any | None = None, db_path: str | Path | None = No
         if not query_lock.acquire(blocking=False):
             raise HTTPException(status_code=503, detail="The healthcare concierge is busy. Please try again shortly.")
         begun = False
+        observation = None
+        telemetry_status = "error"
+        telemetry_agents: list[str] = []
+        telemetry_runs: list[AgentMetrics] = []
         try:
             existing = get_store().begin_turn(user['id'], conversation_id, request_id, message)
             if existing is not None:
                 return ChatResponse(**existing)
             begun = True
+            observation = start_chat_observation(request_id)
             history = get_store().history(conversation_id)
-            payload = agent.answer_query_with_metadata(message, history=history)
+            trace_token = current_trace_parent.set(observation_parent(observation))
+            try:
+                payload = agent.answer_query_with_metadata(message, history=history)
+            finally:
+                current_trace_parent.reset(trace_token)
             result = _chat_response(payload, started).model_copy(update={
                 'request_id': request_id, 'conversation_id': conversation_id,
             })
             if get_store().finish_turn(conversation_id, request_id, result.model_dump()):
                 background_tasks.add_task(update_title, conversation_id, message, result.answer)
+            telemetry_status = "ok"
+            telemetry_agents = result.agents_used
+            telemetry_runs = parse_agent_metrics(payload.get("metrics"))
             begun = False
             return result
         except HTTPException:
             raise
         except TimeoutError as exc:
+            telemetry_status = "timeout"
             raise HTTPException(status_code=504, detail="The specialist agent request timed out.") from exc
         except Exception as exc:
             logger.error("Concierge request failed (%s)", type(exc).__name__)
@@ -231,6 +251,14 @@ def create_api_app(concierge: Any | None = None, db_path: str | Path | None = No
                 if begun:
                     get_store().fail_turn(request_id)
             finally:
+                if observation is not None:
+                    finish_chat_observation(
+                        observation,
+                        telemetry_status,
+                        int((perf_counter() - started) * 1000),
+                        telemetry_agents,
+                        telemetry_runs,
+                    )
                 query_lock.release()
 
     frontend_dir = PROJECT_ROOT / "frontend"

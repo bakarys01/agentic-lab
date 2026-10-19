@@ -1,10 +1,10 @@
 """Expose source-attributed web search through MCP."""
 
 from ddgs import DDGS
-from mcp.server.fastmcp import FastMCP
+from medinova.mcp_servers.traced_server import TracedFastMCP
 
 
-mcp = FastMCP("research_web")
+mcp = TracedFastMCP("research_web")
 
 
 @mcp.tool()

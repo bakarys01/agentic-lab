@@ -4,11 +4,11 @@ import json
 import re
 
 import psycopg
-from mcp.server.fastmcp import FastMCP
+from medinova.mcp_servers.traced_server import TracedFastMCP
 from psycopg.rows import dict_row
 
 
-mcp = FastMCP("medication_catalog")
+mcp = TracedFastMCP("medication_catalog")
 MAX_RESULTS = 5
 
 
