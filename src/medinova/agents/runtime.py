@@ -1,7 +1,9 @@
 """Build and run agents from their configured definitions."""
 
 import asyncio
+from contextvars import copy_context
 import json
+import logging
 import threading
 from functools import partial
 from time import perf_counter
@@ -13,13 +15,22 @@ from langchain.agents.middleware import ModelCallLimitMiddleware
 from smolagents import ToolCallingAgent
 
 from medinova.a2a_clients.client_utils import get_agent_url
-from medinova.agents.config_loader import load_agent_definition, load_execution_profile
+from medinova.agents.config_loader import (
+    load_agent_definition,
+    load_execution_profile,
+    load_model_config,
+)
 from medinova.agents.conversation_memory import recent_history
 from medinova.agents.definition import AgentDefinition
+from medinova.agents.langchain_metrics import ToolCallRecorder
+from medinova.agents.metrics import AgentMetrics
 from medinova.agents.models import create_model
+from medinova.agents.smolagents_metrics import TracedModel
 from medinova.prompts.loader import load_prompt
 from medinova.tools.delegation import AgentTool, invoke_a2a_agent
 from medinova.tools.mcp_connector import load_mcp_tools
+
+logger = logging.getLogger(__name__)
 
 
 class AgentRuntime:
@@ -99,10 +110,50 @@ class AgentRuntime:
                     "Conversation history is not supported by the LangChain adapter."
                 )
             with self._langchain_lock:
-                return self._langchain_runner.run(self._run_langchain(question))
+                return self._langchain_runner.run(
+                    self._run_langchain(question), context=copy_context()
+                )
 
-        _, answer = self._execute_smolagents(question, history)
+        _, answer, _ = self._execute_smolagents(question, history)
         return answer
+
+    def run_with_metrics(self, question: str) -> tuple[str, AgentMetrics | None]:
+        """Return the normal answer plus content-free execution metrics."""
+        self._validate_question(question)
+        if self.definition.runtime == "langchain":
+            with self._langchain_lock:
+                return self._langchain_runner.run(
+                    self._run_langchain_core(question, capture_metrics=True),
+                    context=copy_context(),
+                )
+        started = perf_counter()
+        agent, answer, tools = self._execute_smolagents(question, None)
+        try:
+            return answer, self._smolagents_metrics(agent, tools, started)
+        except Exception as exc:
+            logger.warning("Agent metrics unavailable (%s)", type(exc).__name__)
+            return answer, None
+
+    def _model_identity(self) -> tuple[str, str]:
+        settings = load_model_config(self.definition.model)
+        return settings["provider"], settings["model_id"]
+
+    def _smolagents_metrics(self, agent, tools, started: float) -> AgentMetrics:
+        steps = list(agent.memory.steps)
+        usages = [step.token_usage for step in steps
+                  if getattr(step, "token_usage", None) is not None]
+        provider, model = self._model_identity()
+        return AgentMetrics(
+            agent=self.definition.name,
+            runtime=self.definition.runtime,
+            provider=provider,
+            model=model,
+            duration_ms=int((perf_counter() - started) * 1000),
+            steps=sum(getattr(step, "step_number", None) is not None for step in steps),
+            input_tokens=sum(item.input_tokens for item in usages) if usages else None,
+            output_tokens=sum(item.output_tokens for item in usages) if usages else None,
+            tools=tuple(call for tool in tools for call in tool.calls),
+        )
 
     def answer_query_with_metadata(
         self,
@@ -116,13 +167,19 @@ class AgentRuntime:
             )
 
         started = perf_counter()
-        agent, answer = self._execute_smolagents(question, history)
+        agent, answer, tools = self._execute_smolagents(question, history)
         called_tools = {
             call.name
             for step in agent.memory.steps
             for call in (getattr(step, "tool_calls", None) or [])
         }
 
+        try:
+            metrics = self._smolagents_metrics(agent, tools, started)
+        except Exception as exc:
+            logger.warning("Agent metrics unavailable (%s)", type(exc).__name__)
+            metrics = None
+        remote_runs = [run for tool in tools for run in tool.remote_runs]
         return {
             "answer": answer,
             "agents_used": [
@@ -131,25 +188,32 @@ class AgentRuntime:
                 if f"ask_{delegate.definition.name}" in called_tools
             ],
             "latency_ms": int((perf_counter() - started) * 1000),
+            "metrics": [run.model_dump(mode="json") for run in (metrics, *remote_runs)
+                        if run is not None],
         }
 
     def _execute_smolagents(
         self,
         question: str,
         history: list[dict[str, Any]] | None,
-    ) -> tuple[ToolCallingAgent, str]:
+    ) -> tuple[ToolCallingAgent, str, list[AgentTool]]:
         tools = [
             AgentTool(
                 agent_name=delegate.definition.name,
                 description=delegate.definition.description,
-                invoke=partial(invoke_a2a_agent, delegate.definition.name),
+                invoke=partial(
+                    invoke_a2a_agent, delegate.definition.name, include_metrics=True
+                ),
             )
             for delegate in self.delegates
         ]
         agent = ToolCallingAgent(
-            model=create_model(
-                name=self.definition.model,
-                runtime=self.definition.runtime,
+            model=TracedModel(
+                create_model(
+                    name=self.definition.model,
+                    runtime=self.definition.runtime,
+                ),
+                self.definition.name,
             ),
             tools=tools,
             max_steps=self.max_steps,
@@ -163,9 +227,16 @@ class AgentRuntime:
             else ""
         )
         task = f"{self.instructions}{context}\n\nUser question:\n{question}"
-        return agent, str(agent.run(task))
+        return agent, str(agent.run(task)), tools
 
     async def _run_langchain(self, question: str) -> str:
+        answer, _ = await self._run_langchain_core(question, capture_metrics=False)
+        return answer
+
+    async def _run_langchain_core(
+        self, question: str, *, capture_metrics: bool
+    ) -> tuple[str, AgentMetrics | None]:
+        started = perf_counter()
         tool_groups = []
         if self.definition.tools:
             tool_groups = [
@@ -201,23 +272,57 @@ class AgentRuntime:
             ],
         )
 
+        recorder = (
+            ToolCallRecorder(
+                agent_name=self.definition.name,
+                model=self._model_identity()[1],
+            ) if capture_metrics else None
+        )
+        invoke_options = {"config": {"callbacks": [recorder]}} if recorder else {}
         response = await agent.ainvoke(
-            {"messages": [{"role": "user", "content": question}]}
+            {"messages": [{"role": "user", "content": question}]},
+            **invoke_options,
         )
         content = response["messages"][-1].content
         if isinstance(content, str):
-            return content
-
-        return "\n".join(
-            block if isinstance(block, str) else block["text"]
-            for block in content
-            if isinstance(block, str)
-            or (
-                isinstance(block, dict)
-                and block.get("type") == "text"
-                and isinstance(block.get("text"), str)
+            answer = content
+        else:
+            answer = "\n".join(
+                block if isinstance(block, str) else block["text"]
+                for block in content
+                if isinstance(block, str)
+                or (
+                    isinstance(block, dict)
+                    and block.get("type") == "text"
+                    and isinstance(block.get("text"), str)
+                )
             )
-        )
+
+        if not capture_metrics:
+            return answer, None
+        try:
+            usages = [message.usage_metadata for message in response["messages"]
+                      if isinstance(getattr(message, "usage_metadata", None), dict)]
+            input_counts = [item["input_tokens"] for item in usages
+                            if isinstance(item.get("input_tokens"), int)]
+            output_counts = [item["output_tokens"] for item in usages
+                             if isinstance(item.get("output_tokens"), int)]
+            provider, model = self._model_identity()
+            return answer, AgentMetrics(
+                agent=self.definition.name,
+                runtime=self.definition.runtime,
+                provider=provider,
+                model=model,
+                duration_ms=int((perf_counter() - started) * 1000),
+                steps=sum(getattr(message, "type", None) == "ai"
+                          for message in response["messages"]),
+                input_tokens=sum(input_counts) if input_counts else None,
+                output_tokens=sum(output_counts) if output_counts else None,
+                tools=tuple(recorder.calls),
+            )
+        except Exception as exc:
+            logger.warning("Agent metrics unavailable (%s)", type(exc).__name__)
+            return answer, None
 
     def get_health(self) -> dict[str, Any]:
         services = {self.definition.name: {"status": "available"}}

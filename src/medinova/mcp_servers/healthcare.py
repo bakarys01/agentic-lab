@@ -1,11 +1,11 @@
 import json
 
-from mcp.server.fastmcp import FastMCP
+from medinova.mcp_servers.traced_server import TracedFastMCP
 
 from medinova.paths import PROJECT_ROOT
 
 
-mcp = FastMCP("doctorserver")
+mcp = TracedFastMCP("doctorserver")
 
 DOCTORS_FILE = PROJECT_ROOT / "data" / "doctors.json"
 

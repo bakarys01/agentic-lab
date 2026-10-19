@@ -26,9 +26,9 @@ Baseline rechecked on **2026-10-14**. Status describes repository implementation
 | Medication catalog via MCP | [IMPLEMENTED] | `src/medinova/mcp_servers/medication.py` exposes `get_medication` over stdio; structured sample from the French BDPM in PostgreSQL, imported on demand |
 | Container configuration | [IMPLEMENTED] | `Dockerfile.agent`, `Dockerfile.backend`, `docker-compose.yml` and HTTPS override; the local Compose stack has been exercised manually, while image security scans are still pending |
 | Regression tests | [IMPLEMENTED] | `tests/`; deterministic substitutes, not live AI quality benchmarks |
-| Request metadata | [IMPLEMENTED] | Concierge latency, selected specialists and idempotency IDs; not distributed observability |
+| Request metadata | [IMPLEMENTED] | Concierge latency, selected specialists and idempotency IDs, plus opt-in metadata-only distributed tracing |
 | V1 completion | [IN PROGRESS] | Functional local foundation exists; final validation and operational gaps remain |
-| Benchmark, tracing, additional provider adapters | [PLANNED] | No AI quality dataset, distributed traces or general provider adapter registry |
+| Benchmark, tracing, additional provider adapters | [IN PROGRESS] | Opt-in metadata-only Langfuse timeline across backend, A2A, agents, model calls and local MCP tools; no AI quality dataset or general provider adapter registry |
 | Baseline CI | [IMPLEMENTED] | `.github/workflows/ci.yml` checks the lockfile, Ruff lint, deterministic tests including in-memory A2A and A2A-to-MCP exchanges, wheel build, committed secrets and locked production dependencies; `image-security.yml` scans both built images for fixable critical vulnerabilities on every PR and weekly; no live AI evaluation |
 | Required checks on `master` | [PLANNED] | The repository remains private on GitHub Free by choice; CI results are visible but cannot block a merge. Revisit branch protection if an eligible plan becomes available. |
 | Alternative frameworks, Terraform and clouds | [PLANNED] | No deployment artifacts or measured comparisons |
@@ -99,11 +99,13 @@ Follow the phase order below. Security and cost controls apply from the beginnin
 
 **Exit evidence:** `docker compose up --build` reproduces the full local application from documented configuration on a clean machine, with persistence and restart checks. A successful configuration parse alone does not meet this criterion.
 
-### 3. Evaluation and observability — [PLANNED]
+### 3. Evaluation and observability — [IN PROGRESS]
 
 **Learn:** separate software correctness from AI quality; measure behavior before comparing technologies.
 
-**Deliver:** versioned evaluation cases for policy, research, routing, mixed requests, retrieval, tool use, follow-up memory and safety. Define expected evidence, grading rules and failure categories. Add correlation across backend, concierge, model calls, A2A and retrieval/search, starting with structured redacted logs and OpenTelemetry. Evaluate LangSmith or Langfuse only as needed; introduce experiment tracking such as MLflow when it serves a defined measurement need.
+**Existing first step:** opt-in Langfuse span for each new backend chat attempt, with request UUID, status, latency, specialists, tool names/durations, agent steps and available model token counts. A2A requests carry trace IDs; specialist agents, model calls and selected MCP tool calls create timed observations. Local stdio MCP servers also record server-side tool execution through a shared wrapper. Specialists return metrics in A2A response metadata. `usage-*` generation observations summarize tokens and estimated cost while timed `model-*` observations measure the individual calls; this avoids double-counting cost. Langfuse can infer costs for matching priced models when usage exists; incomplete usage or unsupported pricing remains unknown. Questions, answers, prompts, tool arguments and MCP results are excluded. This is not yet an AI quality evaluation or a trace of third-party MCP servers.
+
+**Deliver:** repository-owned, versioned evaluation cases for policy, research, routing, mixed requests, retrieval, tool use, follow-up memory and safety. Define expected evidence, grading rules and failure categories. Add privacy-preserving correlation across backend, concierge, model calls, A2A and retrieval/search without exporting chat content. Run the same cases and rubrics through separate Langfuse, LangSmith, MLflow and W&B Weave pilots; compare usefulness, privacy controls, operational effort and cost. Keep the evaluation dataset and results portable rather than binding them to one vendor.
 
 **Exit evidence:** a repeatable baseline report containing quality, latency, token/cost measurements and failures, plus a trace following one complete request. Record what remains unmeasured. Do not begin framework/model/cloud comparisons before this baseline.
 

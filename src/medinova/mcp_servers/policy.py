@@ -3,12 +3,12 @@
 from functools import lru_cache
 
 import pymupdf
-from mcp.server.fastmcp import FastMCP
+from medinova.mcp_servers.traced_server import TracedFastMCP
 
 from medinova.paths import PROJECT_ROOT
 
 
-mcp = FastMCP("policy_documents")
+mcp = TracedFastMCP("policy_documents")
 POLICY_PATH = PROJECT_ROOT / "data" / "2026AnthemgHIPSBC.pdf"
 
 

@@ -1,11 +1,15 @@
 from types import SimpleNamespace
 from unittest.mock import Mock
+from uuid import uuid4
 
 import httpx
 import pytest
 
 from medinova.agents.config_loader import load_agent_definition
 from medinova.agents.runtime import AgentRuntime
+from medinova.agents.metrics import AgentMetrics
+from medinova.tools.delegation import AgentTool
+from medinova.agents.trace_context import current_trace_parent
 
 
 def test_run_returns_text_and_includes_recent_history(monkeypatch):
@@ -126,6 +130,89 @@ def test_metadata_reports_only_called_delegates(monkeypatch):
     assert payload["latency_ms"] >= 0
 
 
+def test_concierge_metrics_collect_token_usage_without_messages(monkeypatch):
+    import medinova.agents.runtime as runtime_module
+
+    fake_agent = Mock()
+    fake_agent.run.return_value = "PRIVATE ANSWER"
+    fake_agent.memory.steps = [SimpleNamespace(
+        step_number=1, token_usage=SimpleNamespace(input_tokens=90, output_tokens=12),
+        tool_calls=[],
+    )]
+    monkeypatch.setattr(runtime_module, "create_model", lambda **_: object())
+    monkeypatch.setattr(runtime_module, "ToolCallingAgent", lambda **_: fake_agent)
+
+    metrics = AgentRuntime(load_agent_definition("concierge")).answer_query_with_metadata(
+        "PRIVATE QUESTION"
+    )["metrics"][0]
+    assert metrics["input_tokens"] == 90
+    assert metrics["output_tokens"] == 12
+    assert metrics["steps"] == 1
+    assert "PRIVATE" not in repr(metrics)
+
+
+def test_concierge_answer_survives_metric_collection_failure(monkeypatch):
+    import medinova.agents.runtime as runtime_module
+
+    fake_agent = Mock()
+    fake_agent.run.return_value = "Answer"
+    fake_agent.memory.steps = []
+    monkeypatch.setattr(runtime_module, "create_model", lambda **_: object())
+    monkeypatch.setattr(runtime_module, "ToolCallingAgent", lambda **_: fake_agent)
+    runtime = AgentRuntime(load_agent_definition("concierge"))
+    monkeypatch.setattr(runtime, "_smolagents_metrics", lambda *_: 1 / 0)
+
+    payload = runtime.answer_query_with_metadata("Question")
+
+    assert payload["answer"] == "Answer"
+    assert payload["metrics"] == []
+
+
+def test_delegation_tool_retains_only_timing_and_remote_metrics():
+    remote = AgentMetrics(
+        agent="policy", runtime="langchain", provider="openai",
+        model="gpt-4o", duration_ms=10, steps=1,
+    )
+    tool = AgentTool("policy", "Find policy data", lambda question: ("PRIVATE ANSWER", remote))
+    assert tool.forward("PRIVATE QUESTION") == "PRIVATE ANSWER"
+    assert tool.calls[0].name == "ask_policy"
+    assert tool.calls[0].status == "ok"
+    assert tool.remote_runs == [remote]
+    assert "PRIVATE" not in repr((tool.calls, tool.remote_runs))
+
+
+def test_langchain_metrics_capture_tool_timing_and_model_tokens(monkeypatch):
+    import medinova.agents.runtime as runtime_module
+
+    async def fake_load(server):
+        return [SimpleNamespace(name="search_policy")]
+
+    class FakeAgent:
+        async def ainvoke(self, payload, *, config):
+            recorder = config["callbacks"][0]
+            run_id = uuid4()
+            await recorder.on_tool_start(
+                {"name": "search_policy"}, "PRIVATE TOOL INPUT", run_id=run_id
+            )
+            await recorder.on_tool_end("PRIVATE TOOL RESULT", run_id=run_id)
+            return {"messages": [SimpleNamespace(
+                type="ai", content="PRIVATE ANSWER",
+                usage_metadata={"input_tokens": 20, "output_tokens": 5},
+            )]}
+
+    monkeypatch.setattr(runtime_module, "load_mcp_tools", fake_load)
+    monkeypatch.setattr(runtime_module, "create_model", lambda **_: object())
+    monkeypatch.setattr(runtime_module, "create_agent", lambda **_: FakeAgent())
+    answer, metrics = AgentRuntime(load_agent_definition("policy")).run_with_metrics(
+        "PRIVATE QUESTION"
+    )
+    assert answer == "PRIVATE ANSWER"
+    assert metrics.input_tokens == 20
+    assert metrics.output_tokens == 5
+    assert metrics.tools[0].name == "search_policy"
+    assert "PRIVATE" not in repr(metrics)
+
+
 @pytest.mark.parametrize("available", [True, False])
 def test_health_checks_all_a2a_delegate_cards(monkeypatch, available):
     import medinova.agents.runtime as runtime_module
@@ -174,3 +261,24 @@ def test_langchain_runtime_reuses_event_loop_across_questions(monkeypatch):
     assert runtime.run("first") == "first"
     assert runtime.run("second") == "second"
     assert loop_ids[0] == loop_ids[1]
+
+
+def test_reused_langchain_runner_does_not_reuse_previous_trace(monkeypatch):
+    runtime = AgentRuntime(load_agent_definition("medication"))
+    parents = []
+
+    async def fake_run(question):
+        parents.append(current_trace_parent.get())
+        return question
+
+    monkeypatch.setattr(runtime, "_run_langchain", fake_run)
+    first = {"trace_id": "1" * 32, "parent_span_id": "2" * 16}
+    second = {"trace_id": "3" * 32, "parent_span_id": "4" * 16}
+    token = current_trace_parent.set(first)
+    try:
+        runtime.run("first")
+        current_trace_parent.set(second)
+        runtime.run("second")
+    finally:
+        current_trace_parent.reset(token)
+    assert parents == [first, second]

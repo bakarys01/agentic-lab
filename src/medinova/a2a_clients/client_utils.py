@@ -1,6 +1,7 @@
 import os
 
 import httpx
+from google.protobuf.json_format import MessageToDict
 
 from a2a.client import ClientConfig, create_client
 from a2a.helpers import get_message_text, new_text_message
@@ -10,6 +11,20 @@ from a2a.types import (
     SendMessageRequest,
 )
 from medinova.agents.config_loader import load_a2a_config
+from medinova.agents.metrics import AgentMetrics
+from medinova.agents.trace_context import current_trace_parent
+
+
+def _text_and_metrics(message, include_metrics: bool):
+    answer = get_message_text(message)
+    if not include_metrics:
+        return answer
+    payload = MessageToDict(message.metadata).get("medinova_metrics")
+    try:
+        metrics = AgentMetrics.model_validate(payload) if payload else None
+    except ValueError:
+        metrics = None
+    return answer, metrics
 
 def get_agent_url(name: str) -> str:
     port = load_a2a_config(name)["port"]
@@ -23,7 +38,8 @@ async def ask_a2a_agent(
     agent_url: str,
     question: str,
     timeout: float = 120.0,
-) -> str:
+    include_metrics: bool = False,
+) -> str | tuple[str, AgentMetrics | None]:
     """
     Send a question to an A2A agent and return its text response.
 
@@ -47,6 +63,9 @@ async def ask_a2a_agent(
         question,
         role=Role.ROLE_USER,
     )
+    trace_parent = current_trace_parent.get()
+    if trace_parent is not None:
+        message.metadata.update({"medinova_trace_parent": trace_parent})
 
     request = SendMessageRequest(
         message=message,
@@ -59,9 +78,7 @@ async def ask_a2a_agent(
         async for response in client.send_message(request):
 
             if response.HasField("message"):
-                return get_message_text(
-                    response.message
-                )
+                return _text_and_metrics(response.message, include_metrics)
 
             if response.HasField("task"):
                 task = response.task
@@ -72,11 +89,10 @@ async def ask_a2a_agent(
                     task.HasField("status")
                     and task.status.HasField("message")
                 ):
-                    return get_message_text(
-                        task.status.message
-                    )
+                    return _text_and_metrics(task.status.message, include_metrics)
 
-        return "The agent did not return a text response."
+        answer = "The agent did not return a text response."
+        return (answer, None) if include_metrics else answer
 
     finally:
         await client.close()
