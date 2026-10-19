@@ -175,6 +175,10 @@ Every smolagents model `generate` call and LangChain chat-model callback now ope
 
 The backend, A2A request, specialist agent and model observations form a distributed timeline. MCP tool calls are timed at the specialist client. For the app's local stdio MCP servers, the connector passes validated trace and parent IDs through the short-lived subprocess environment; a shared `TracedFastMCP` records server-side tool execution and flushes before exit. Because the connector starts its process before LangChain signals the individual tool callback, server-side MCP spans attach to the specialist agent rather than the client-side `tool-*` span; both have real timing in the same trace. Third-party MCP servers are not instrumented by this local wrapper. Exact per-call provider usage, complete provider billing categories and a versioned cost ledger remain evaluation-phase work. Keep evaluation cases, rubrics and run results independent of the telemetry vendor so that the same workload can later be tried with LangSmith, MLflow and W&B Weave. Test cases used with external tools must be fictitious or otherwise authorized for export.
 
+### Evaluation baseline
+
+`evaluation/cases/v1.json` is the repository-owned dataset. `src/medinova/evaluation/cases.py` validates and loads its cases, `grading.py` checks expected specialist routing, MCP tool use and answer fragments, and `runner.py` runs the cases against the concierge. With the A2A services running and model credentials configured, execute `uv run --env-file .env python -m medinova.evaluation.runner`; `--output report.json` writes a local report containing case IDs, check failures, durations and available token counts, without questions or answers. The runner is independent of Langfuse and does not publish the dataset or report to an external service. These deterministic checks are an initial regression baseline, not a medical correctness or groundedness evaluation; live runs require model API calls and are not part of CI. The broader evaluation plan is in [the roadmap](roadmap.md).
+
 The frontend and Python tests use deterministic substitutes for many agent calls. Run:
 
 ~~~bash

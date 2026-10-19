@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "policy_deductible",
+      "question": "What is the deductible stated in the example insurance policy?",
+      "expected_agents": ["policy"],
+      "expected_tools": ["search_policy"],
+      "answer_contains": ["1,700"]
+    },
+    {
+      "id": "medication_substance",
+      "question": "Quelle est la substance active d'OXCARBAZEPINE VIATRIS 300 mg et sous quelle forme se présente-t-il ?",
+      "expected_agents": ["medication"],
+      "expected_tools": ["get_medication"],
+      "answer_contains": ["oxcarbazépine", "comprimé"]
+    }
+  ]
+}
