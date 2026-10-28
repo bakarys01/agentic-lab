@@ -114,6 +114,26 @@ Faire remonter les échecs et retours autorisés dans un jeu d'évaluation maint
 
 Un déploiement ne devient pas « prêt client » parce que l'interface fonctionne. Il faut une validation métier des cas critiques, des droits sur les données vérifiés, des actions bornées, des métriques et alertes utiles, une estimation des coûts et un runbook couvrant panne, restauration et retour arrière. Les seuils précis sont fixés avec le client selon son risque ; le socle impose que ces décisions existent et soient testables.
 
+## Grille de maîtrise des systèmes agentiques
+
+Le sommaire partagé couvre des concepts, des techniques et des pratiques d'exploitation ; chacun n'est pas une fonctionnalité obligatoire. Pour chaque thème, conserver une décision explicite, une expérience reproductible et une preuve. « Partiel » signifie que MediNova possède une première implémentation, pas que le thème est maîtrisé pour tout client.
+
+| Thème du sommaire | État MediNova | Travail et preuve attendue |
+| --- | --- | --- |
+| Fondamentaux et cinq couches d'un agent : rôle, actions, raisonnement, connaissance/mémoire, feedback | Partiel : agents et prompts configurés, outils MCP, mémoire de conversation | Décrire les responsabilités et frontières de chaque couche pour MediNova puis un second domaine ; montrer que les besoins métier se branchent sans modifier le cœur. |
+| Modèles, paramètres, prompts et sorties typées | Partiel : fournisseurs et prompts configurés | Versionner les paramètres et sorties attendues ; comparer des variantes sur les mêmes cas et mesurer erreurs de format, qualité, latence et coût. |
+| MCP : outils, ressources, prompts, transports et inspection | Partiel : outils MCP réellement utilisés | Tester contrats, permissions, erreurs et transport effectivement retenu ; introduire ressources ou prompts MCP seulement si un cas concret les demande. |
+| Multi-agent : routage, handoff, coordination et collaboration | Partiel : concierge et spécialistes reliés par A2A | Mesurer choix d'agent, transmission du contexte et échecs partiels ; comparer au workflow simple avant d'ajouter une collaboration entre pairs. |
+| Raisonnement, planification et boucles | Partiel : boucle d'agent et limite d'étapes | Comparer une planification explicite si elle corrige un échec observé ; tester terminaison, stagnation, appels répétés et dépassement de budget, sans exiger de raisonnement interne verbatim. |
+| RAG, recherche et mémoire | Partiel : recherche documentaire/structurée et historique borné | Distinguer mémoire de conversation, état du workflow et connaissances ; évaluer d'abord la recherche et ses sources, puis comparer lexical, vectoriel et hybride sur un corpus versionné. |
+| Évaluation, ancrage, rubriques et feedback | Début : deux cas et contrôles déterministes | Appliquer le contrat d'évaluation de la phase 1, faire valider les rubriques métier, annoter des échecs autorisés et mesurer la concordance entre juges automatiques et humains. |
+| Déploiement et fiabilité | Partiel : images, Compose, CI et traces | Tester délais, retries bornés, idempotence, reprise, indisponibilité d'un agent ou outil, sauvegarde et retour arrière ; publier des objectifs de service et un runbook. |
+| Sécurité, sûreté et gouvernance | Partiel : authentification et quelques frontières techniques | Vérifier droits des personnes, agents, outils et données jusqu'aux connecteurs ; tester injection de prompt, exfiltration, effets externes, isolation client et politique de rétention. |
+| Observabilité, coûts et releases | Partiel : métadonnées Langfuse, durées et tokens | Relier résultats à code, prompts, modèles, paramètres, corpus et prix datés ; mesurer coût par tâche réussie, alertes et budget exécutoire, sans exporter de contenu client par défaut. |
+| Agents « cognitifs », graphes de mémoire, Tree-of-Thought et variantes avancées | Non retenus par défaut | Formuler une hypothèse liée à un échec mesuré, comparer à une solution simple, adopter seulement si le gain justifie coût, risque et exploitation. |
+
+Cette grille complète les six phases sans les remplacer. La phase 1 fournit les cas et les mesures ; les phases suivantes éprouvent les techniques qui répondent à des besoins réels. Une capacité n'est déclarée acquise qu'après test et preuve conservée, et la réussite sur MediNova ne démontre pas à elle seule sa portabilité chez un client.
+
 ## Décisions à prendre au moment de l'implémentation
 
 - Définir la première interface de profil client à partir des besoins réels de MediNova et du second cas, sans prétendre que `config/agents.yaml` est déjà une configuration multi-client.
