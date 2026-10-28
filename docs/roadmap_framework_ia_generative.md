@@ -40,7 +40,7 @@ Les contrats sont plus importants que le choix d'une bibliothèque. Un adaptateu
 
 **Décision envisagée :** utiliser LangGraph pour l'orchestration du concierge de MediNova, à la place de sa boucle actuelle fondée sur smolagents. Le workflow décrirait explicitement l'analyse de la demande, le choix des spécialistes, leurs appels, la synthèse et les chemins d'erreur. Son état et ses éventuelles interruptions pourront servir aux parcours qui exigent une reprise ou une validation humaine. Ce changement concerne la couche d'exécution : A2A reste la communication avec les spécialistes et MCP leur accès aux outils. Les agents spécialisés LangChain et les données ne sont pas remplacés automatiquement.
 
-LangGraph est le candidat retenu pour ce premier workflow du socle, **pas une dépendance imposée à chaque cas client**. Un parcours simple et fixe peut utiliser une exécution plus légère. Le contrat d'exécution doit permettre d'évaluer ces choix sur les mêmes entrées, sorties et critères, sans lier les profils clients à l'API d'un framework. La migration ne sera effectuée qu'après la baseline MediNova ; qualité, routage, latence, coût, reprise et erreurs devront être comparés avant de retirer smolagents du déploiement de référence.
+LangGraph est le candidat retenu pour ce premier workflow du socle, **pas une dépendance imposée à chaque cas client**. Un parcours simple et fixe peut utiliser une exécution plus légère. Une frontière d'exécution minimale doit permettre de comparer les deux orchestrateurs sur les mêmes entrées, sorties et critères, sans lier les futurs profils clients à l'API d'un framework. La migration ne sera effectuée qu'après la baseline MediNova ; qualité, routage, latence, coût, reprise et erreurs devront être comparés avant de retirer smolagents du déploiement de référence. Les contrats client plus larges seront définis après cette comparaison.
 
 ## Chaîne d'outils de bout en bout et alternatives
 
@@ -70,43 +70,45 @@ Une plateforme multi-clients mutualisée serait une étape ultérieure, seulemen
 
 ## Plan de réalisation et preuves de sortie
 
-Les phases ci-dessous sont **à réaliser** pour le framework. MediNova fournit certains composants de départ (agents configurés, MCP, A2A, Compose, tests et traces), mais ne satisfait pas à lui seul les critères de sortie.
+Les phases ci-dessous sont **à réaliser** pour le framework. MediNova fournit certains composants de départ (agents configurés, MCP, A2A, Compose, tests et traces), mais ne satisfait pas à lui seul les critères de sortie. Les protections élémentaires des données et des accès s'appliquent dès le début ; la phase 5 établit les garanties supplémentaires exigées pour un pilote client. Les phases 1 et 2 prouvent le fonctionnement et la migration de MediNova, la phase 4 éprouve la réutilisation, et la phase 5 prouve l'exploitabilité chez un client.
 
-### 1. Mesurer le déploiement de référence
+### 1. Établir la baseline MediNova
 
-Stabiliser un jeu de cas MediNova revu, avec qualité des réponses et des sources, routage, erreurs, latence, tokens et coût par requête. Séparer tests déterministes, évaluation hors ligne et trafic réel. Versionner cas, rubriques, corpus, prompts, modèles et paramètres ; conserver les échecs et la variabilité entre répétitions.
+Commencer par rendre l'évaluation réutilisable sans refondre tout le framework : définir un contrat minimal pour interroger l'application évaluée, charger des cas et des seuils propres à un déploiement, appliquer des critères extensibles et produire un résultat indépendant de MediNova et de l'outil de télémétrie. Brancher le concierge actuel sur ce contrat ; vérifier que les cas existants continuent de fonctionner sans logique métier codée dans le moteur commun.
 
-**Preuve :** rapport de référence reproductible et limites connues. Sans cette mesure, une refonte du socle ne prouve aucune amélioration.
+Enrichir ensuite les deux cas actuels avec des questions simples, mixtes, des échecs et des réponses nécessitant des sources. Faire revoir les critères métier ; mesurer qualité des réponses et des preuves, routage, erreurs, latence, tokens et coût par requête. Séparer tests déterministes, évaluation hors ligne et trafic réel. Versionner cas, rubriques, corpus, prompts, modèles et paramètres ; conserver les échecs et la variabilité entre répétitions.
 
-### 2. Formaliser les contrats du socle
+**Preuve :** contrat d'évaluation utilisé par MediNova, tests montrant que le moteur ne dépend pas de ses agents ou de ses règles métier, rapport de référence reproductible et limites connues. La réutilisation réelle sera vérifiée sur le second domaine en phase 4. Sans cette mesure, une refonte du socle ne prouve aucune amélioration.
 
-Extraire progressivement les interfaces nécessaires pour profil client, sources, outils, modèles, workflow et résultats d'évaluation. Valider les configurations au démarrage. Conserver les adaptateurs MediNova comme première implémentation ; éviter une réécriture générale avant de connaître les besoins du second cas. Implémenter ensuite le workflow du concierge avec LangGraph derrière le contrat d'exécution, en conservant ses appels A2A et les mêmes cas d'évaluation. Comparer avec la version smolagents avant tout basculement.
+### 2. Comparer LangGraph au concierge actuel
 
-**Preuve :** contrats documentés, tests de compatibilité, erreurs de configuration explicites et MediNova fonctionnant toujours avec la même suite d'évaluation. Le rapport de migration compare les deux orchestrations et explique la décision de basculement.
+Implémenter le workflow du concierge avec LangGraph derrière une frontière d'exécution minimale, en conservant ses appels A2A aux spécialistes et leurs outils MCP. Exécuter la même suite d'évaluation que pour smolagents ; mesurer qualité, routage, latence, coût, reprise et gestion des erreurs. Ne basculer le déploiement de référence qu'après examen des régressions et des bénéfices constatés.
 
-### 3. Construire un second déploiement de référence
+**Preuve :** rapport comparatif reproductible, tests des contrats d'entrée/sortie, décision motivée de conserver ou de remplacer smolagents et possibilité de revenir à la version précédente.
 
-Choisir un cas d'usage d'un **autre domaine**, avec d'autres données et critères de réussite. Faire passer son intégration par les contrats : nouveaux connecteurs ou règles aux points d'extension prévus, sans dupliquer le cœur. Comparer le coût d'intégration et relever chaque modification du socle exigée par ce deuxième client.
+### 3. Extraire le socle minimal réutilisable
 
-**Preuve :** deux applications déployées séparément à partir du même socle, chacune avec ses données, permissions et évaluations. Les changements du cœur sont justifiés et répercutés sur les deux.
+Séparer progressivement le cœur technique des prompts, données, outils et règles propres à MediNova. Définir des contrats validés pour le profil client, les connecteurs, l'exécution et les permissions ; consolider le contrat d'évaluation amorcé en phase 1 à partir des besoins constatés. Garder MediNova comme première implémentation ; documenter ce qui se configure et ce qui demande un adaptateur testé. Éviter une réécriture générale et des abstractions sans deuxième besoin concret.
 
-### 4. Durcir la sécurité et la gouvernance
+**Preuve :** MediNova fonctionne avec les contrats extraits et les mêmes évaluations ; une configuration invalide échoue clairement ; les éléments métier ne sont plus requis par le cœur commun.
 
-Faire appliquer l'autorisation des sources et outils par le code, indépendamment des instructions au modèle. Définir des identités de service à privilèges minimaux, protéger les secrets, valider les entrées/sorties, tester les injections de prompt et les appels d'outil abusifs. Les actions à effet externe ou difficilement réversibles ont une politique d'approbation. Définir rétention, suppression, audit et périmètre exact des données exportées en télémétrie.
+### 4. Éprouver les contrats sur un second domaine réduit
 
-**Preuve :** tests d'accès croisés refusés, scénarios d'abus exécutés, inventaire des données et revue des privilèges. Aucun contenu client n'est envoyé à un fournisseur ou outil d'observabilité sans décision explicite.
+Choisir un cas d'usage d'un **autre domaine**, petit et local, avec d'autres données, outils et critères de réussite. L'intégrer par les contrats et les adaptateurs prévus, sans dupliquer le cœur. Mesurer le travail spécifique et noter toute modification du socle qu'exige ce cas. Il s'agit d'un test de modularité, **pas encore d'un déploiement client**.
 
-### 5. Industrialiser le déploiement et l'exploitation
+**Preuve :** les deux cas utilisent le même cœur avec configurations, sources et évaluations distinctes. Chaque changement du cœur est justifié, testé sur les deux cas et documenté comme apprentissage sur les contrats.
 
-Produire des images et configurations reproductibles, CI/CD, environnements séparés, gestion des secrets, migrations, sauvegardes/restauration, supervision et procédure de retour arrière. Définir limites de concurrence, délais, retries bornés et comportement en cas de panne du modèle, d'un outil ou d'une source. Prévoir des quotas et des budgets mesurés par déploiement ; une alerte seule ne constitue pas une limite de dépense.
+### 5. Sécuriser et exploiter un pilote client
 
-**Preuve :** création d'un environnement client depuis les artefacts versionnés, déploiement d'une nouvelle version, test de charge ciblé, incident simulé, restauration et retour arrière documentés.
+Préparer une instance dédiée avec images et configurations reproductibles, CI/CD, environnements séparés, secrets, migrations, sauvegardes/restauration, supervision et retour arrière. Faire appliquer par le code les autorisations sur les outils **et sur les données de chaque utilisateur**, indépendamment des instructions au modèle ; tester les accès croisés, les injections de prompt et les actions abusives. Prévoir une approbation pour les actions à effet externe, ainsi que des limites de concurrence, délais, retries bornés, quotas, budgets et procédures d'incident. Définir rétention, suppression, audit et périmètre des données envoyées aux fournisseurs et à la télémétrie.
+
+**Preuve :** création d'un environnement depuis les artefacts versionnés, droits vérifiés jusqu'aux connecteurs, scénarios d'abus refusés, test de charge ciblé, incident simulé, restauration et retour arrière documentés. Aucun contenu client n'est exporté sans décision explicite. La réussite de la phase 4 seule ne satisfait pas ces critères.
 
 ### 6. Améliorer en continu
 
 Faire remonter les échecs et retours autorisés dans un jeu d'évaluation maintenu. Tester chaque modification de données, prompt, modèle, outil ou workflow contre la version en service ; comparer qualité, sécurité, latence et coût avant promotion. Garder l'historique des décisions et des versions pour expliquer un résultat et revenir à une version précédente.
 
-**Preuve :** une modification pilotée par un échec observé, évaluée sur les deux déploiements, livrée sans régression acceptée et réversible.
+**Preuve :** une modification pilotée par un échec observé, évaluée sur les deux cas d'usage, livrée sur le pilote sans régression acceptée et réversible.
 
 ## Conditions d'acceptation d'un déploiement client
 
